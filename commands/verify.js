@@ -53,7 +53,7 @@ module.exports = {
       )
     } else {
       const characterId = characterIds[0]
-      const character = await FfxivUtil.getCharacterById(characterId, true)
+      const character = await FfxivUtil.getCharacterById(characterId)
 
       if (!character) {
         const embed = DiscordUtil.getErrorEmbed(
@@ -68,9 +68,19 @@ module.exports = {
 
           if (verification.is_verified) {
             const verifiedCharacter = await FfxivUtil.getCharacterById(
-              verification.character_id,
-              true
+              verification.character_id
             )
+
+            if (character.id === verifiedCharacter.character_id) {
+              await interaction.editReply({
+                embeds: [
+                  DiscordUtil.getSuccessEmbed(
+                    `You already verified this character.`
+                  )
+                ]
+              })
+              return
+            }
 
             // User is already verified and needs a new code for a new character
             verificationCode = await FfxivUtil.generateVerificationCode()
@@ -95,7 +105,7 @@ module.exports = {
             )
 
             await interaction.editReply({
-              content: `Hey ${name}!\n\nYou are already verified with \`${verifiedCharacter.Name}\`! If you want to change your character, follow the instructions below.\n\nPlease change your lodestone bio to this verification code:\n\`${verificationCode}\`\n\nAfter changing your bio, click on \`Verify me\`.`,
+              content: `Hey ${name}!\n\nYou are already verified with \`${verifiedCharacter.name}\`! If you want to change your character, follow the instructions below.\n\nPlease change your lodestone bio to this verification code:\n\`${verificationCode}\`\n\nAfter changing your bio, click on \`Verify me\`.`,
               components: [row]
             })
           } else {
@@ -133,7 +143,7 @@ module.exports = {
               .setLabel('Verify me')
               .setStyle('PRIMARY'),
             new MessageButton()
-              .setLabel(`Lodestone: ${character.Name}`)
+              .setLabel(`Lodestone: ${character.name}`)
               .setURL(
                 `https://eu.finalfantasyxiv.com/lodestone/character/${characterId}/`
               )
@@ -171,7 +181,10 @@ module.exports = {
     const verification = await DbUtil.getCharacterVerification(userId)
 
     if (verification) {
-      if (verification.character_id === characterId) {
+      if (
+        verification.character_id === characterId &&
+        verification.is_verified
+      ) {
         await interaction.editReply({
           embeds: [
             DiscordUtil.getSuccessEmbed(`You already verified this character.`)
@@ -182,7 +195,7 @@ module.exports = {
     }
 
     // Get bio
-    const character = await FfxivUtil.getCharacterById(characterId, true)
+    const character = await FfxivUtil.getCharacterById(characterId)
 
     if (!character) {
       await interaction.editReply({
@@ -193,14 +206,14 @@ module.exports = {
         ]
       })
     } else {
-      const charBio = character.Bio
+      const charBio = character.bio
       if (verificationCode === charBio) {
         DbUtil.verifyCharacter(userId, characterId)
 
         await interaction.editReply({
           embeds: [
             DiscordUtil.getSuccessEmbed(
-              `Congratulations, ${character.Name}! You are now verified.\nYou no longer have to keep the verification code in your bio.`
+              `Congratulations, ${character.name}! You are now verified.\nYou no longer have to keep the verification code in your bio.`
             )
           ]
         })

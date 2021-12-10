@@ -34,14 +34,7 @@ module.exports = class FfxivUtil {
     else return res.data.List.map((a) => a.ID)
   }
 
-  static async getCharacterById(id, onlyBio = false) {
-    if (onlyBio) {
-      const res = await axios.get(
-        `http://localhost:8080/character/${id}?columns=Character.Bio,Character.Name`
-      )
-      return res.status === 200 ? res.data.Character : undefined
-    }
-
+  static async getCharacterById(id) {
     const res = await axios.get(`http://localhost:8080/character/${id}`)
     if (res.status !== 200) return undefined
     else return res.data.Character

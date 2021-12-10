@@ -5,8 +5,8 @@ const moment = require('moment')
 module.exports = class DbUtil {
   static async getMysqlResult(sql) {
     const res = await mysql.query(sql)
-    if (res[0][0]) return res[0][0]
-    else if (res[0]) return res[0]
+    if (res[0][0]) return res[0][0]?.length === 0 ? null : res[0][0]
+    else if (res[0]) return res[0]?.length === 0 ? null : res[0]
     else return undefined
   }
 
@@ -33,7 +33,7 @@ module.exports = class DbUtil {
     } else {
       // Insert
       const sql = `
-        INSERT INTO iam (user_id,character_id,verification_code,is_verified)
+        INSERT INTO verifications (user_id,character_id,verification_code,is_verified)
         VALUES (
           ${mysql.escape(userId)},
           ${mysql.escape(characterId)},
@@ -207,8 +207,7 @@ module.exports = class DbUtil {
       AND platform=${mysql.escape(platform)}
     `
 
-    let socialMedia = await this.getMysqlResult(sql)
-    if (socialMedia?.length === 0) socialMedia = null
+    const socialMedia = await this.getMysqlResult(sql)
 
     if (socialMedia) {
       // Update
