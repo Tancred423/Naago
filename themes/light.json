@@ -1,0 +1,19 @@
+{
+  "background": "#F4DAB5",
+  "background_border": "#9C7C63",
+  "window_title": "#392713",
+  "window_title_name": "#544532",
+  "window_title_underline": "#CFBA9D",
+  "acj_level": "#392713",
+  "portrait_border": "#C0A58B",
+  "item_level": "#549695",
+  "title": "#392713",
+  "name": "#392713",
+  "block_background": "#5C4732",
+  "block_title": "#FFF2D1",
+  "block_content": "#DDDDDD",
+  "block_content_highlight": "#AD8E65",
+  "exp_bar": "#605F60",
+  "green": "#77B22D",
+  "purple": "#E2648D"
+}
