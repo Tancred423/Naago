@@ -280,9 +280,9 @@ class Profile {
     )
     await profileBlock.add(
       'Achievements',
-      this.character.amount_achievements !== 'Private'
-        ? `${this.character.amount_achievements} (${this.character.ap} AP)`
-        : 'Private',
+      this.character.amount_achievements === 'Private'
+        ? 'Private'
+        : `${this.character.amount_achievements} (${this.character.ap} AP)`,
       './images/achievements.png',
       false,
       false,
