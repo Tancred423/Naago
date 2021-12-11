@@ -9,11 +9,12 @@
   "item_level": "#549695",
   "title": "#392713",
   "name": "#392713",
-  "block_background": "#5C4732",
+  "block_background": "#806346",
   "block_title": "#FFF2D1",
   "block_content": "#DDDDDD",
   "block_content_highlight": "#AD8E65",
-  "exp_bar": "#605F60",
+  "exp_bar": "#634f40",
+  "exp_bar_filled": "#858385",
   "green": "#77B22D",
   "purple": "#E2648D"
 }

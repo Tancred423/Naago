@@ -50,15 +50,19 @@ module.exports = {
       const embed = DiscordUtil.getErrorEmbed(
         `Multiple characters were found for \`${name}\` on \`${server}\`.\nPlease provide the command with the full name of your character to get rid of duplicates.`
       )
-      await interaction.editReply({
-        embeds: [embed]
+      await interaction.deleteReply()
+      await interaction.followUp({
+        embeds: [embed],
+        ephemeral: true
       })
     } else if (characterIds.length < 1) {
       const embed = DiscordUtil.getErrorEmbed(
         `No characters were found for \`${name}\` on \`${server}\``
       )
-      await interaction.editReply({
-        embeds: [embed]
+      await interaction.deleteReply()
+      await interaction.followUp({
+        embeds: [embed],
+        ephemeral: true
       })
     } else {
       const characterId = characterIds[0]
@@ -68,8 +72,10 @@ module.exports = {
         const embed = DiscordUtil.getErrorEmbed(
           `Could not fetch your character.\nPlease try again later.`
         )
-        await interaction.editReply({
-          embeds: [embed]
+        await interaction.deleteReply()
+        await interaction.followUp({
+          embeds: [embed],
+          ephemeral: true
         })
       } else {
         try {

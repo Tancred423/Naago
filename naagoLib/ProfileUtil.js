@@ -3,7 +3,10 @@ const {
   height,
   borderRadius,
   maxLevel,
-  maxLevelLimited
+  maxLevelLimited,
+  maxMounts,
+  maxMinions,
+  maxAchievements
 } = require('../config.json')
 const DbUtil = require('./DbUtil')
 const DiscordUtil = require('./DiscordUtil')
@@ -282,16 +285,19 @@ class Profile {
       'Achievements',
       this.character.amount_achievements === 'Private'
         ? 'Private'
-        : `${this.character.amount_achievements} (${this.character.ap} AP)`,
+        : `${Math.round(
+            (this.character.amount_achievements / maxAchievements) * 100
+          )} % (${this.character.ap} AP)`,
       './images/achievements.png',
       false,
       false,
       true,
       1
     )
+    ctx.textAlign = 'center'
     await profileBlock.add(
       'Mounts',
-      this.character.amount_mounts,
+      `${Math.round((this.character.amount_mounts / maxMounts) * 100)} %`,
       null,
       false,
       true,
@@ -300,13 +306,14 @@ class Profile {
     )
     await profileBlock.add(
       'Minions',
-      this.character.amount_minions,
+      `${Math.round((this.character.amount_minions / maxMinions) * 100)} %`,
       null,
       false,
       true,
       true,
       3
     )
+    ctx.textAlign = 'left'
 
     ////////////////////////////////////////////
     // Return buffer
@@ -650,8 +657,8 @@ class Profile {
     ctx.fillStyle = theme.block_background
     ctx.roundRect(x, yAdd, fWidth / 2, 355, borderRadius).fill()
 
-    const tankIcon = await loadImage('./images/doh.png')
-    ctx.drawImage(tankIcon, x + 10, yAdd + 8, 20, 20)
+    const dohIcon = await loadImage('./images/doh.png')
+    ctx.drawImage(dohIcon, x + 10, yAdd + 8, 20, 20)
 
     ctx.fillStyle = theme.block_title
     ctx.font = `normal 16px roboto condensed`
@@ -690,6 +697,65 @@ class Profile {
     await classJobBlock.add(this.character.miner)
     await classJobBlock.add(this.character.botanist)
     await classJobBlock.add(this.character.fisher)
+
+    ////////////////////////////////////////////
+    // Bozja
+    ////////////////////////////////////////////
+    yAdd = 462
+    x = 10
+
+    ctx.fillStyle = theme.block_background
+    ctx.roundRect(x, yAdd, fWidth + 10, 60, borderRadius).fill()
+
+    const bozjaIcon = await loadImage('./images/bozja.png')
+    ctx.drawImage(bozjaIcon, x + 10, yAdd + 8, 20, 20)
+
+    ctx.fillStyle = theme.block_title
+    ctx.font = `normal 16px roboto condensed`
+    ctx.fillText('Bozja', x + 35, yAdd + 8)
+
+    const bozja = this.character.bozja
+    ctx.fillStyle = theme.block_content
+    ctx.font = `normal 20px roboto condensed`
+    ctx.fillText(
+      bozja
+        ? `${bozja.name}: ${bozja.level}` +
+            (bozja.Mettle !== '--' ? ` (${bozja.Mettle} mettle)` : '')
+        : '-',
+      x + 10,
+      yAdd + 30,
+      fWidth - 10
+    )
+
+    ////////////////////////////////////////////
+    // Eureka
+    ////////////////////////////////////////////
+    yAdd = 527
+
+    ctx.fillStyle = theme.block_background
+    ctx.roundRect(x, yAdd, fWidth + 10, 60, borderRadius).fill()
+
+    const eurekaIcon = await loadImage('./images/eureka.png')
+    ctx.drawImage(eurekaIcon, x + 10, yAdd + 8, 20, 20)
+
+    ctx.fillStyle = theme.block_title
+    ctx.font = `normal 16px roboto condensed`
+    ctx.fillText('Eureka', x + 35, yAdd + 8)
+
+    const eureka = this.character.eureka
+    ctx.fillStyle = theme.block_content
+    ctx.font = `normal 20px roboto condensed`
+    ctx.fillText(
+      eureka
+        ? `${eureka.name}: ${eureka.level}` +
+            (eureka.CurrentEXP !== '--'
+              ? ` (${eureka.CurrentEXP} / ${eureka.MaxEXP} exp)`
+              : '')
+        : '-',
+      x + 10,
+      yAdd + 30,
+      fWidth - 10
+    )
 
     ////////////////////////////////////////////
     // Return buffer
@@ -1203,11 +1269,21 @@ class ProfileBlock {
 
     this.ctx.fillStyle = this.theme.block_title
     this.ctx.font = `normal 16px roboto condensed`
-    this.ctx.fillText(title, x + 10, this.yAdd + 3, maxWidth)
+    this.ctx.fillText(
+      title,
+      x + 10 + (triple && slot > 1 ? 30 : 0),
+      this.yAdd + 3,
+      maxWidth
+    )
 
     this.ctx.fillStyle = this.theme.block_content
     this.ctx.font = `bold 24px arial`
-    this.ctx.fillText(content, x + 10, this.yAdd + 18, maxWidth)
+    this.ctx.fillText(
+      content,
+      x + 10 + (triple && slot > 1 ? 30 : 0),
+      this.yAdd + 18,
+      maxWidth
+    )
 
     if (iconLink) {
       const icon = await loadImage(iconLink)
@@ -1252,6 +1328,28 @@ class ClassJobBlock {
 
     this.ctx.fillStyle = this.theme.exp_bar
     this.ctx.roundRect(this.x + 85, this.yAdd + 47, 100, 5, borderRadius).fill()
+
+    this.ctx.fillStyle = this.theme.exp_bar_filled
+    this.ctx
+      .roundRect(
+        this.x + 85,
+        this.yAdd + 47,
+        this.getLevelPercent(job),
+        5,
+        borderRadius
+      )
+      .fill()
+  }
+
+  getLevelPercent(job) {
+    const currentExpParse = job.CurrentEXP.toString().replaceAll(',', '')
+    const currentExp = isNaN(currentExpParse) ? 0 : parseInt(currentExpParse)
+
+    const maxExpParse = job.MaxEXP.toString().replaceAll(',', '')
+    const maxExp = isNaN(maxExpParse) ? 0 : parseInt(maxExpParse)
+
+    if (maxExp === 0) return 0
+    else return Math.round((currentExp / maxExp) * 100)
   }
 }
 

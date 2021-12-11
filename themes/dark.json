@@ -14,6 +14,7 @@
   "block_content": "#DDDDDD",
   "block_content_highlight": "#AD8E65",
   "exp_bar": "#605F60",
+  "exp_bar_filled": "#AD8E65",
   "green": "#77B22D",
   "purple": "#E2648D"
 }
