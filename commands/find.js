@@ -24,15 +24,16 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply()
 
-    const userId = interaction.user.id
     const name = FfxivUtil.formatName(interaction.options.getString('name'))
     const server = interaction.options.getString('server').toLowerCase()
 
     // Check server name
     if (!FfxivUtil.isValidServer(server)) {
       const embed = DiscordUtil.getErrorEmbed(`This server doesn't exist.`)
-      await interaction.editReply({
-        embeds: [embed]
+      await interaction.deleteReply()
+      await interaction.followUp({
+        embeds: [embed],
+        ephemeral: true
       })
       return
     }
@@ -42,7 +43,6 @@ module.exports = {
     try {
       characterIds = await FfxivUtil.getCharacterIdsByName(name, server)
     } catch (error) {
-      console.log('yep hier')
       return
     }
 

@@ -1,7 +1,6 @@
 const mysql = require('../naagoLib/mysql')
 const FfxivUtil = require('../naagoLib/FfxivUtil')
 const moment = require('moment')
-const { MessageActionRow, MessageButton } = require('discord.js')
 const DiscordUtil = require('./DiscordUtil')
 
 module.exports = class DbUtil {
@@ -11,6 +10,10 @@ module.exports = class DbUtil {
     else if (res[0]) return res[0]?.length === 0 ? null : res[0]
     else return undefined
   }
+
+  ////////////////////////////////////////////
+  // Verifications
+  ////////////////////////////////////////////
 
   static async getCharacterVerification(userId) {
     const sql = `
@@ -58,6 +61,10 @@ module.exports = class DbUtil {
 
     await mysql.query(sql)
   }
+
+  ////////////////////////////////////////////
+  // Fetch Character (Cache)
+  ////////////////////////////////////////////
 
   static async fetchCharacter(interaction, characterId) {
     const loadingEmote = await DiscordUtil.getEmote(
@@ -120,6 +127,8 @@ module.exports = class DbUtil {
       )
 
       const character = await FfxivUtil.getCharacterById(characterId)
+      if (!character) return undefined
+
       const now = Date.now()
       const nowSQL = moment(now).format('YYYY-MM-DD HH:mm:ss')
 
@@ -145,6 +154,10 @@ module.exports = class DbUtil {
       return res ? JSON.parse(res.json_string) : undefined
     }
   }
+
+  ////////////////////////////////////////////
+  // Profile Pages
+  ////////////////////////////////////////////
 
   static async getProfilePages(userId) {
     const sql = `
@@ -193,6 +206,10 @@ module.exports = class DbUtil {
       await mysql.query(sql)
     }
   }
+
+  ////////////////////////////////////////////
+  // Social Media
+  ////////////////////////////////////////////
 
   static async getSocialMedia(characterId) {
     const sql = `
@@ -250,6 +267,10 @@ module.exports = class DbUtil {
     await mysql.query(sql)
   }
 
+  ////////////////////////////////////////////
+  // Theme
+  ////////////////////////////////////////////
+
   static async getTheme(userId) {
     const sql = `
       SELECT theme
@@ -258,7 +279,7 @@ module.exports = class DbUtil {
     `
 
     const res = await this.getMysqlResult(sql)
-    return res.theme
+    return res?.theme
   }
 
   static async setTheme(userId, theme) {
@@ -290,6 +311,112 @@ module.exports = class DbUtil {
       `
 
       await mysql.query(sql)
+    }
+  }
+
+  ////////////////////////////////////////////
+  // Favorites
+  ////////////////////////////////////////////
+
+  static async getFavorites(userId) {
+    const sql = `
+      SELECT character_id, character_name, server
+      FROM favorites
+      WHERE user_id=${mysql.escape(userId)}
+    `
+
+    const res = await mysql.query(sql)
+    return res?.[0]
+  }
+
+  static async addFavorite(userId, characterId, characterName, server) {
+    const favorites = await this.getFavorites(userId)
+
+    if (favorites?.length >= 25) return false
+
+    if (!favorites?.find((o) => o.character_id == characterId)) {
+      // Insert
+      const sql = `
+        INSERT INTO favorites (user_id,character_id,character_name,server)
+        VALUES (
+          ${mysql.escape(userId)},
+          ${mysql.escape(characterId)},
+          ${mysql.escape(characterName)},
+          ${mysql.escape(server)}
+        )
+      `
+
+      await mysql.query(sql)
+    }
+
+    return true
+  }
+
+  static async removeFavorite(userId, characterId) {
+    const sql = `
+      DELETE FROM favorites
+      WHERE user_id=${mysql.escape(userId)}
+      AND character_id=${mysql.escape(characterId)}
+    `
+
+    await mysql.query(sql)
+  }
+
+  ////////////////////////////////////////////
+  // Purge
+  ////////////////////////////////////////////
+
+  static async purgeUser(userId, characterId) {
+    try {
+      let sql = `
+        DELETE FROM character_data
+        WHERE character_id=${mysql.escape(characterId)}
+      `
+
+      await mysql.query(sql)
+
+      sql = `
+        DELETE FROM social_medias
+        WHERE character_id=${mysql.escape(characterId)}
+      `
+
+      await mysql.query(sql)
+
+      sql = `
+        DELETE FROM favorites
+        WHERE user_id=${mysql.escape(userId)}
+      `
+
+      await mysql.query(sql)
+
+      sql = `
+        DELETE FROM profile_pages
+        WHERE user_id=${mysql.escape(userId)}
+      `
+
+      await mysql.query(sql)
+
+      sql = `
+        DELETE FROM themes
+        WHERE user_id=${mysql.escape(userId)}
+      `
+
+      await mysql.query(sql)
+
+      sql = `
+        DELETE FROM verifications
+        WHERE user_id=${mysql.escape(userId)}
+        AND character_id=${mysql.escape(characterId)}
+      `
+
+      await mysql.query(sql)
+
+      return true
+    } catch (err) {
+      console.error(
+        `[ERROR] User purge was NOT successful. Error: ${error.message}`
+      )
+      return false
     }
   }
 }

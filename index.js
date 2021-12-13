@@ -1,11 +1,10 @@
 const fs = require('fs')
-const { Client, Collection, Intents, MessageAttachment } = require('discord.js')
+const { Client, Collection, Intents } = require('discord.js')
 const { token } = require('./config.json')
 const { CanvasRenderingContext2D } = require('canvas')
 const DiscordUtil = require('./naagoLib/DiscordUtil')
-const DbUtil = require('./naagoLib/DbUtil')
-const ProfileUtil = require('./naagoLib/profileUtil')
 const ButtonUtil = require('./naagoLib/ButtonUtil')
+const SelectMenuUtil = require('./naagoLib/SelectMenuUtil')
 
 // Canvas lib
 CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
@@ -71,6 +70,19 @@ client.on('interactionCreate', async (interaction) => {
   } else if (interaction.isButton()) {
     try {
       ButtonUtil.execute(interaction)
+    } catch (error) {
+      console.error(error)
+      const embed = DiscordUtil.getErrorEmbed(
+        'There was an error while executing this command.'
+      )
+      await interaction.followUp({
+        embeds: [embed],
+        ephemeral: true
+      })
+    }
+  } else if (interaction.isSelectMenu()) {
+    try {
+      SelectMenuUtil.execute(interaction)
     } catch (error) {
       console.error(error)
       const embed = DiscordUtil.getErrorEmbed(

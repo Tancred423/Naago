@@ -1,6 +1,5 @@
 const axios = require('axios')
 const crypto = require('crypto')
-const NaagoUtil = require('./naagoUtil')
 const fs = require('fs')
 
 module.exports = class FfxivUtil {
@@ -25,19 +24,27 @@ module.exports = class FfxivUtil {
   }
 
   static async getCharacterIdsByName(name, server) {
-    const nameEncoded = encodeURIComponent(name)
-    const res = await axios.get(
-      `http://localhost:8080/character/search?name=${nameEncoded}&worldname=${server}`
-    )
+    try {
+      const nameEncoded = encodeURIComponent(name)
+      const res = await axios.get(
+        `http://localhost:8080/character/search?name=${nameEncoded}&worldname=${server}`
+      )
 
-    if (res.status !== 200) return []
-    else return res.data.List.map((a) => a.ID)
+      if (res.status !== 200) return []
+      else return res.data.List.map((a) => a.ID)
+    } catch (err) {
+      return []
+    }
   }
 
   static async getCharacterById(id) {
-    const res = await axios.get(`http://localhost:8080/character/${id}`)
-    if (res.status !== 200) return undefined
-    else return res.data.Character
+    try {
+      const res = await axios.get(`http://localhost:8080/character/${id}`)
+      if (res.status !== 200) return undefined
+      else return res.data.Character
+    } catch (err) {
+      return undefined
+    }
   }
 
   static generateVerificationCode() {

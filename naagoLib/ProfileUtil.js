@@ -176,7 +176,7 @@ class Profile {
     ////////////////////////////////////////////
     if (this.isVerified) {
       const verificationSticker = await loadImage('./images/naago_verified.png')
-      ctx.drawImage(verificationSticker, 690, 40, 90, 90)
+      ctx.drawImage(verificationSticker, 800 - 80 - 5, 45, 80, 80)
     }
 
     ////////////////////////////////////////////
@@ -200,7 +200,7 @@ class Profile {
 
     // Item level
     ctx.fillStyle = theme.item_level
-    ctx.font = `bold 30px roboto condensed`
+    ctx.font = `normal 30px roboto condensed`
     ctx.fillText(this.character.item_level, 700 + 20, 140, 50)
     ctx.textAlign = 'left'
 
@@ -258,21 +258,21 @@ class Profile {
       'Characteristics',
       `${this.character.characteristics.race} (${this.character.characteristics.tribe})`,
       this.character.characteristics.gender == '♀'
-        ? './images/emoji_female.png'
-        : './images/emoji_male.png',
+        ? theme['emoji_female']
+        : theme['emoji_male'],
       true
     )
     await profileBlock.add('Nameday', this.character.nameday, null, true)
     await profileBlock.add(
-      `Grand Company: ${this.character.grand_company.name}`,
-      this.character.grand_company.rank,
-      this.character.grand_company.icon,
+      `Grand Company: ${this.character.grand_company?.name ?? '-'}`,
+      this.character.grand_company?.rank ?? '-',
+      this.character.grand_company?.icon,
       true
     )
     await profileBlock.add(
       'Free Company',
-      this.character.free_company ? this.character.free_company.name : '-',
-      this.character.free_company ? this.character.free_company.icon : null,
+      this.character.free_company?.name ?? '-',
+      this.character.free_company?.icon,
       true
     )
     await profileBlock.add(
@@ -297,7 +297,9 @@ class Profile {
     ctx.textAlign = 'center'
     await profileBlock.add(
       'Mounts',
-      `${Math.round((this.character.amount_mounts / maxMounts) * 100)} %`,
+      this.character.amount_mounts
+        ? `${Math.round((this.character.amount_mounts / maxMounts) * 100)} %`
+        : '0 %',
       null,
       false,
       true,
@@ -306,7 +308,9 @@ class Profile {
     )
     await profileBlock.add(
       'Minions',
-      `${Math.round((this.character.amount_minions / maxMinions) * 100)} %`,
+      this.character.amount_minions
+        ? `${Math.round((this.character.amount_minions / maxMinions) * 100)} %`
+        : '0 %',
       null,
       false,
       true,
@@ -418,7 +422,7 @@ class Profile {
 
     // Item level
     ctx.fillStyle = theme.item_level
-    ctx.font = `bold 30px roboto condensed`
+    ctx.font = `normal 30px roboto condensed`
     ctx.fillText(this.character.item_level, 700 + 20, 140, 50)
     ctx.textAlign = 'left'
 
@@ -641,7 +645,7 @@ class Profile {
 
     // Item level
     ctx.fillStyle = theme.item_level
-    ctx.font = `bold 30px roboto condensed`
+    ctx.font = `normal 30px roboto condensed`
     ctx.fillText(this.character.item_level, 700 + 20, 140, 50)
     ctx.textAlign = 'left'
 
@@ -820,23 +824,23 @@ class Profile {
     // ACJ level
     const acjLevel = `Level ${this.character.active_classjob.level}`
     ctx.fillStyle = theme.acj_level
-    ctx.font = `normal 20px MiedingerMediumW00-Regular`
-    ctx.fillText(acjLevel, 446, 50, 330)
+    ctx.font = `normal 16px MiedingerMediumW00-Regular`
+    ctx.fillText(acjLevel, 300, 132 - 35 + 3 - 20 - 14, 330)
 
     // ACJ icon
     const acjIcon = await loadImage(this.character.active_classjob.icon)
-    ctx.drawImage(acjIcon, 446, 75, 50, 50)
+    ctx.drawImage(acjIcon, 300, 93, 30, 30)
 
     // ACJ name
     const acjName = await loadImage(this.character.active_classjob.name)
-    ctx.drawImage(acjName, 446 + 50, 75)
+    ctx.drawImage(acjName, 300 + 30, 90, 320, 35)
 
     ////////////////////////////////////////////
     // Verification sticker
     ////////////////////////////////////////////
     if (this.isVerified) {
       const verificationSticker = await loadImage('./images/naago_verified.png')
-      ctx.drawImage(verificationSticker, 690, 40, 90, 90)
+      ctx.drawImage(verificationSticker, 500 - 50, 40, 45, 45)
     }
 
     ////////////////////////////////////////////
@@ -847,24 +851,45 @@ class Profile {
     ctx.save()
     ctx.strokeStyle = theme.portrait_border
     ctx.lineWidth = 4
-    ctx.roundRect(450, 135, 330, 450, borderRadius).stroke()
+    ctx.roundRect(300, 137, 200, 450, borderRadius).stroke()
     ctx.clip()
 
     // Portrait
     const portrait = await loadImage(this.character.portrait)
-    ctx.drawImage(portrait, 450, 135, 330, 450)
+    ctx.drawImage(portrait, 235, 137, 330, 450)
 
     // Item level icon
     const gearIcon = await loadImage('./images/gear.png')
-    ctx.drawImage(gearIcon, 690, 142)
+    ctx.drawImage(gearIcon, 500 - 80, 144)
 
     // Item level
     ctx.fillStyle = theme.item_level
-    ctx.font = `bold 30px roboto condensed`
-    ctx.fillText(this.character.item_level, 700 + 20, 140, 50)
+    ctx.font = `normal 30px roboto condensed`
+    ctx.fillText(this.character.item_level, 500 - 50, 142, 50)
     ctx.textAlign = 'left'
 
     ctx.restore()
+
+    ////////////////////////////////////////////
+    // Gear
+    ////////////////////////////////////////////
+    let y = 45
+    let gear = new Gear(theme, ctx, 300, y, true)
+    await gear.add(this.character.mainhand, 'weapon', true)
+    await gear.add(this.character.head, 'head')
+    await gear.add(this.character.body, 'body')
+    await gear.add(this.character.hands, 'hands')
+    await gear.add(this.character.legs, 'legs')
+    await gear.add(this.character.feet, 'feet')
+
+    gear = new Gear(theme, ctx, 500, y, false)
+    await gear.add(this.character.offhand, 'weapon', true)
+    await gear.add(this.character.earrings, 'earrings')
+    await gear.add(this.character.necklace, 'necklace')
+    await gear.add(this.character.bracelets, 'bracelets')
+    await gear.add(this.character.ring1, 'ring')
+    await gear.add(this.character.ring2, 'ring')
+    // await gear.add(this.character.soulcrystal)
 
     ////////////////////////////////////////////
     // Return buffer
@@ -969,7 +994,7 @@ class Profile {
 
     // Item level
     ctx.fillStyle = theme.item_level
-    ctx.font = `bold 30px roboto condensed`
+    ctx.font = `normal 30px roboto condensed`
     ctx.fillText(this.character.item_level, 700 + 20, 140, 50)
     ctx.textAlign = 'left'
 
@@ -1372,9 +1397,480 @@ class Stats {
     this.ctx.fillStyle = this.theme.block_title
     this.ctx.textAlign = 'right'
     this.ctx.fillText(
-      content,
+      content ?? '0',
       this.x > 200 ? this.fWidth : this.fWidth / 2,
       this.yAdd + 23
     )
+  }
+}
+
+class Gear {
+  constructor(theme, ctx, x, y, isLeft) {
+    this.theme = theme
+    this.ctx = ctx
+    this.x = x
+    this.y = y
+    this.isLeft = isLeft
+    this.fWidth = 280 - 45
+    this.width = 290
+    this.height = 87
+  }
+
+  async add(gear, type, isFirst = false) {
+    if (!isFirst) this.y += 92
+
+    if (this.isLeft) this.ctx.textAlign = 'right'
+    else this.ctx.textAlign = 'left'
+
+    // BG
+    this.ctx.fillStyle = this.theme.block_background
+    this.ctx
+      .roundRect(
+        this.isLeft ? 5 : this.x + 5,
+        this.y,
+        this.width,
+        this.height,
+        borderRadius
+      )
+      .fill()
+
+    this.x = this.isLeft ? this.x - 10 : this.x + 10
+    this.y += 5
+
+    // Gear icon
+    const gearIcon = await loadImage(
+      gear ? gear.icon : this.getDefaultIcon(type)
+    )
+    this.ctx.drawImage(
+      gearIcon,
+      this.isLeft ? this.x - 40 : this.x,
+      this.y,
+      40,
+      40
+    )
+
+    if (!gear) {
+      this.x = this.isLeft ? this.x + 10 : this.x - 10
+      this.y -= 5
+
+      return
+    }
+
+    // Item level
+    this.ctx.font = `normal 20px roboto condensed`
+    this.ctx.fillStyle = this.theme.block_title
+    this.ctx.fillText(
+      gear.item_level,
+      this.isLeft ? this.x - 45 : this.x + 45,
+      this.y,
+      30
+    )
+
+    // Materia
+    if (gear.materia_1) {
+      const materiaIcon = await loadImage(this.getMateriaIcon(gear.materia_1))
+      this.ctx.drawImage(
+        materiaIcon,
+        this.isLeft ? this.x - 80 - 20 : this.x + 80,
+        this.y + 2,
+        20,
+        20
+      )
+    }
+
+    if (gear.materia_2) {
+      const materiaIcon = await loadImage(this.getMateriaIcon(gear.materia_2))
+      this.ctx.drawImage(
+        materiaIcon,
+        this.isLeft ? this.x - 80 - 20 - 25 : this.x + 80 + 25,
+        this.y + 2,
+        20,
+        20
+      )
+    }
+
+    if (gear.materia_3) {
+      const materiaIcon = await loadImage(this.getMateriaIcon(gear.materia_3))
+      this.ctx.drawImage(
+        materiaIcon,
+        this.isLeft ? this.x - 80 - 20 - 25 * 2 : this.x + 80 + 25 * 2,
+        this.y + 2,
+        20,
+        20
+      )
+    }
+
+    if (gear.materia_4) {
+      const materiaIcon = await loadImage(this.getMateriaIcon(gear.materia_4))
+      this.ctx.drawImage(
+        materiaIcon,
+        this.isLeft ? this.x - 80 - 20 - 25 * 3 : this.x + 80 + 25 * 3,
+        this.y + 2,
+        20,
+        20
+      )
+    }
+
+    if (gear.materia_5) {
+      const materiaIcon = await loadImage(this.getMateriaIcon(gear.materia_5))
+      this.ctx.drawImage(
+        materiaIcon,
+        this.isLeft ? this.x - 80 - 20 - 25 * 4 : this.x + 80 + 25 * 4,
+        this.y + 2,
+        20,
+        20
+      )
+    }
+
+    // Item name
+    this.ctx.font = `bold 17px roboto condensed`
+    this.ctx.fillStyle = gear.rarity
+      ? this.theme[gear.rarity] ?? this.theme.block_content
+      : this.theme.block_content
+    this.ctx.fillText(
+      gear.name?.split('<')[0],
+      this.isLeft ? this.x - 45 : this.x + 45,
+      this.y + 20 + 2,
+      this.fWidth
+    )
+
+    // Mirage name
+    if (gear.mirage_name) {
+      const glamourIcon = await loadImage('./images/glamour.png')
+      this.ctx.drawImage(
+        glamourIcon,
+        this.isLeft ? this.x - 45 - 18 : this.x + 45,
+        this.y + 20 + 19 + 4,
+        18,
+        18
+      )
+
+      this.ctx.font = `normal 14px roboto condensed`
+      this.ctx.fillStyle = this.theme.block_content
+      this.ctx.fillText(
+        gear.mirage_name,
+        this.isLeft ? this.x - 45 - 18 - 2 : this.x + 45 + 18 + 2,
+        this.y + 20 + 19 + 5,
+        this.fWidth - 19
+      )
+    }
+
+    // Color name
+    if (gear.color_name && gear.color_code) {
+      this.ctx.lineWidth = 2
+      this.ctx.strokeStyle = this.theme.mirage_border_color
+      this.ctx
+        .roundRect(
+          this.isLeft ? this.x - 45 - 12 - 3 : this.x + 45 + 3,
+          this.y + 20 + 19 + 19 + 7,
+          12,
+          12,
+          0.5
+        )
+        .stroke()
+
+      this.ctx.fillStyle = gear.color_code
+      this.ctx
+        .roundRect(
+          this.isLeft ? this.x - 45 - 12 - 3 : this.x + 45 + 3,
+          this.y + 20 + 19 + 19 + 7,
+          12,
+          12,
+          0.5
+        )
+        .fill()
+
+      this.ctx.font = `normal 14px roboto condensed`
+      this.ctx.fillStyle = this.theme.block_content
+      this.ctx.fillText(
+        gear.color_name,
+        this.isLeft ? this.x - 45 - 18 - 2 : this.x + 45 + 18 + 2,
+        this.y + 20 + 19 + 19 + 5,
+        this.fWidth - 19
+      )
+    }
+
+    this.x = this.isLeft ? this.x + 10 : this.x - 10
+    this.y -= 5
+  }
+
+  getDefaultIcon(type) {
+    if (type === 'head') return this.theme['no_head']
+    else if (type === 'body') return this.theme['no_body']
+    else if (type === 'hands') return this.theme['no_hands']
+    else if (type === 'legs') return this.theme['no_legs']
+    else if (type === 'feet') return this.theme['no_feet']
+    else if (type === 'earrings') return this.theme['no_earrings']
+    else if (type === 'necklace') return this.theme['no_necklace']
+    else if (type === 'bracelets') return this.theme['no_bracelets']
+    else if (type === 'ring') return this.theme['no_ring']
+    else if (type === 'soulcrystal') return this.theme['no_soulcrystal']
+    else return this.theme['no_weapon']
+  }
+
+  getMateriaIcon(materia) {
+    if (materia === 'Savage Aim Materia I') return './images/materia/crt_1.png'
+    else if (materia === 'Savage Aim Materia II')
+      return './images/materia/crt_2.png'
+    else if (materia === 'Savage Aim Materia III')
+      return './images/materia/crt_3.png'
+    else if (materia === 'Savage Aim Materia IV')
+      return './images/materia/crt_4.png'
+    else if (materia === 'Savage Aim Materia V')
+      return './images/materia/crt_5.png'
+    else if (materia === 'Savage Aim Materia VI')
+      return './images/materia/crt_6.png'
+    else if (materia === 'Savage Aim Materia VII')
+      return './images/materia/crt_7.png'
+    else if (materia === 'Savage Aim Materia VIII')
+      return './images/materia/crt_8.png'
+    else if (materia === 'Savage Aim Materia IX')
+      return './images/materia/crt_9.png'
+    else if (materia === 'Savage Aim Materia X')
+      return './images/materia/crt_10.png'
+    else if (materia === "Heavens' Eye Materia I")
+      return './images/materia/dh_1.png'
+    else if (materia === "Heavens' Eye Materia II")
+      return './images/materia/dh_2.png'
+    else if (materia === "Heavens' Eye Materia III")
+      return './images/materia/dh_3.png'
+    else if (materia === "Heavens' Eye Materia IV")
+      return './images/materia/dh_4.png'
+    else if (materia === "Heavens' Eye Materia V")
+      return './images/materia/dh_5.png'
+    else if (materia === "Heavens' Eye Materia VI")
+      return './images/materia/dh_6.png'
+    else if (materia === "Heavens' Eye Materia VII")
+      return './images/materia/dh_7.png'
+    else if (materia === "Heavens' Eye Materia VIII")
+      return './images/materia/dh_8.png'
+    else if (materia === "Heavens' Eye Materia IX")
+      return './images/materia/dh_9.png'
+    else if (materia === "Heavens' Eye Materia X")
+      return './images/materia/dh_10.png'
+    else if (materia === 'Savage Might Materia I')
+      return './images/materia/det_1.png'
+    else if (materia === 'Savage Might Materia II')
+      return './images/materia/det_2.png'
+    else if (materia === 'Savage Might Materia III')
+      return './images/materia/det_3.png'
+    else if (materia === 'Savage Might Materia IV')
+      return './images/materia/det_4.png'
+    else if (materia === 'Savage Might Materia V')
+      return './images/materia/det_5.png'
+    else if (materia === 'Savage Might Materia VI')
+      return './images/materia/det_6.png'
+    else if (materia === 'Savage Might Materia VII')
+      return './images/materia/det_7.png'
+    else if (materia === 'Savage Might Materia VIII')
+      return './images/materia/det_8.png'
+    else if (materia === 'Savage Might Materia IX')
+      return './images/materia/det_9.png'
+    else if (materia === 'Savage Might Materia X')
+      return './images/materia/det_10.png'
+    else if (materia === 'Quickarm Materia I')
+      return './images/materia/sks_1.png'
+    else if (materia === 'Quickarm Materia II')
+      return './images/materia/sks_2.png'
+    else if (materia === 'Quickarm Materia III')
+      return './images/materia/sks_3.png'
+    else if (materia === 'Quickarm Materia VI')
+      return './images/materia/sks_4.png'
+    else if (materia === 'Quickarm Materia V')
+      return './images/materia/sks_5.png'
+    else if (materia === 'Quickarm Materia VI')
+      return './images/materia/sks_6.png'
+    else if (materia === 'Quickarm Materia VII')
+      return './images/materia/sks_7.png'
+    else if (materia === 'Quickarm Materia VIII')
+      return './images/materia/sks_8.png'
+    else if (materia === 'Quickarm Materia IX')
+      return './images/materia/sks_9.png'
+    else if (materia === 'Quickarm Materia X')
+      return './images/materia/sks_10.png'
+    else if (materia === 'Quicktongue Materia I')
+      return './images/materia/sps_1.png'
+    else if (materia === 'Quicktongue Materia II')
+      return './images/materia/sps_2.png'
+    else if (materia === 'Quicktongue Materia III')
+      return './images/materia/sps_3.png'
+    else if (materia === 'Quicktongue Materia IV')
+      return './images/materia/sps_4.png'
+    else if (materia === 'Quicktongue Materia V')
+      return './images/materia/sps_5.png'
+    else if (materia === 'Quicktongue Materia VI')
+      return './images/materia/sps_6.png'
+    else if (materia === 'Quicktongue Materia VII')
+      return './images/materia/sps_7.png'
+    else if (materia === 'Quicktongue Materia VIII')
+      return './images/materia/sps_8.png'
+    else if (materia === 'Quicktongue Materia IX')
+      return './images/materia/sps_9.png'
+    else if (materia === 'Quicktongue Materia X')
+      return './images/materia/sps_10.png'
+    else if (materia === 'Battledance Materia I')
+      return './images/materia/tenacity_1.png'
+    else if (materia === 'Battledance Materia II')
+      return './images/materia/tenacity_2.png'
+    else if (materia === 'Battledance Materia III')
+      return './images/materia/tenacity_3.png'
+    else if (materia === 'Battledance Materia IV')
+      return './images/materia/tenacity_4.png'
+    else if (materia === 'Battledance Materia V')
+      return './images/materia/tenacity_5.png'
+    else if (materia === 'Battledance Materia VI')
+      return './images/materia/tenacity_6.png'
+    else if (materia === 'Battledance Materia VII')
+      return './images/materia/tenacity_7.png'
+    else if (materia === 'Battledance Materia VIII')
+      return './images/materia/tenacity_8.png'
+    else if (materia === 'Battledance Materia IX')
+      return './images/materia/tenacity_9.png'
+    else if (materia === 'Battledance Materia X')
+      return './images/materia/tenacity_10.png'
+    else if (materia === 'Piety Materia I')
+      return './images/materia/piety_1.png'
+    else if (materia === 'Piety Materia II')
+      return './images/materia/piety_2.png'
+    else if (materia === 'Piety Materia III')
+      return './images/materia/piety_3.png'
+    else if (materia === 'Piety Materia IV')
+      return './images/materia/piety_4.png'
+    else if (materia === 'Piety Materia V')
+      return './images/materia/piety_5.png'
+    else if (materia === 'Piety Materia VI')
+      return './images/materia/piety_6.png'
+    else if (materia === 'Piety Materia VII')
+      return './images/materia/piety_7.png'
+    else if (materia === 'Piety Materia VIII')
+      return './images/materia/piety_8.png'
+    else if (materia === 'Piety Materia IX')
+      return './images/materia/piety_9.png'
+    else if (materia === 'Piety Materia X')
+      return './images/materia/piety_10.png'
+    else if (materia === "Craftman's Command Materia I")
+      return './images/materia/control_1.png'
+    else if (materia === "Craftman's Command Materia II")
+      return './images/materia/control_2.png'
+    else if (materia === "Craftman's Command Materia III")
+      return './images/materia/control_3.png'
+    else if (materia === "Craftman's Command Materia IV")
+      return './images/materia/control_4.png'
+    else if (materia === "Craftman's Command Materia V")
+      return './images/materia/control_5.png'
+    else if (materia === "Craftman's Command Materia VI")
+      return './images/materia/control_6.png'
+    else if (materia === "Craftman's Command Materia VII")
+      return './images/materia/control_7.png'
+    else if (materia === "Craftman's Command Materia VIII")
+      return './images/materia/control_8.png'
+    else if (materia === "Craftman's Command Materia IX")
+      return './images/materia/control_9.png'
+    else if (materia === "Craftman's Command Materia X")
+      return './images/materia/control_10.png'
+    else if (materia === "Craftman's Cunning Materia I")
+      return './images/materia/cp_1.png'
+    else if (materia === "Craftman's Cunning Materia II")
+      return './images/materia/cp_2.png'
+    else if (materia === "Craftman's Cunning Materia III")
+      return './images/materia/cp_3.png'
+    else if (materia === "Craftman's Cunning Materia IV")
+      return './images/materia/cp_4.png'
+    else if (materia === "Craftman's Cunning Materia V")
+      return './images/materia/cp_5.png'
+    else if (materia === "Craftman's Cunning Materia VI")
+      return './images/materia/cp_6.png'
+    else if (materia === "Craftman's Cunning Materia VII")
+      return './images/materia/cp_7.png'
+    else if (materia === "Craftman's Cunning Materia VIII")
+      return './images/materia/cp_8.png'
+    else if (materia === "Craftman's Cunning Materia IX")
+      return './images/materia/cp_9.png'
+    else if (materia === "Craftman's Cunning Materia X")
+      return './images/materia/cp_10.png'
+    else if (materia === "Craftman's Competence Materia I")
+      return './images/materia/cms_1.png'
+    else if (materia === "Craftman's Competence Materia II")
+      return './images/materia/cms_2.png'
+    else if (materia === "Craftman's Competence Materia III")
+      return './images/materia/cms_3.png'
+    else if (materia === "Craftman's Competence Materia IV")
+      return './images/materia/cms_4.png'
+    else if (materia === "Craftman's Competence Materia V")
+      return './images/materia/cms_5.png'
+    else if (materia === "Craftman's Competence Materia VI")
+      return './images/materia/cms_6.png'
+    else if (materia === "Craftman's Competence Materia VII")
+      return './images/materia/cms_7.png'
+    else if (materia === "Craftman's Competence Materia VIII")
+      return './images/materia/cms_8.png'
+    else if (materia === "Craftman's Competence Materia IX")
+      return './images/materia/cms_9.png'
+    else if (materia === "Craftman's Competence Materia X")
+      return './images/materia/cms_10.png'
+    else if (materia === "Gatherer's Grasp Materia I")
+      return './images/materia/gp_1.png'
+    else if (materia === "Gatherer's Grasp Materia II")
+      return './images/materia/gp_2.png'
+    else if (materia === "Gatherer's Grasp Materia III")
+      return './images/materia/gp_3.png'
+    else if (materia === "Gatherer's Grasp Materia IV")
+      return './images/materia/gp_4.png'
+    else if (materia === "Gatherer's Grasp Materia V")
+      return './images/materia/gp_5.png'
+    else if (materia === "Gatherer's Grasp Materia VI")
+      return './images/materia/gp_6.png'
+    else if (materia === "Gatherer's Grasp Materia VII")
+      return './images/materia/gp_7.png'
+    else if (materia === "Gatherer's Grasp Materia VIII")
+      return './images/materia/gp_8.png'
+    else if (materia === "Gatherer's Grasp Materia IX")
+      return './images/materia/gp_9.png'
+    else if (materia === "Gatherer's Grasp Materia X")
+      return './images/materia/gp_10.png'
+    else if (materia === "Gatherer's Guerdon Materia I")
+      return './images/materia/gathering_1.png'
+    else if (materia === "Gatherer's Guerdon Materia II")
+      return './images/materia/gathering_2.png'
+    else if (materia === "Gatherer's Guerdon Materia III")
+      return './images/materia/gathering_3.png'
+    else if (materia === "Gatherer's Guerdon Materia IV")
+      return './images/materia/gathering_4.png'
+    else if (materia === "Gatherer's Guerdon Materia V")
+      return './images/materia/gathering_5.png'
+    else if (materia === "Gatherer's Guerdon Materia VI")
+      return './images/materia/gathering_6.png'
+    else if (materia === "Gatherer's Guerdon Materia VII")
+      return './images/materia/gathering_7.png'
+    else if (materia === "Gatherer's Guerdon Materia VIII")
+      return './images/materia/gathering_8.png'
+    else if (materia === "Gatherer's Guerdon Materia IX")
+      return './images/materia/gathering_9.png'
+    else if (materia === "Gatherer's Guerdon Materia X")
+      return './images/materia/gathering_10.png'
+    else if (materia === "Gatherer's Guile Materia I")
+      return './images/materia/perception_1.png'
+    else if (materia === "Gatherer's Guile Materia II")
+      return './images/materia/perception_2.png'
+    else if (materia === "Gatherer's Guile Materia III")
+      return './images/materia/perception_3.png'
+    else if (materia === "Gatherer's Guile Materia IV")
+      return './images/materia/perception_4.png'
+    else if (materia === "Gatherer's Guile Materia V")
+      return './images/materia/perception_5.png'
+    else if (materia === "Gatherer's Guile Materia VI")
+      return './images/materia/perception_6.png'
+    else if (materia === "Gatherer's Guile Materia VII")
+      return './images/materia/perception_7.png'
+    else if (materia === "Gatherer's Guile Materia VIII")
+      return './images/materia/perception_8.png'
+    else if (materia === "Gatherer's Guile Materia IX")
+      return './images/materia/perception_9.png'
+    else if (materia === "Gatherer's Guile Materia X")
+      return './images/materia/perception_10.png'
+    else {
+      console.log(`[ERROR] Materia '${materia}' doesn't exist.'`)
+      return './images/materia/fallback.png'
+    }
   }
 }

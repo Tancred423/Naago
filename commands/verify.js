@@ -1,5 +1,4 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
-const mysql = require('../naagoLib/mysql')
 const { MessageActionRow, MessageButton } = require('discord.js')
 const FfxivUtil = require('../naagoLib/FfxivUtil')
 const DiscordUtil = require('../naagoLib/DiscordUtil')
@@ -9,81 +8,140 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('verify')
     .setDescription('Verify your character.')
-    .addStringOption((option) =>
-      option
-        .setName('name')
-        .setDescription('Your character name')
-        .setRequired(true)
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName('set')
+        .setDescription('Verify your character.')
+        .addStringOption((option) =>
+          option
+            .setName('name')
+            .setDescription('Your character name')
+            .setRequired(true)
+        )
+        .addStringOption((option) =>
+          option
+            .setName('server')
+            .setDescription('The server your character is on')
+            .setRequired(true)
+        )
     )
-    .addStringOption((option) =>
-      option
-        .setName('server')
-        .setDescription('The server your character is on')
-        .setRequired(true)
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName('delete')
+        .setDescription(
+          'Unlink your character and delete all stored data from you.'
+        )
     ),
   async execute(interaction) {
     // API request will take a while, so defer the interaction
     await interaction.deferReply({ ephemeral: true })
 
-    // Get options from interaction
-    const name = FfxivUtil.formatName(interaction.options.getString('name'))
-    const server = interaction.options.getString('server').toLowerCase()
-    const userId = interaction.user.id
+    if (interaction.options.getSubcommand() === 'set') {
+      // Get options from interaction
+      const name = FfxivUtil.formatName(interaction.options.getString('name'))
+      const server = interaction.options.getString('server').toLowerCase()
+      const userId = interaction.user.id
 
-    // Check server validity
-    if (!FfxivUtil.isValidServer(server)) {
-      await interaction.editReply('This server does not exist')
-      return
-    }
+      // Check server validity
+      if (!FfxivUtil.isValidServer(server)) {
+        await interaction.editReply('This server does not exist')
+        return
+      }
 
-    // Send authorization message
-    const characterIds = await FfxivUtil.getCharacterIdsByName(name, server)
+      // Send authorization message
+      const characterIds = await FfxivUtil.getCharacterIdsByName(name, server)
 
-    if (characterIds.length > 1) {
-      await interaction.editReply(
-        DiscordUtil.getErrorEmbed(
-          `Multiple characters were found for \`${name}\` on \`${server}\`.\nPlease provide the command with the full name of your character to get rid of duplicates.`
+      if (characterIds.length > 1) {
+        await interaction.editReply(
+          DiscordUtil.getErrorEmbed(
+            `Multiple characters were found for \`${name}\` on \`${server}\`.\nPlease provide the command with the full name of your character to get rid of duplicates.`
+          )
         )
-      )
-    } else if (characterIds.length < 1) {
-      await interaction.editReply(
-        DiscordUtil.getErrorEmbed(
-          `No characters were found for \`${name}\` on \`${server}\``
+      } else if (characterIds.length < 1) {
+        await interaction.editReply(
+          DiscordUtil.getErrorEmbed(
+            `No characters were found for \`${name}\` on \`${server}\``
+          )
         )
-      )
-    } else {
-      const characterId = characterIds[0]
-      const character = await FfxivUtil.getCharacterById(characterId)
-
-      if (!character) {
-        const embed = DiscordUtil.getErrorEmbed(
-          `:x: Character could not be retrieved.\nPlease try again later.`
-        )
-        await interaction.editReply({ embeds: [embed] })
       } else {
-        const verification = await DbUtil.getCharacterVerification(userId)
+        const characterId = characterIds[0]
+        const character = await FfxivUtil.getCharacterById(characterId)
 
-        if (verification) {
-          let verificationCode = verification.verification_code
+        if (!character) {
+          const embed = DiscordUtil.getErrorEmbed(
+            `:x: Character could not be retrieved.\nPlease try again later.`
+          )
+          await interaction.editReply({ embeds: [embed] })
+        } else {
+          const verification = await DbUtil.getCharacterVerification(userId)
 
-          if (verification.is_verified) {
-            const verifiedCharacter = await FfxivUtil.getCharacterById(
-              verification.character_id
-            )
+          if (verification) {
+            let verificationCode = verification.verification_code
 
-            if (character.id === verifiedCharacter.character_id) {
-              await interaction.editReply({
-                embeds: [
-                  DiscordUtil.getSuccessEmbed(
-                    `You already verified this character.`
+            if (verification.is_verified) {
+              const verifiedCharacter = await FfxivUtil.getCharacterById(
+                verification.character_id
+              )
+
+              if (character.ID === verifiedCharacter.ID) {
+                await interaction.editReply({
+                  embeds: [
+                    DiscordUtil.getSuccessEmbed(
+                      `You already verified this character.`
+                    )
+                  ]
+                })
+                return
+              }
+
+              // User is already verified and needs a new code for a new character
+              verificationCode = await FfxivUtil.generateVerificationCode()
+
+              await DbUtil.setVerificationCode(
+                userId,
+                characterId,
+                verificationCode
+              )
+
+              const row = new MessageActionRow().addComponents(
+                new MessageButton()
+                  .setCustomId(`verify.${verificationCode}.${characterId}`)
+                  .setLabel('Verify me')
+                  .setStyle('PRIMARY'),
+                new MessageButton()
+                  .setLabel(`Lodestone: ${character.name}`)
+                  .setURL(
+                    `https://eu.finalfantasyxiv.com/lodestone/character/${characterId}/`
                   )
-                ]
-              })
-              return
-            }
+                  .setStyle('LINK')
+              )
 
-            // User is already verified and needs a new code for a new character
-            verificationCode = await FfxivUtil.generateVerificationCode()
+              await interaction.editReply({
+                content: `Hey ${name}!\n\nYou are already verified with \`${verifiedCharacter.name}\`! If you want to change your character, follow the instructions below.\n\nPlease change your lodestone bio to this verification code:\n\`${verificationCode}\`\n\nAfter changing your bio, click on \`Verify me\`.`,
+                components: [row]
+              })
+            } else {
+              const row = new MessageActionRow().addComponents(
+                new MessageButton()
+                  .setCustomId(`verify.${verificationCode}.${characterId}`)
+                  .setLabel('Verify me')
+                  .setStyle('PRIMARY'),
+                new MessageButton()
+                  .setLabel(`Lodestone: ${name}`)
+                  .setURL(
+                    `https://eu.finalfantasyxiv.com/lodestone/character/${characterId}/`
+                  )
+                  .setStyle('LINK')
+              )
+
+              await interaction.editReply({
+                content: `Hey ${name}!\n\nPlease change your lodestone bio to this verification code:\n\`${verificationCode}\`\n\nAfter changing your bio, click on \`Verify me\`.`,
+                components: [row]
+              })
+            }
+          } else {
+            // User doesn't have verification code, now generate
+            const verificationCode = FfxivUtil.generateVerificationCode()
 
             await DbUtil.setVerificationCode(
               userId,
@@ -105,56 +163,38 @@ module.exports = {
             )
 
             await interaction.editReply({
-              content: `Hey ${name}!\n\nYou are already verified with \`${verifiedCharacter.name}\`! If you want to change your character, follow the instructions below.\n\nPlease change your lodestone bio to this verification code:\n\`${verificationCode}\`\n\nAfter changing your bio, click on \`Verify me\`.`,
-              components: [row]
-            })
-          } else {
-            const row = new MessageActionRow().addComponents(
-              new MessageButton()
-                .setCustomId(`verify.${verificationCode}.${characterId}`)
-                .setLabel('Verify me')
-                .setStyle('PRIMARY'),
-              new MessageButton()
-                .setLabel(`Lodestone: ${name}`)
-                .setURL(
-                  `https://eu.finalfantasyxiv.com/lodestone/character/${characterId}/`
-                )
-                .setStyle('LINK')
-            )
-
-            await interaction.editReply({
               content: `Hey ${name}!\n\nPlease change your lodestone bio to this verification code:\n\`${verificationCode}\`\n\nAfter changing your bio, click on \`Verify me\`.`,
               components: [row]
             })
           }
-        } else {
-          // User doesn't have verification code, now generate
-          const verificationCode = FfxivUtil.generateVerificationCode()
-
-          await DbUtil.setVerificationCode(
-            userId,
-            characterId,
-            verificationCode
-          )
-
-          const row = new MessageActionRow().addComponents(
-            new MessageButton()
-              .setCustomId(`verify.${verificationCode}.${characterId}`)
-              .setLabel('Verify me')
-              .setStyle('PRIMARY'),
-            new MessageButton()
-              .setLabel(`Lodestone: ${character.name}`)
-              .setURL(
-                `https://eu.finalfantasyxiv.com/lodestone/character/${characterId}/`
-              )
-              .setStyle('LINK')
-          )
-
-          await interaction.editReply({
-            content: `Hey ${name}!\n\nPlease change your lodestone bio to this verification code:\n\`${verificationCode}\`\n\nAfter changing your bio, click on \`Verify me\`.`,
-            components: [row]
-          })
         }
+      }
+    } else {
+      const userId = interaction.user.id
+      const verification = await DbUtil.getCharacterVerification(userId)
+
+      if (verification) {
+        const row = new MessageActionRow().addComponents(
+          new MessageButton()
+            .setCustomId('unverify.cancel')
+            .setLabel('No, cancel.')
+            .setStyle('SECONDARY'),
+          new MessageButton()
+            .setCustomId(`unverify.${verification.character_id}`)
+            .setLabel('Yes, delete it.')
+            .setStyle('DANGER')
+        )
+
+        await interaction.editReply({
+          content:
+            'Are you sure, you want to unlink your character and delete all stored data from you?',
+          components: [row]
+        })
+      } else {
+        const embed = DiscordUtil.getErrorEmbed(
+          'Please verify your character first. See `/verify set`.'
+        )
+        await interaction.editReply({ embeds: [embed] })
       }
     }
   },
@@ -227,5 +267,51 @@ module.exports = {
         })
       }
     }
+  },
+
+  unverifyUser: async (interaction) => {
+    const idSplit = interaction.component.customId.split('.')
+    if (idSplit.length !== 2) {
+      await interaction.editReply({
+        embeds: [
+          DiscordUtil.getErrorEmbed(
+            `Could not fetch your character. Please try again later.`
+          )
+        ],
+        ephemeral: true
+      })
+      return
+    }
+
+    const userId = interaction.user.id
+    const characterId = idSplit[1]
+
+    if (characterId === 'cancel') {
+      const embed = DiscordUtil.getSuccessEmbed('Cancelled.')
+      await interaction.editReply({
+        content: ' ',
+        embeds: [embed],
+        components: []
+      })
+      return
+    }
+
+    const successful = await DbUtil.purgeUser(userId, characterId)
+    let embed
+    if (successful) {
+      embed = DiscordUtil.getSuccessEmbed(
+        'Your character was unlinked and all your data has been erased.'
+      )
+    } else {
+      embed = DiscordUtil.getErrorEmbed(
+        'Your data could not be (fully) deleted. Please contact Tancred#0001 for help.'
+      )
+    }
+
+    await interaction.editReply({
+      content: ' ',
+      embeds: [embed],
+      components: []
+    })
   }
 }

@@ -6,7 +6,7 @@
   "window_title_underline": "#252625",
   "acj_level": "#FFF2D1",
   "portrait_border": "#C0A58B",
-  "item_level": "#549695",
+  "item_level": "#45b2ae",
   "title": "#FFF2D1",
   "name": "#FFF2D1",
   "block_background": "#252625",
@@ -16,5 +16,27 @@
   "exp_bar": "#605F60",
   "exp_bar_filled": "#AD8E65",
   "green": "#77B22D",
-  "purple": "#E2648D"
+  "purple": "#E2648D",
+  "mirage_border_color": "#DDDDDD",
+
+  "epic": "#b38cff",
+  "rare": "#5990ff",
+  "uncommon": "#c0ffc0",
+  "magic": "#d789b6",
+  "common": "#f3f3f3",
+
+  "emoji_female": "./images/icons/dark/emoji_female.png",
+  "emoji_male": "./images/icons/dark/emoji_male.png",
+
+  "no_weapon": "./images/gear/dark/no_weapon.png",
+  "no_head": "./images/gear/dark/no_head.png",
+  "no_body": "./images/gear/dark/no_body.png",
+  "no_hands": "./images/gear/dark/no_hands.png",
+  "no_legs": "./images/gear/dark/no_legs.png",
+  "no_feet": "./images/gear/dark/no_feet.png",
+  "no_earrings": "./images/gear/dark/no_earrings.png",
+  "no_necklace": "./images/gear/dark/no_necklace.png",
+  "no_bracelets": "./images/gear/dark/no_bracelets.png",
+  "no_ring": "./images/gear/dark/no_ring.png",
+  "no_soulcrystal": "./images/gear/dark/no_soulcrystal.png"
 }

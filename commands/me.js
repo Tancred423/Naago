@@ -14,9 +14,9 @@ module.exports = {
     const userId = interaction.user.id
     const verification = await DbUtil.getCharacterVerification(userId)
 
-    if (!verification) {
+    if (!verification?.is_verified) {
       const embed = DiscordUtil.getErrorEmbed(
-        'You did not save any character yet. You can do so with `/verify`.'
+        'Please verify your character first. See `/verify set`.'
       )
       await interaction.editReply({ embeds: [embed] })
       return
@@ -40,7 +40,7 @@ module.exports = {
     const subProfilePage = profilePages.subProfilePage
 
     try {
-      if (!profilePage) throw new Error('profilePage is undefined')
+      if (!profilePage) throw new Error('[/me] profilePage is undefined')
 
       if (profilePage === 'socialmedia') {
         const profileEmbed = await ProfileUtil.getEmbed(

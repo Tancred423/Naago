@@ -1,7 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
 const DbUtil = require('../naagoLib/DbUtil')
 const DiscordUtil = require('../naagoLib/DiscordUtil')
-const mysql = require('../naagoLib/mysql')
 const URL = require('url').URL
 
 module.exports = {
@@ -49,16 +48,9 @@ module.exports = {
       const platform = interaction.options.getString('platform').toLowerCase()
       const url = interaction.options.getString('url').toLowerCase()
       const userId = interaction.user.id
+      const verification = await DbUtil.getCharacterVerification(userId)
 
-      // Get character ID
-      const sql = `
-        SELECT *
-        FROM verifications
-        WHERE user_id=${mysql.escape(userId)}
-      `
-      const verify = await DbUtil.getMysqlResult(sql)
-
-      if (verify) {
+      if (verification.is_verified) {
         // Check url
         const urlString = url.replace('www.', '')
         try {
@@ -77,7 +69,7 @@ module.exports = {
         }
 
         // Get character
-        const characterId = verify.character_id
+        const characterId = verification.character_id
 
         DbUtil.addSocialMedia(characterId, platform, urlString)
 
@@ -90,25 +82,18 @@ module.exports = {
         })
       } else {
         const embed = DiscordUtil.getErrorEmbed(
-          'Please verify your character first. You can do so with `/verify`.'
+          'Please verify your character first. See `/verify set`.'
         )
         await interaction.editReply({ embeds: [embed] })
       }
     } else {
       const platform = interaction.options.getString('platform').toLowerCase()
       const userId = interaction.user.id
+      const verification = await DbUtil.getCharacterVerification(userId)
 
-      // Get character ID
-      const sql = `
-        SELECT *
-        FROM verifications
-        WHERE user_id=${mysql.escape(userId)}
-      `
-      const verify = await DbUtil.getMysqlResult(sql)
-
-      if (verify) {
+      if (verification.is_verified) {
         // Get character
-        const characterId = verify.character_id
+        const characterId = verification.character_id
 
         DbUtil.removeSocialMedia(characterId, platform)
 
@@ -121,7 +106,7 @@ module.exports = {
         })
       } else {
         const embed = DiscordUtil.getErrorEmbed(
-          'Please verify your character first. You can do so with `/verify`.'
+          'Please verify your character first. See `/verify set`.'
         )
         await interaction.editReply({ embeds: [embed] })
       }

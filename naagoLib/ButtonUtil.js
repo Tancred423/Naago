@@ -1,5 +1,6 @@
 const { MessageAttachment } = require('discord.js')
-const { verifyUser } = require('../commands/verify')
+const { unfavoriteUser } = require('../commands/favorite')
+const { verifyUser, unverifyUser } = require('../commands/verify')
 const DbUtil = require('./DbUtil')
 const DiscordUtil = require('./DiscordUtil')
 const ProfileUtil = require('./profileUtil')
@@ -27,7 +28,7 @@ module.exports = class ButtonUtil {
 
       const verification = await DbUtil.getCharacterVerification(userId)
 
-      if (verification) {
+      if (verification.is_verified) {
         // Get character
         const characterId = verification.character_id
         const character = await DbUtil.fetchCharacter(interaction, characterId)
@@ -110,7 +111,7 @@ module.exports = class ButtonUtil {
             components: components
           })
         }
-      } else throw new Error()
+      }
     } else if (buttonId.startsWith('find')) {
       await interaction.deferUpdate()
 
@@ -195,6 +196,12 @@ module.exports = class ButtonUtil {
     } else if (buttonId.startsWith('verify')) {
       await interaction.deferReply({ ephemeral: true })
       verifyUser(interaction)
+    } else if (buttonId.startsWith('unverify')) {
+      await interaction.deferUpdate()
+      unverifyUser(interaction)
+    } else if (buttonId.startsWith('unfavorite')) {
+      await interaction.deferUpdate()
+      unfavoriteUser(interaction)
     }
   }
 }
