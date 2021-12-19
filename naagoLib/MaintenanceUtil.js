@@ -23,10 +23,10 @@ module.exports = class MaintenanceUtil {
       `[${moment().format('YYYY-MM-DD HH:mm')}] Checking for maintenances`
     )
 
-    const last10 = await this.getLast10()
+    const latestMaintenances = await this.getLast10()
     const newMaintenances = []
 
-    for (const maint of last10) {
+    for (const maint of latestMaintenances) {
       if (await DbUtil.getMaintenanceByTitle(maint.title)) break
       newMaintenances.push(maint)
     }

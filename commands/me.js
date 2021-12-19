@@ -29,8 +29,10 @@ module.exports = {
       const embed = DiscordUtil.getErrorEmbed(
         `Could not fetch your character.\nPlease try again later.`
       )
-      await interaction.editReply({
-        embeds: [embed]
+      await interaction.deleteReply()
+      await interaction.followUp({
+        embeds: [embed],
+        ephemeral: true
       })
       return
     }

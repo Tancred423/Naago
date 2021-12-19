@@ -4,7 +4,7 @@ const { unsetup } = require('../commands/setup')
 const { verifyUser, unverifyUser } = require('../commands/verify')
 const DbUtil = require('./DbUtil')
 const DiscordUtil = require('./DiscordUtil')
-const ProfileUtil = require('./profileUtil')
+const ProfileUtil = require('./ProfileUtil')
 
 module.exports = class ButtonUtil {
   static async execute(interaction) {
