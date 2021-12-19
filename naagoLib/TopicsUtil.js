@@ -27,7 +27,7 @@ module.exports = class TopicsUtil {
 
     for (const topic of latestTopics) {
       topic.date = topic.date * 1000
-      if (await DbUtil.getTopicByTitle(topic.title, topic.date)) break
+      if (await DbUtil.getTopicByTitle(topic.title, topic.date)) continue
 
       // Enrich topic
       let markdown = NaagoUtil.topicHtmlToMarkdown(topic.description)
