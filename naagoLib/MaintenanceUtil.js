@@ -10,7 +10,7 @@ const GlobalUtil = require('./GlobalUtil')
 module.exports = class MaintenanceUtil {
   static async getLast10() {
     try {
-      const res = await axios.get('http://localhost:8080/lodestone/maintenance')
+      const res = await axios.get('http://localhost:8081/lodestone/maintenance')
       return res?.data?.Maintenances ?? []
     } catch (err) {
       console.log(err)

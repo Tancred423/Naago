@@ -9,7 +9,7 @@ const moment = require('moment')
 module.exports = class TopicsUtil {
   static async getLast10() {
     try {
-      const res = await axios.get('http://localhost:8080/lodestone/topics')
+      const res = await axios.get('http://localhost:8081/lodestone/topics')
       return res?.data?.Topics ?? []
     } catch (err) {
       console.log(err)
