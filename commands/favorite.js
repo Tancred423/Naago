@@ -7,7 +7,7 @@ const FfxivUtil = require('../naagoLib/FfxivUtil')
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('favorite')
-    .setDescription('Mark up to 25 characters as favorites.')
+    .setDescription('Save up to 25 characters as favorites.')
     .addSubcommand((subcommand) =>
       subcommand
         .setName('add')
@@ -15,13 +15,13 @@ module.exports = {
         .addStringOption((option) =>
           option
             .setName('name')
-            .setDescription('A full character name')
+            .setDescription('A full character name.')
             .setRequired(true)
         )
         .addStringOption((option) =>
           option
             .setName('server')
-            .setDescription('The server the character is on')
+            .setDescription('The server the character is on.')
             .setRequired(true)
         )
     )
@@ -107,27 +107,43 @@ module.exports = {
               `${character.server.world} (${character.server.dc})`
             )
 
-            if (successful) {
+            if (successful === 'capped') {
+              const embed = DiscordUtil.getErrorEmbed(
+                `\`${name}\` was NOT added as favorite as you already reached the maximum of 25.\nPlease remove a favorite before adding a new one. See \`/favorite remove\``
+              )
+
               await interaction.editReply({
                 content: ' ',
                 components: [],
-                embeds: [
-                  DiscordUtil.getSuccessEmbed(
-                    `\`${name}\` was added as favorite.`
-                  )
-                ],
-                ephemeral: true
+                embeds: [embed]
               })
-            } else {
+
+              return
+            }
+
+            if (!successful) {
+              const embed = DiscordUtil.getErrorEmbed(
+                `\`${name}\` could not be added as favorite. Please contact Tancred#0001 for help.`
+              )
+
               await interaction.editReply({
                 content: ' ',
                 components: [],
-                embeds: [
-                  DiscordUtil.getErrorEmbed(
-                    `\`${name}\` was NOT added as favorite as you already reached the maximum of 25.\nPlease remove a favorite before adding a new one. See \`/favorite remove\``
-                  )
-                ],
-                ephemeral: true
+                embeds: [embed]
+              })
+
+              return
+            }
+
+            if (successful) {
+              const embed = DiscordUtil.getSuccessEmbed(
+                `\`${name}\` was added as favorite.`
+              )
+
+              await interaction.editReply({
+                content: ' ',
+                components: [],
+                embeds: [embed]
               })
             }
           }
@@ -242,7 +258,20 @@ module.exports = {
     const characterId = idSplit[1]
     const characterName = idSplit[2]
 
-    await DbUtil.removeFavorite(userId, characterId)
+    const successful = await DbUtil.removeFavorite(userId, characterId)
+
+    if (!successful) {
+      const embed = DiscordUtil.getErrorEmbed(
+        `\`${characterName}\` could not be removed from your favorites. Please contact Tancred#0001 for help.`
+      )
+      await interaction.editReply({
+        content: ' ',
+        components: [],
+        embeds: [embed]
+      })
+
+      return
+    }
 
     const embed = DiscordUtil.getSuccessEmbed(
       `\`${characterName}\` has been removed from your favorites.`

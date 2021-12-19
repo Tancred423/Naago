@@ -6,12 +6,8 @@ const { MessageActionRow, MessageSelectMenu } = require('discord.js')
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('theme')
-    .setDescription(
-      'Change the theme for your profile to dark, light or classic (blue).'
-    ),
+    .setDescription('Change the theme of the profiles you request.'),
   async execute(interaction) {
-    await interaction.deferReply({ ephemeral: true })
-
     const userId = interaction.user.id
     const verification = await DbUtil.getCharacterVerification(userId)
 
@@ -19,9 +15,11 @@ module.exports = {
       const embed = DiscordUtil.getErrorEmbed(
         'Please verify your character first. See `/verify set`.'
       )
-      await interaction.editReply({ embeds: [embed] })
+      await interaction.reply({ ephemeral: true, embeds: [embed] })
       return
     }
+
+    await interaction.deferReply({ ephemeral: true })
 
     const row = new MessageActionRow().addComponents(
       new MessageSelectMenu()

@@ -16,50 +16,75 @@ module.exports = class DbUtil {
   ////////////////////////////////////////////
 
   static async getCharacterVerification(userId) {
-    const sql = `
+    try {
+      const sql = `
         SELECT *
         FROM verifications
         WHERE user_id=${mysql.escape(userId)}
       `
 
-    return await this.getMysqlResult(sql)
+      return await this.getMysqlResult(sql)
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting verification code was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
   }
 
   static async setVerificationCode(userId, characterId, verificationCode) {
-    if (await this.getCharacterVerification(userId)) {
-      // Update
-      const sql = `
-        UPDATE verifications
-        SET verification_code=${mysql.escape(verificationCode)}
-        WHERE user_id=${mysql.escape(userId)}
-      `
+    try {
+      if (await this.getCharacterVerification(userId)) {
+        // Update
+        const sql = `
+          UPDATE verifications
+          SET verification_code=${mysql.escape(verificationCode)}
+          WHERE user_id=${mysql.escape(userId)}
+        `
 
-      await mysql.query(sql)
-    } else {
-      // Insert
-      const sql = `
-        INSERT INTO verifications (user_id,character_id,verification_code,is_verified)
-        VALUES (
-          ${mysql.escape(userId)},
-          ${mysql.escape(characterId)},
-          ${mysql.escape(verificationCode)},
-          ${mysql.escape(false)}
-        )
-      `
+        await mysql.query(sql)
+      } else {
+        // Insert
+        const sql = `
+          INSERT INTO verifications (user_id,character_id,verification_code,is_verified)
+          VALUES (
+            ${mysql.escape(userId)},
+            ${mysql.escape(characterId)},
+            ${mysql.escape(verificationCode)},
+            ${mysql.escape(false)}
+          )
+        `
 
-      await mysql.query(sql)
+        await mysql.query(sql)
+      }
+
+      return true
+    } catch (err) {
+      console.error(
+        `[ERROR] Setting verification code was NOT successful. Error: ${err.message}`
+      )
+      return false
     }
   }
 
   static async verifyCharacter(userId, characterId) {
-    const sql = `
-      UPDATE verifications
-      SET character_id=${mysql.escape(characterId)},
-          is_verified=${mysql.escape(true)}
-      WHERE user_id=${mysql.escape(userId)}
-    `
+    try {
+      const sql = `
+        UPDATE verifications
+        SET character_id=${mysql.escape(characterId)},
+            is_verified=${mysql.escape(true)}
+        WHERE user_id=${mysql.escape(userId)}
+      `
 
-    await mysql.query(sql)
+      await mysql.query(sql)
+
+      return true
+    } catch (err) {
+      console.error(
+        `[ERROR] Verifying character was NOT successful. Error: ${err.message}`
+      )
+      return false
+    }
   }
 
   ////////////////////////////////////////////
@@ -67,72 +92,73 @@ module.exports = class DbUtil {
   ////////////////////////////////////////////
 
   static async fetchCharacter(interaction, characterId) {
-    const loadingEmote = await DiscordUtil.getEmote(
-      interaction.client,
-      'loading'
-    )
+    try {
+      const loadingEmote = await DiscordUtil.getEmote(
+        interaction.client,
+        'loading'
+      )
 
-    // Get character data
-    let sql = `
-      SELECT *
-      FROM character_data
-      WHERE character_id=${mysql.escape(characterId)}
-    `
+      // Get character data
+      let sql = `
+        SELECT *
+        FROM character_data
+        WHERE character_id=${mysql.escape(characterId)}
+      `
 
-    const characterDataRes = await this.getMysqlResult(sql)
+      const characterDataRes = await this.getMysqlResult(sql)
 
-    const characterData =
-      typeof characterDataRes?.json_string === 'string'
-        ? JSON.parse(characterDataRes.json_string)
-        : undefined
+      const characterData =
+        typeof characterDataRes?.json_string === 'string'
+          ? JSON.parse(characterDataRes.json_string)
+          : undefined
 
-    if (characterData) {
-      const lastUpdate = new Date(characterDataRes.latest_update).getTime()
-      const now = Date.now()
-      const nowSQL = moment(now).format('YYYY-MM-DD HH:mm:ss')
+      if (characterData) {
+        const lastUpdate = new Date(characterDataRes.latest_update).getTime()
+        const now = Date.now()
+        const nowSQL = moment(now).format('YYYY-MM-DD HH:mm:ss')
 
-      if (now - lastUpdate > 2 * 60 * 60 * 1000) {
-        // Last update was for >= 2 hours. Update data now.
-        await interaction.editReply(
-          `${loadingEmote} *Updating lodestone data. This might take several seconds.*`
-        )
+        if (now - lastUpdate > 2 * 60 * 60 * 1000) {
+          // Last update was for >= 2 hours. Update data now.
+          await interaction.editReply(
+            `${loadingEmote} *Updating lodestone data. This might take several seconds.*`
+          )
 
-        const character = await FfxivUtil.getCharacterById(characterId)
-        sql = `
+          const character = await FfxivUtil.getCharacterById(characterId)
+          sql = `
             UPDATE character_data
             SET latest_update=${mysql.escape(nowSQL)},
                 json_string=${mysql.escape(JSON.stringify(character))}
             WHERE character_id=${mysql.escape(characterId)}
           `
 
-        await mysql.query(sql)
+          await mysql.query(sql)
 
-        sql = `
+          sql = `
             SELECT *
             FROM character_data
             WHERE character_id=${mysql.escape(characterId)}
           `
 
-        const res = await this.getMysqlResult(sql)
+          const res = await this.getMysqlResult(sql)
 
-        return res ? JSON.parse(res.json_string) : undefined
+          return res ? JSON.parse(res.json_string) : undefined
+        } else {
+          // Last update was for < 2 hours. Use cached data.
+          return characterData
+        }
       } else {
-        // Last update was for < 2 hours. Use cached data.
-        return characterData
-      }
-    } else {
-      // No character data yet. Cache now.
-      await interaction.editReply(
-        `${loadingEmote} *Updating lodestone data. This might take several seconds.*`
-      )
+        // No character data yet. Cache now.
+        await interaction.editReply(
+          `${loadingEmote} *Updating lodestone data. This might take several seconds.*`
+        )
 
-      const character = await FfxivUtil.getCharacterById(characterId)
-      if (!character) return undefined
+        const character = await FfxivUtil.getCharacterById(characterId)
+        if (!character) return undefined
 
-      const now = Date.now()
-      const nowSQL = moment(now).format('YYYY-MM-DD HH:mm:ss')
+        const now = Date.now()
+        const nowSQL = moment(now).format('YYYY-MM-DD HH:mm:ss')
 
-      sql = `
+        sql = `
           INSERT INTO character_data (character_id,latest_update,json_string)
           VALUES (
             ${mysql.escape(characterId)},
@@ -141,17 +167,23 @@ module.exports = class DbUtil {
           )
         `
 
-      await mysql.query(sql)
+        await mysql.query(sql)
 
-      sql = `
+        sql = `
           SELECT *
           FROM character_data
           WHERE character_id=${mysql.escape(characterId)}
         `
 
-      const res = await this.getMysqlResult(sql)
+        const res = await this.getMysqlResult(sql)
 
-      return res ? JSON.parse(res.json_string) : undefined
+        return res ? JSON.parse(res.json_string) : undefined
+      }
+    } catch (err) {
+      console.error(
+        `[ERROR] Fetching character was NOT successful. Error: ${err.message}`
+      )
+      return undefined
     }
   }
 
@@ -160,50 +192,69 @@ module.exports = class DbUtil {
   ////////////////////////////////////////////
 
   static async getProfilePages(userId) {
-    const sql = `
+    try {
+      const sql = `
         SELECT *
         FROM profile_pages
         WHERE user_id=${mysql.escape(userId)}
       `
 
-    const res = await this.getMysqlResult(sql)
+      const res = await this.getMysqlResult(sql)
 
-    return res
-      ? { profilePage: res.profile_page, subProfilePage: res.sub_profile_page }
-      : { profilePage: 'profile', subProfilePage: undefined }
+      return res
+        ? {
+            profilePage: res.profile_page,
+            subProfilePage: res.sub_profile_page
+          }
+        : { profilePage: 'profile', subProfilePage: undefined }
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting profile page was NOT successful. Error: ${err.message}`
+      )
+      return { profilePage: 'profile', subProfilePage: undefined }
+    }
   }
 
   static async updateProfilePage(userId, profilePage, subProfilePage) {
-    let sql = `
-      SELECT user_id
-      FROM profile_pages
-      WHERE user_id=${mysql.escape(userId)}
-    `
-
-    const res = await this.getMysqlResult(sql)
-
-    if (res) {
-      // Update
-      sql = `
-        UPDATE profile_pages
-        SET profile_page=${mysql.escape(profilePage)},
-            sub_profile_page=${mysql.escape(subProfilePage)}
+    try {
+      let sql = `
+        SELECT user_id
+        FROM profile_pages
         WHERE user_id=${mysql.escape(userId)}
       `
 
-      await mysql.query(sql)
-    } else {
-      // Insert
-      sql = `
-        INSERT INTO profile_pages (user_id,profile_page,sub_profile_page)
-        VALUES (
-          ${mysql.escape(userId)},
-          ${mysql.escape(profilePage)},
-          ${mysql.escape(subProfilePage)}
-        )
-      `
+      const res = await this.getMysqlResult(sql)
 
-      await mysql.query(sql)
+      if (res) {
+        // Update
+        sql = `
+          UPDATE profile_pages
+          SET profile_page=${mysql.escape(profilePage)},
+              sub_profile_page=${mysql.escape(subProfilePage)}
+          WHERE user_id=${mysql.escape(userId)}
+        `
+
+        await mysql.query(sql)
+      } else {
+        // Insert
+        sql = `
+          INSERT INTO profile_pages (user_id,profile_page,sub_profile_page)
+          VALUES (
+            ${mysql.escape(userId)},
+            ${mysql.escape(profilePage)},
+            ${mysql.escape(subProfilePage)}
+          )
+        `
+
+        await mysql.query(sql)
+      }
+
+      return true
+    } catch (err) {
+      console.error(
+        `[ERROR] Updating profile page was NOT successful. Error: ${err.message}`
+      )
+      return false
     }
   }
 
@@ -212,39 +263,47 @@ module.exports = class DbUtil {
   ////////////////////////////////////////////
 
   static async getSocialMedia(characterId) {
-    const sql = `
-      SELECT *
-      FROM social_medias
-      WHERE character_id=${mysql.escape(characterId)}
-    `
+    try {
+      const sql = `
+        SELECT *
+        FROM social_medias
+        WHERE character_id=${mysql.escape(characterId)}
+      `
 
-    const res = await mysql.query(sql)
-    return res[0]
+      const res = await mysql.query(sql)
+      return res[0]
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting social media was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
   }
 
   static async addSocialMedia(characterId, platform, url) {
-    const sql = `
+    try {
+      const sql = `
       SELECT *
       FROM social_medias
       WHERE character_id=${mysql.escape(characterId)}
       AND platform=${mysql.escape(platform)}
     `
 
-    const socialMedia = await this.getMysqlResult(sql)
+      const socialMedia = await this.getMysqlResult(sql)
 
-    if (socialMedia) {
-      // Update
-      const sql = `
+      if (socialMedia) {
+        // Update
+        const sql = `
         UPDATE social_medias
         SET url=${mysql.escape(url)}
         WHERE character_id=${mysql.escape(characterId)}
         AND platform=${mysql.escape(platform)}
       `
 
-      await mysql.query(sql)
-    } else {
-      // Insert
-      const sql = `
+        await mysql.query(sql)
+      } else {
+        // Insert
+        const sql = `
         INSERT INTO social_medias (character_id,platform,url)
         VALUES (
           ${mysql.escape(characterId)},
@@ -253,18 +312,35 @@ module.exports = class DbUtil {
         )
       `
 
-      await mysql.query(sql)
+        await mysql.query(sql)
+      }
+
+      return true
+    } catch (err) {
+      console.error(
+        `[ERROR] Adding social media was NOT successful. Error: ${err.message}`
+      )
+      return false
     }
   }
 
   static async removeSocialMedia(characterId, platform) {
-    const sql = `
-      DELETE FROM social_medias
-      WHERE character_id=${mysql.escape(characterId)}
-      AND platform=${mysql.escape(platform)}
-    `
+    try {
+      const sql = `
+        DELETE FROM social_medias
+        WHERE character_id=${mysql.escape(characterId)}
+        AND platform=${mysql.escape(platform)}
+      `
 
-    await mysql.query(sql)
+      await mysql.query(sql)
+
+      return true
+    } catch (err) {
+      console.error(
+        `[ERROR] Removing social media was NOT successful. Error: ${err.message}`
+      )
+      return false
+    }
   }
 
   ////////////////////////////////////////////
@@ -272,45 +348,61 @@ module.exports = class DbUtil {
   ////////////////////////////////////////////
 
   static async getTheme(userId) {
-    const sql = `
-      SELECT theme
-      FROM themes
-      WHERE user_id=${mysql.escape(userId)}
-    `
-
-    const res = await this.getMysqlResult(sql)
-    return res?.theme
-  }
-
-  static async setTheme(userId, theme) {
-    const sql = `
-      SELECT *
-      FROM themes
-      WHERE user_id=${mysql.escape(userId)}
-    `
-
-    const themeRes = await this.getMysqlResult(sql)
-
-    if (themeRes) {
-      // Update
+    try {
       const sql = `
-        UPDATE themes
-        SET theme=${mysql.escape(theme)}
+        SELECT theme
+        FROM themes
         WHERE user_id=${mysql.escape(userId)}
       `
 
-      await mysql.query(sql)
-    } else {
-      // Insert
+      const res = await this.getMysqlResult(sql)
+      return res?.theme
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting theme was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
+  }
+
+  static async setTheme(userId, theme) {
+    try {
       const sql = `
-        INSERT INTO themes (user_id,theme)
-        VALUES (
-          ${mysql.escape(userId)},
-          ${mysql.escape(theme)}
-        )
+        SELECT *
+        FROM themes
+        WHERE user_id=${mysql.escape(userId)}
       `
 
-      await mysql.query(sql)
+      const themeRes = await this.getMysqlResult(sql)
+
+      if (themeRes) {
+        // Update
+        const sql = `
+          UPDATE themes
+          SET theme=${mysql.escape(theme)}
+          WHERE user_id=${mysql.escape(userId)}
+        `
+
+        await mysql.query(sql)
+      } else {
+        // Insert
+        const sql = `
+          INSERT INTO themes (user_id,theme)
+          VALUES (
+            ${mysql.escape(userId)},
+            ${mysql.escape(theme)}
+          )
+        `
+
+        await mysql.query(sql)
+      }
+
+      return true
+    } catch (err) {
+      console.error(
+        `[ERROR] Setting theme was NOT successful. Error: ${err.message}`
+      )
+      return false
     }
   }
 
@@ -319,47 +411,436 @@ module.exports = class DbUtil {
   ////////////////////////////////////////////
 
   static async getFavorites(userId) {
-    const sql = `
-      SELECT character_id, character_name, server
-      FROM favorites
-      WHERE user_id=${mysql.escape(userId)}
-    `
+    try {
+      const sql = `
+        SELECT character_id, character_name, server
+        FROM favorites
+        WHERE user_id=${mysql.escape(userId)}
+      `
 
-    const res = await mysql.query(sql)
-    return res?.[0]
+      const res = await mysql.query(sql)
+      return res?.[0]
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting favorites was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
   }
 
   static async addFavorite(userId, characterId, characterName, server) {
-    const favorites = await this.getFavorites(userId)
+    try {
+      const favorites = await this.getFavorites(userId)
 
-    if (favorites?.length >= 25) return false
+      if (favorites?.length >= 25) return 'capped'
 
-    if (!favorites?.find((o) => o.character_id == characterId)) {
-      // Insert
-      const sql = `
-        INSERT INTO favorites (user_id,character_id,character_name,server)
-        VALUES (
-          ${mysql.escape(userId)},
-          ${mysql.escape(characterId)},
-          ${mysql.escape(characterName)},
-          ${mysql.escape(server)}
-        )
-      `
+      if (!favorites?.find((o) => o.character_id == characterId)) {
+        // Insert
+        const sql = `
+          INSERT INTO favorites (user_id,character_id,character_name,server)
+          VALUES (
+            ${mysql.escape(userId)},
+            ${mysql.escape(characterId)},
+            ${mysql.escape(characterName)},
+            ${mysql.escape(server)}
+          )
+        `
 
-      await mysql.query(sql)
+        await mysql.query(sql)
+      }
+
+      return true
+    } catch (err) {
+      console.error(
+        `[ERROR] Adding favorite was NOT successful. Error: ${err.message}`
+      )
+      return false
     }
-
-    return true
   }
 
   static async removeFavorite(userId, characterId) {
-    const sql = `
-      DELETE FROM favorites
-      WHERE user_id=${mysql.escape(userId)}
-      AND character_id=${mysql.escape(characterId)}
-    `
+    try {
+      const sql = `
+        DELETE FROM favorites
+        WHERE user_id=${mysql.escape(userId)}
+        AND character_id=${mysql.escape(characterId)}
+      `
 
-    await mysql.query(sql)
+      await mysql.query(sql)
+
+      return true
+    } catch (err) {
+      console.error(
+        `[ERROR] Removing favorite was NOT successful. Error: ${err.message}`
+      )
+      return false
+    }
+  }
+
+  ////////////////////////////////////////////
+  // Fashion Report
+  ////////////////////////////////////////////
+  static async getFashionReportData() {
+    try {
+      const sql = `
+        SELECT *
+        FROM fashion_report_data
+        ORDER BY week DESC
+        LIMIT 1
+      `
+
+      const res = await mysql.query(sql)
+
+      return res?.[0]?.[0]
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting fashion report data was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
+  }
+
+  static async setFashionReportData(data) {
+    try {
+      const currentData = await this.getFashionReportData()
+
+      if (currentData && currentData.week == data.week) {
+        // Update
+        const sql = `
+          UPDATE fashion_report_data
+          SET username=${mysql.escape(data.username)},
+              nickname=${mysql.escape(data.nickname)},
+              profile_url=${mysql.escape(data.profileUrl)},
+              avatar=${mysql.escape(data.avatar)},
+              verified=${mysql.escape(data.verified)},
+              tweet_url=${mysql.escape(data.tweetUrl)},
+              title=${mysql.escape(data.title)},
+              image_url=${mysql.escape(data.imageUrl)},
+              timestamp=${mysql.escape(data.timestamp)}
+          WHERE week=${mysql.escape(currentData.week)}
+        `
+
+        await mysql.query(sql)
+      } else {
+        // Insert
+        const sql = `
+          INSERT INTO fashion_report_data (week, username,nickname,profile_url,avatar,verified,tweet_url,title,image_url,timestamp)
+            VALUES (
+              ${mysql.escape(data.week)},
+              ${mysql.escape(data.username)},
+              ${mysql.escape(data.nickname)},
+              ${mysql.escape(data.profileUrl)},
+              ${mysql.escape(data.avatar)},
+              ${mysql.escape(data.verified)},
+              ${mysql.escape(data.tweetUrl)},
+              ${mysql.escape(data.title)},
+              ${mysql.escape(data.imageUrl)},
+              ${mysql.escape(data.timestamp)}
+            )
+        `
+
+        await mysql.query(sql)
+      }
+
+      return true
+    } catch (err) {
+      console.error(
+        `[ERROR] Setting fashion report data was NOT successful. Error: ${err.message}`
+      )
+      return false
+    }
+  }
+
+  ////////////////////////////////////////////
+  // Maintenance
+  ////////////////////////////////////////////
+  static async getCurrentMaintenances() {
+    try {
+      const now = moment().tz('Europe/London').format('YYYY-MM-DD HH:mm:ss')
+
+      const sql = `
+        SELECT *
+        FROM maintenance_data
+        WHERE m_from <= ${mysql.escape(now)}
+        AND m_to >= ${mysql.escape(now)}
+        ORDER BY id DESC
+      `
+
+      let res = await mysql.query(sql)
+
+      if (res?.[0]?.length < 1) res = undefined
+      else res = res?.[0]
+
+      return res
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting current maintenance was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
+  }
+
+  static async getMaintenanceByTitle(title) {
+    try {
+      const sql = `
+        SELECT *
+        FROM maintenance_data
+        WHERE title=${mysql.escape(title)}
+      `
+
+      const res = await mysql.query(sql)
+
+      return res?.[0]?.[0]
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting maintenance by title was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
+  }
+
+  static async addMaintenance(maintenance) {
+    try {
+      if (!(await this.getMaintenanceByTitle(maintenance.title))) {
+        // Insert
+        const sql = `
+          INSERT INTO maintenance_data (title,tag,date,link,details,m_from,m_to)
+          VALUES (
+            ${mysql.escape(maintenance.title)},
+            ${mysql.escape(maintenance.tag)},
+            ${mysql.escape(
+              moment(maintenance.date).format('YYYY-MM-DD HH:mm:ss')
+            )},
+            ${mysql.escape(maintenance.link)},
+            ${mysql.escape(maintenance.details)},
+            ${mysql.escape(
+              maintenance.mFrom
+                .tz('Europe/London')
+                .format('YYYY-MM-DD HH:mm:ss')
+            )},
+            ${mysql.escape(
+              maintenance.mTo.tz('Europe/London').format('YYYY-MM-DD HH:mm:ss')
+            )}
+          )
+        `
+
+        await mysql.query(sql)
+
+        return true
+      } else return 'existant'
+    } catch (err) {
+      console.error(
+        `[ERROR] Adding maintenance was NOT successful. Error: ${err.message}`
+      )
+      return false
+    }
+  }
+
+  ////////////////////////////////////////////
+  // Setup - Fashion Report
+  ////////////////////////////////////////////
+  static async getFashionReportInfo() {
+    try {
+      const sql = `
+        SELECT *
+        FROM fashion_reports
+      `
+
+      const res = await mysql.query(sql)
+
+      return res?.[0]
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting fashion report info was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
+  }
+
+  static async getFashionReportChannelId(guildId) {
+    try {
+      const sql = `
+        SELECT channel_id
+        FROM fashion_reports
+        WHERE guild_id=${mysql.escape(guildId)}
+      `
+
+      const res = await this.getMysqlResult(sql)
+      return res?.channel_id
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting fashion report channel ID was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
+  }
+
+  static async setFashionReportChannelId(guildId, channelId) {
+    try {
+      if (await this.getFashionReportChannelId(guildId)) {
+        // Update
+        const sql = `
+          UPDATE fashion_reports
+          SET channel_id=${mysql.escape(channelId)}
+          WHERE guild_id=${mysql.escape(guildId)}
+        `
+
+        await mysql.query(sql)
+      } else {
+        // Insert
+        const sql = `
+          INSERT INTO fashion_reports (guild_id,channel_id)
+          VALUES (
+            ${mysql.escape(guildId)},
+            ${mysql.escape(channelId)}
+          )
+        `
+
+        await mysql.query(sql)
+      }
+      return true
+    } catch (err) {
+      console.error(
+        `[ERROR] Setting fashion report channel ID was NOT successful. Error: ${err.message}`
+      )
+      return false
+    }
+  }
+
+  static async unsetFashionReportChannelId(guildId) {
+    try {
+      const sql = `
+        DELETE FROM fashion_reports
+        WHERE guild_id=${mysql.escape(guildId)}
+      `
+
+      await mysql.query(sql)
+
+      return true
+    } catch (err) {
+      console.error(
+        `[ERROR] Unsetting fashion report channel ID was NOT successful. Error: ${err.message}`
+      )
+      return false
+    }
+  }
+
+  ////////////////////////////////////////////
+  // Setup - Maintenance
+  ////////////////////////////////////////////
+  static async getMaintenanceInfo() {
+    try {
+      const sql = `
+        SELECT *
+        FROM maintenances
+      `
+
+      const res = await mysql.query(sql)
+
+      return res?.[0]
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting maintenance info was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
+  }
+
+  static async getMaintenanceChannelId(guildId) {
+    try {
+      const sql = `
+        SELECT channel_id
+        FROM maintenances
+        WHERE guild_id=${mysql.escape(guildId)}
+      `
+
+      const res = await this.getMysqlResult(sql)
+      return res?.channel_id
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting maintenance channel ID was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
+  }
+
+  static async setMaintenanceChannelId(guildId, channelId) {
+    try {
+      if (await this.getMaintenanceChannelId(guildId)) {
+        // Update
+        const sql = `
+          UPDATE maintenances
+          SET channel_id=${mysql.escape(channelId)}
+          WHERE guild_id=${mysql.escape(guildId)}
+        `
+
+        await mysql.query(sql)
+      } else {
+        // Insert
+        const sql = `
+          INSERT INTO maintenances (guild_id,channel_id)
+          VALUES (
+            ${mysql.escape(guildId)},
+            ${mysql.escape(channelId)}
+          )
+        `
+
+        await mysql.query(sql)
+      }
+      return true
+    } catch (err) {
+      console.error(
+        `[ERROR] Setting maintenance channel ID was NOT successful. Error: ${err.message}`
+      )
+      return false
+    }
+  }
+
+  static async unsetMaintenanceChannelId(guildId) {
+    try {
+      const sql = `
+        DELETE FROM maintenances
+        WHERE guild_id=${mysql.escape(guildId)}
+      `
+
+      await mysql.query(sql)
+
+      return true
+    } catch (err) {
+      console.error(
+        `[ERROR] Unsetting maintenance channel ID was NOT successful. Error: ${err.message}`
+      )
+      return false
+    }
+  }
+
+  ////////////////////////////////////////////
+  // Setup - Purge
+  ////////////////////////////////////////////
+
+  static async purgeGuild(guildId) {
+    try {
+      let sql = `
+        DELETE FROM fashion_reports
+        WHERE guild_id=${mysql.escape(guildId)}
+      `
+
+      await mysql.query(sql)
+
+      sql = `
+        DELETE FROM maintenances
+        WHERE guild_id=${mysql.escape(guildId)}
+      `
+
+      await mysql.query(sql)
+
+      return true
+    } catch (err) {
+      console.error(
+        `[ERROR] Guild purge was NOT successful. Error: ${err.message}`
+      )
+      return false
+    }
   }
 
   ////////////////////////////////////////////
@@ -414,7 +895,7 @@ module.exports = class DbUtil {
       return true
     } catch (err) {
       console.error(
-        `[ERROR] User purge was NOT successful. Error: ${error.message}`
+        `[ERROR] User purge was NOT successful. Error: ${err.message}`
       )
       return false
     }

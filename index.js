@@ -1,10 +1,22 @@
 const fs = require('fs')
 const { Client, Collection, Intents } = require('discord.js')
-const { token } = require('./config.json')
+const {
+  token,
+  twitterStreamEnabled,
+  maintenanceStartInstantly
+} = require('./config.json')
 const { CanvasRenderingContext2D } = require('canvas')
 const DiscordUtil = require('./naagoLib/DiscordUtil')
 const ButtonUtil = require('./naagoLib/ButtonUtil')
 const SelectMenuUtil = require('./naagoLib/SelectMenuUtil')
+const TwitterUtil = require('./naagoLib/TwitterUtil')
+const GlobalUtil = require('./naagoLib/GlobalUtil')
+const MaintenanceUtil = require('./naagoLib/MaintenanceUtil')
+const moment = require('moment')
+const cron = require('node-cron')
+
+// Locale
+moment.locale('en')
 
 // Canvas lib
 CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
@@ -21,7 +33,7 @@ CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
 }
 
 // Discord bot setup
-const client = new Client({ intents: [Intents.FLAGS.GUILDS] })
+const client = new Client({ intents: [Intents.FLAGS.GUILDS] }) // , shards: 'auto'
 
 client.commands = new Collection()
 const commandFiles = fs
@@ -33,9 +45,40 @@ for (const file of commandFiles) {
   client.commands.set(command.data.name, command)
 }
 
+const ownerCommandFiles = fs
+  .readdirSync('./commands/owner')
+  .filter((file) => file.endsWith('.js'))
+
+for (const ownerfile of ownerCommandFiles) {
+  const ownerCommand = require(`./commands/owner/${ownerfile}`)
+  client.commands.set(ownerCommand.data.name, ownerCommand)
+}
+
 // Discord events
 client.once('ready', () => {
-  console.log(`Bot logged in as ${client.user.tag}`)
+  console.log(`Connected: Discord (${client.user.tag})`)
+  client.user.setActivity('Endwalker', { type: 'PLAYING' })
+
+  GlobalUtil.client = client
+
+  // Twitter Bot
+  try {
+    if (twitterStreamEnabled) TwitterUtil.streamTweets()
+  } catch (err) {
+    console.error(err)
+  }
+
+  // Maintenance checker
+  try {
+    if (maintenanceStartInstantly) MaintenanceUtil.updateDb()
+    else {
+      cron.schedule('*/15 * * * *', () => {
+        MaintenanceUtil.updateDb()
+      })
+    }
+  } catch (err) {
+    console.error(err)
+  }
 })
 
 client.on('interactionCreate', async (interaction) => {

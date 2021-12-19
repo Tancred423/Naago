@@ -17,6 +17,6 @@ const pool = mysql.createPool({
 
 const promisePool = pool.promise()
 
-console.log('MySQL connected!')
+console.log('Connected: MySQL')
 
 module.exports = promisePool

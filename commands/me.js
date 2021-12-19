@@ -9,8 +9,6 @@ module.exports = {
     .setName('me')
     .setDescription("Your verified character's FFXIV profile."),
   async execute(interaction) {
-    await interaction.deferReply()
-
     const userId = interaction.user.id
     const verification = await DbUtil.getCharacterVerification(userId)
 
@@ -18,9 +16,11 @@ module.exports = {
       const embed = DiscordUtil.getErrorEmbed(
         'Please verify your character first. See `/verify set`.'
       )
-      await interaction.editReply({ embeds: [embed] })
+      await interaction.reply({ ephemeral: true, embeds: [embed] })
       return
     }
+
+    await interaction.deferReply()
 
     const characterId = verification.character_id
     const character = await DbUtil.fetchCharacter(interaction, characterId)

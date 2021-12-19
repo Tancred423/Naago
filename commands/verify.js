@@ -7,7 +7,7 @@ const DbUtil = require('../naagoLib/DbUtil')
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('verify')
-    .setDescription('Verify your character.')
+    .setDescription('Manage the verification of your character.')
     .addSubcommand((subcommand) =>
       subcommand
         .setName('set')
@@ -15,13 +15,13 @@ module.exports = {
         .addStringOption((option) =>
           option
             .setName('name')
-            .setDescription('Your character name')
+            .setDescription('Your character name.')
             .setRequired(true)
         )
         .addStringOption((option) =>
           option
             .setName('server')
-            .setDescription('The server your character is on')
+            .setDescription('The server your character is on.')
             .setRequired(true)
         )
     )
@@ -29,7 +29,7 @@ module.exports = {
       subcommand
         .setName('delete')
         .setDescription(
-          'Unlink your character and delete all stored data from you.'
+          'Unlink your character and delete all stored data of you.'
         )
     ),
   async execute(interaction) {
@@ -97,11 +97,25 @@ module.exports = {
               // User is already verified and needs a new code for a new character
               verificationCode = await FfxivUtil.generateVerificationCode()
 
-              await DbUtil.setVerificationCode(
+              const successful = await DbUtil.setVerificationCode(
                 userId,
                 characterId,
                 verificationCode
               )
+
+              if (!successful) {
+                const embed = DiscordUtil.getErrorEmbed(
+                  'An error occured during verification process. Please contact Tancred#0001 for help.'
+                )
+
+                await interaction.editReply({
+                  content: '',
+                  embeds: [embed],
+                  components: []
+                })
+
+                return
+              }
 
               const row = new MessageActionRow().addComponents(
                 new MessageButton()
@@ -143,11 +157,25 @@ module.exports = {
             // User doesn't have verification code, now generate
             const verificationCode = FfxivUtil.generateVerificationCode()
 
-            await DbUtil.setVerificationCode(
+            const successful = await DbUtil.setVerificationCode(
               userId,
               characterId,
               verificationCode
             )
+
+            if (!successful) {
+              const embed = DiscordUtil.getErrorEmbed(
+                'An error occured during verification process. Please contact Tancred#0001 for help.'
+              )
+
+              await interaction.editReply({
+                content: '',
+                embeds: [embed],
+                components: []
+              })
+
+              return
+            }
 
             const row = new MessageActionRow().addComponents(
               new MessageButton()
@@ -187,7 +215,7 @@ module.exports = {
 
         await interaction.editReply({
           content:
-            'Are you sure, you want to unlink your character and delete all stored data from you?',
+            'Are you sure you want to unlink your character and delete all stored data of you?',
           components: [row]
         })
       } else {
@@ -248,14 +276,26 @@ module.exports = {
     } else {
       const charBio = character.bio
       if (verificationCode === charBio) {
-        DbUtil.verifyCharacter(userId, characterId)
+        const successful = await DbUtil.verifyCharacter(userId, characterId)
+
+        if (!successful) {
+          const embed = DiscordUtil.getErrorEmbed(
+            `Character could not be verified. Please contact Tancred#0001 for help.`
+          )
+
+          await interaction.editReply({
+            embeds: [embed]
+          })
+
+          return
+        }
+
+        const embed = DiscordUtil.getSuccessEmbed(
+          `Congratulations, ${character.name}! You are now verified.\nYou no longer have to keep the verification code in your bio.`
+        )
 
         await interaction.editReply({
-          embeds: [
-            DiscordUtil.getSuccessEmbed(
-              `Congratulations, ${character.name}! You are now verified.\nYou no longer have to keep the verification code in your bio.`
-            )
-          ]
+          embeds: [embed]
         })
       } else {
         await interaction.editReply({

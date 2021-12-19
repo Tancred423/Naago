@@ -27,16 +27,29 @@ module.exports = class SelectMenuUtil {
       await interaction.deferUpdate()
 
       const theme = interaction.values[0]
-
-      await DbUtil.setTheme(userId, theme)
-
       const themeName =
         interaction.message.components[0].components[0].options.find(
           (o) => o.value === theme
         )?.label ?? theme
 
+      const successful = await DbUtil.setTheme(userId, theme)
+
+      if (!successful) {
+        const embed = DiscordUtil.getErrorEmbed(
+          `Theme could not be set to \`${themeName}\`. Please contact Tancred#0001 for help.`
+        )
+
+        interaction.editReply({
+          content: ' ',
+          components: [],
+          embeds: [embed]
+        })
+
+        return
+      }
+
       const embed = DiscordUtil.getSuccessEmbed(
-        `Your theme was set to \`${themeName}\``
+        `Your theme was set to \`${themeName}\`.`
       )
 
       interaction.editReply({

@@ -1229,7 +1229,7 @@ class Profile {
     const socialMedias = await DbUtil.getSocialMedia(characterId)
 
     const embed = new MessageEmbed()
-      .setColor(await DiscordUtil.getBotColor(this.interaction))
+      .setColor(await DiscordUtil.getBotColorByInteraction(this.interaction))
       .setTitle(
         `${this.character.name}${NaagoUtil.getApostropheS(
           this.character.name
@@ -1248,10 +1248,12 @@ class Profile {
       for (const socialMedia of socialMedias) {
         embed.setDescription(
           embed.description +
-            `\n[${await DiscordUtil.getEmote(
-              client,
-              socialMedia.platform
-            )} ${NaagoUtil.capitalizeFirstLetter(socialMedia.platform)}](${
+            `\n${
+              (await DiscordUtil.getEmote(
+                client,
+                socialMedia.platform.split('.')[0]
+              )) ?? ''
+            } [${NaagoUtil.getWebsiteName(socialMedia.platform)}](${
               socialMedia.url
             })`
         )
@@ -1555,6 +1557,18 @@ class Gear {
       )
     }
 
+    // Mirage icon
+    if (gear.mirage_icon) {
+      const mirageIcon = await loadImage(gear.mirage_icon)
+      this.ctx.drawImage(
+        mirageIcon,
+        this.isLeft ? this.x - 35 : this.x + 5,
+        this.y + 45,
+        30,
+        30
+      )
+    }
+
     // Color name
     if (gear.color_name && gear.color_code) {
       this.ctx.lineWidth = 2
@@ -1748,65 +1762,65 @@ class Gear {
       return './images/materia/piety_9.png'
     else if (materia === 'Piety Materia X')
       return './images/materia/piety_10.png'
-    else if (materia === "Craftman's Command Materia I")
+    else if (materia === "Craftsman's Command Materia I")
       return './images/materia/control_1.png'
-    else if (materia === "Craftman's Command Materia II")
+    else if (materia === "Craftsman's Command Materia II")
       return './images/materia/control_2.png'
-    else if (materia === "Craftman's Command Materia III")
+    else if (materia === "Craftsman's Command Materia III")
       return './images/materia/control_3.png'
-    else if (materia === "Craftman's Command Materia IV")
+    else if (materia === "Craftsman's Command Materia IV")
       return './images/materia/control_4.png'
-    else if (materia === "Craftman's Command Materia V")
+    else if (materia === "Craftsman's Command Materia V")
       return './images/materia/control_5.png'
-    else if (materia === "Craftman's Command Materia VI")
+    else if (materia === "Craftsman's Command Materia VI")
       return './images/materia/control_6.png'
-    else if (materia === "Craftman's Command Materia VII")
+    else if (materia === "Craftsman's Command Materia VII")
       return './images/materia/control_7.png'
-    else if (materia === "Craftman's Command Materia VIII")
+    else if (materia === "Craftsman's Command Materia VIII")
       return './images/materia/control_8.png'
-    else if (materia === "Craftman's Command Materia IX")
+    else if (materia === "Craftsman's Command Materia IX")
       return './images/materia/control_9.png'
-    else if (materia === "Craftman's Command Materia X")
+    else if (materia === "Craftsman's Command Materia X")
       return './images/materia/control_10.png'
-    else if (materia === "Craftman's Cunning Materia I")
+    else if (materia === "Craftsman's Cunning Materia I")
       return './images/materia/cp_1.png'
-    else if (materia === "Craftman's Cunning Materia II")
+    else if (materia === "Craftsman's Cunning Materia II")
       return './images/materia/cp_2.png'
-    else if (materia === "Craftman's Cunning Materia III")
+    else if (materia === "Craftsman's Cunning Materia III")
       return './images/materia/cp_3.png'
-    else if (materia === "Craftman's Cunning Materia IV")
+    else if (materia === "Craftsman's Cunning Materia IV")
       return './images/materia/cp_4.png'
-    else if (materia === "Craftman's Cunning Materia V")
+    else if (materia === "Craftsman's Cunning Materia V")
       return './images/materia/cp_5.png'
-    else if (materia === "Craftman's Cunning Materia VI")
+    else if (materia === "Craftsman's Cunning Materia VI")
       return './images/materia/cp_6.png'
-    else if (materia === "Craftman's Cunning Materia VII")
+    else if (materia === "Craftsman's Cunning Materia VII")
       return './images/materia/cp_7.png'
-    else if (materia === "Craftman's Cunning Materia VIII")
+    else if (materia === "Craftsman's Cunning Materia VIII")
       return './images/materia/cp_8.png'
-    else if (materia === "Craftman's Cunning Materia IX")
+    else if (materia === "Craftsman's Cunning Materia IX")
       return './images/materia/cp_9.png'
-    else if (materia === "Craftman's Cunning Materia X")
+    else if (materia === "Craftsman's Cunning Materia X")
       return './images/materia/cp_10.png'
-    else if (materia === "Craftman's Competence Materia I")
+    else if (materia === "Craftsman's Competence Materia I")
       return './images/materia/cms_1.png'
-    else if (materia === "Craftman's Competence Materia II")
+    else if (materia === "Craftsman's Competence Materia II")
       return './images/materia/cms_2.png'
-    else if (materia === "Craftman's Competence Materia III")
+    else if (materia === "Craftsman's Competence Materia III")
       return './images/materia/cms_3.png'
-    else if (materia === "Craftman's Competence Materia IV")
+    else if (materia === "Craftsman's Competence Materia IV")
       return './images/materia/cms_4.png'
-    else if (materia === "Craftman's Competence Materia V")
+    else if (materia === "Craftsman's Competence Materia V")
       return './images/materia/cms_5.png'
-    else if (materia === "Craftman's Competence Materia VI")
+    else if (materia === "Craftsman's Competence Materia VI")
       return './images/materia/cms_6.png'
-    else if (materia === "Craftman's Competence Materia VII")
+    else if (materia === "Craftsman's Competence Materia VII")
       return './images/materia/cms_7.png'
-    else if (materia === "Craftman's Competence Materia VIII")
+    else if (materia === "Craftsman's Competence Materia VIII")
       return './images/materia/cms_8.png'
-    else if (materia === "Craftman's Competence Materia IX")
+    else if (materia === "Craftsman's Competence Materia IX")
       return './images/materia/cms_9.png'
-    else if (materia === "Craftman's Competence Materia X")
+    else if (materia === "Craftsman's Competence Materia X")
       return './images/materia/cms_10.png'
     else if (materia === "Gatherer's Grasp Materia I")
       return './images/materia/gp_1.png'

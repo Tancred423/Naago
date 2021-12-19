@@ -12,13 +12,13 @@ module.exports = {
     .addStringOption((option) =>
       option
         .setName('name')
-        .setDescription('A full character name')
+        .setDescription('A full character name.')
         .setRequired(true)
     )
     .addStringOption((option) =>
       option
         .setName('server')
-        .setDescription('The server the character is on')
+        .setDescription('The server the character is on.')
         .setRequired(true)
     ),
   async execute(interaction) {

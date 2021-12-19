@@ -1,5 +1,6 @@
 const { MessageAttachment } = require('discord.js')
 const { unfavoriteUser } = require('../commands/favorite')
+const { unsetup } = require('../commands/setup')
 const { verifyUser, unverifyUser } = require('../commands/verify')
 const DbUtil = require('./DbUtil')
 const DiscordUtil = require('./DiscordUtil')
@@ -202,6 +203,9 @@ module.exports = class ButtonUtil {
     } else if (buttonId.startsWith('unfavorite')) {
       await interaction.deferUpdate()
       unfavoriteUser(interaction)
+    } else if (buttonId.startsWith('unsetup')) {
+      await interaction.deferUpdate()
+      unsetup(interaction)
     }
   }
 }

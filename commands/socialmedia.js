@@ -1,6 +1,7 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
 const DbUtil = require('../naagoLib/DbUtil')
 const DiscordUtil = require('../naagoLib/DiscordUtil')
+const NaagoUtil = require('../naagoLib/NaagoUtil')
 const URL = require('url').URL
 
 module.exports = {
@@ -16,9 +17,15 @@ module.exports = {
             .setName('platform')
             .setDescription('The social media platform.')
             .setRequired(true)
-            .addChoice('Twitch', 'twitch')
-            .addChoice('YouTube', 'youtube')
-            .addChoice('Twitter', 'twitter')
+            .addChoice('GitHub', 'github.com')
+            .addChoice('Instagram', 'instagram.com')
+            .addChoice('Reddit', 'reddit.com')
+            .addChoice('Spotify', 'spotify.com')
+            .addChoice('Steam', 'steamcommunity.com')
+            .addChoice('TikTok', 'tiktok.com')
+            .addChoice('Twitch', 'twitch.tv')
+            .addChoice('Twitter', 'twitter.com')
+            .addChoice('YouTube', 'youtube.com')
         )
         .addStringOption((option) =>
           option
@@ -36,9 +43,15 @@ module.exports = {
             .setName('platform')
             .setDescription('The social media platform.')
             .setRequired(true)
-            .addChoice('Twitch', 'twitch')
-            .addChoice('YouTube', 'youtube')
-            .addChoice('Twitter', 'twitter')
+            .addChoice('GitHub', 'github.com')
+            .addChoice('Instagram', 'instagram.com')
+            .addChoice('Reddit', 'reddit.com')
+            .addChoice('Spotify', 'spotify.com')
+            .addChoice('Steam', 'steamcommunity.com')
+            .addChoice('TikTok', 'tiktok.com')
+            .addChoice('Twitch', 'twitch.tv')
+            .addChoice('Twitter', 'twitter.com')
+            .addChoice('YouTube', 'youtube.com')
         )
     ),
   async execute(interaction) {
@@ -49,15 +62,15 @@ module.exports = {
       const url = interaction.options.getString('url').toLowerCase()
       const userId = interaction.user.id
       const verification = await DbUtil.getCharacterVerification(userId)
+      const websiteName = NaagoUtil.getWebsiteName(platform)
 
       if (verification?.is_verified) {
         // Check url
         const urlString = url.replace('www.', '')
         try {
           const urlObject = new URL(urlString)
-          const hostnameSplit = urlObject.hostname.split('.')
-          const domain = hostnameSplit.slice(hostnameSplit.length - 2)[0]
-          if (domain !== platform) {
+          const hostname = urlObject.hostname.split('.').slice(-2).join('.')
+          if (hostname !== platform) {
             throw new Error()
           }
         } catch (err) {
@@ -71,14 +84,30 @@ module.exports = {
         // Get character
         const characterId = verification.character_id
 
-        DbUtil.addSocialMedia(characterId, platform, urlString)
+        const successful = await DbUtil.addSocialMedia(
+          characterId,
+          platform,
+          urlString
+        )
+
+        if (!successful) {
+          const embed = DiscordUtil.getErrorEmbed(
+            `The ${websiteName} URL could not be added. Please contact Tancred#0001 for help.`
+          )
+
+          await interaction.editReply({
+            embeds: [embed]
+          })
+
+          return
+        }
+
+        const embed = DiscordUtil.getSuccessEmbed(
+          `Your ${websiteName} URL was set to \`${urlString}\`!`
+        )
 
         await interaction.editReply({
-          embeds: [
-            DiscordUtil.getSuccessEmbed(
-              `Your \`${platform}\` URL was set to \`${urlString}\`!`
-            )
-          ]
+          embeds: [embed]
         })
       } else {
         const embed = DiscordUtil.getErrorEmbed(
@@ -95,14 +124,26 @@ module.exports = {
         // Get character
         const characterId = verification.character_id
 
-        DbUtil.removeSocialMedia(characterId, platform)
+        const successful = await DbUtil.removeSocialMedia(characterId, platform)
+
+        if (!successful) {
+          const embed = DiscordUtil.getErrorEmbed(
+            `\`${platform}\` URL could not be removed. Please contact Tancred#0001 for help.`
+          )
+
+          await interaction.editReply({
+            embeds: [embed]
+          })
+
+          return
+        }
+
+        const embed = DiscordUtil.getSuccessEmbed(
+          `Your \`${platform}\` URL has been removed.`
+        )
 
         await interaction.editReply({
-          embeds: [
-            DiscordUtil.getSuccessEmbed(
-              `Your \`${platform}\` URL has been removed!`
-            )
-          ]
+          embeds: [embed]
         })
       } else {
         const embed = DiscordUtil.getErrorEmbed(
