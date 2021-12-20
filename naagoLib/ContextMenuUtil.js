@@ -89,8 +89,8 @@ module.exports = class ContextMenuUtil {
         const successful = await DbUtil.removeFavorite(invoker.id, character.id)
 
         if (successful === 'notfound') {
-          const embed = DiscordUtil.getErrorEmbed(
-            `\`${character.name}\` is not a favorite.`
+          const embed = DiscordUtil.getSuccessEmbed(
+            `\`${character.name}\` is not a favorite already.`
           )
 
           await interaction.reply({
