@@ -142,20 +142,10 @@ module.exports = class NaagoUtil {
       mFrom = moment.utc(fromString, 'MM D YYYY h:mm')
       mTo = moment.utc(toString, 'MM D YYYY h:mm')
 
-      let formatted = `🇩🇪 ${mFrom
+      let formatted = `🇪🇺 ${mFrom
         .tz('Europe/Berlin')
         .format('MMM. DD **HH:mm z**')} - ${mTo
         .tz('Europe/Berlin')
-        .format('MMM. DD **HH:mm z**')}`
-      formatted += `\n🇪🇸 ${mFrom
-        .tz('Europe/Madrid')
-        .format('MMM. DD **HH:mm z**')} - ${mTo
-        .tz('Europe/Madrid')
-        .format('MMM. DD **HH:mm z**')}`
-      formatted += `\n🇫🇷 ${mFrom
-        .tz('Europe/Paris')
-        .format('MMM. DD **HH:mm z**')} - ${mTo
-        .tz('Europe/Paris')
         .format('MMM. DD **HH:mm z**')}`
       formatted += `\n🇬🇧 ${mFrom
         .tz('Europe/London')
