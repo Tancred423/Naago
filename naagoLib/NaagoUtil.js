@@ -142,30 +142,30 @@ module.exports = class NaagoUtil {
       mFrom = moment.utc(fromString, 'MM D YYYY h:mm')
       mTo = moment.utc(toString, 'MM D YYYY h:mm')
 
-      let formatted = `🇪🇺 ${mFrom
-        .tz('Europe/Berlin')
+      let formatted = `\n🇺🇸 ${mFrom
+        .tz('America/Los_Angeles')
         .format('MMM. DD **HH:mm z**')} - ${mTo
-        .tz('Europe/Berlin')
+        .tz('America/Los_Angeles')
+        .format('MMM. DD **HH:mm z**')}`
+      formatted += `\n🇺🇸 ${mFrom
+        .tz('America/New_York')
+        .format('MMM. DD **HH:mm z**')} - ${mTo
+        .tz('America/New_York')
         .format('MMM. DD **HH:mm z**')}`
       formatted += `\n🇬🇧 ${mFrom
         .tz('Europe/London')
         .format('MMM. DD **HH:mm z**')} - ${mTo
         .tz('Europe/London')
         .format('MMM. DD **HH:mm z**')}`
+      formatted += `🇪🇺 ${mFrom
+        .tz('Europe/Berlin')
+        .format('MMM. DD **HH:mm z**')} - ${mTo
+        .tz('Europe/Berlin')
+        .format('MMM. DD **HH:mm z**')}`
       formatted += `\n🇯🇵 ${mFrom
         .tz('Asia/Tokyo')
         .format('MMM. DD **HH:mm z**')} - ${mTo
         .tz('Asia/Tokyo')
-        .format('MMM. DD **HH:mm z**')}`
-      formatted += `\n🇺🇸 ${mFrom
-        .tz('America/Los_Angeles')
-        .format('MMM. DD **HH:mm z**')} - ${mTo
-        .tz('America/Los_Angeles')
-        .format('MMM. DD **HH:mm z**')}`
-      formatted += `\n🇺🇸 ${mFrom
-        .tz('America/New_York')
-        .format('MMM. DD **HH:mm z**')} - ${mTo
-        .tz('America/New_York')
         .format('MMM. DD **HH:mm z**')}`
 
       dateReplacements.set(date, formatted)
@@ -239,6 +239,11 @@ module.exports = class NaagoUtil {
     markdown = markdown
       .replaceAll(/(\[\!\[\]).*\)/g, '')
       .replaceAll(/\n{3,}/g, '\n\n')
+
+    markdown = markdown.replaceAll(
+      '](/lodestone',
+      '](https://eu.finalfantasyxiv.com/lodestone'
+    )
 
     markdown = this.cutString(markdown, 4096)
 

@@ -54,15 +54,25 @@ module.exports = class TopicsUtil {
     if (!tInfo || tInfo?.length < 1) return
 
     for (const info of tInfo) {
-      const guild = await client.guilds.fetch(info.guild_id)
-      if (!guild) continue
-      const channel = await guild.channels.fetch(info.channel_id)
-      if (!channel) continue
+      try {
+        const guild = await client.guilds.fetch(info.guild_id)
+        if (!guild) continue
+        const channel = await guild.channels.fetch(info.channel_id)
+        if (!channel) continue
 
-      const botColor = await DiscordUtil.getBotColorByClientGuild(client, guild)
-      const embed = DiscordUtil.getTopicEmbed(topic, botColor)
+        const botColor = await DiscordUtil.getBotColorByClientGuild(
+          client,
+          guild
+        )
+        const embed = DiscordUtil.getTopicEmbed(topic, botColor)
 
-      await channel.send({ embeds: [embed] })
+        await channel.send({ embeds: [embed] })
+      } catch (err) {
+        console.log(
+          `[TOPICS] Could not access guild: ${info.guild_id} and/or channel: ${info.channel_id}`
+        )
+        continue
+      }
     }
   }
 }
