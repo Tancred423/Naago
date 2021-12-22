@@ -2,9 +2,13 @@ const { ETwitterStreamEvent } = require('twitter-api-v2')
 const client = require('./twitter')
 const moment = require('moment')
 const { MessageEmbed } = require('discord.js')
-const { getBotColor } = require('./DiscordUtil')
 const GlobalUtil = require('./GlobalUtil')
-const { neededHashtags, twitterUsername } = require('../config.json')
+const {
+  neededHashtags,
+  twitterUsername,
+  colorTwitter,
+  twitterIconLink
+} = require('../config.json')
 const DbUtil = require('./DbUtil')
 
 module.exports = class TwitterUtil {
@@ -103,7 +107,7 @@ module.exports = class TwitterUtil {
         if (!channel) continue
 
         const embed = new MessageEmbed()
-          .setColor(await getBotColor(client, guild))
+          .setColor(colorTwitter)
           .setAuthor(
             `${myTweet.nickname}${myTweet.verified ? ' ✅' : ''} (@${
               myTweet.username
@@ -114,7 +118,7 @@ module.exports = class TwitterUtil {
           .setTitle(myTweet.title)
           .setURL(myTweet.tweetUrl)
           .setImage(myTweet.imageUrl)
-          .setFooter('Posted at')
+          .setFooter('Posted at', twitterIconLink)
           .setTimestamp(myTweet.timestamp)
 
         await channel.send({ embeds: [embed] })
