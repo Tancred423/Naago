@@ -83,7 +83,7 @@ module.exports = class MaintenancesUtil {
         await channel.send({ embeds: [embed] })
       } catch (err) {
         console.log(
-          `[MAINTENANCES] Sending maintenance was NOT successful: ${err.message}`
+          `[MAINTENANCES] Sending maintenance to ${setup.guild_id} was NOT successful: ${err.message}`
         )
         continue
       }

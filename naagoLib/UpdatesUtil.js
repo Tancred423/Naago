@@ -73,7 +73,7 @@ module.exports = class UpdatesUtil {
         await channel.send({ embeds: [embed] })
       } catch (err) {
         console.log(
-          `[UPDATES] Sending update was NOT successful: ${err.message}`
+          `[UPDATES] Sending update to ${setup.guild_id} was NOT successful: ${err.message}`
         )
         continue
       }

@@ -75,7 +75,9 @@ module.exports = class TopicsUtil {
 
         await channel.send({ embeds: [embed] })
       } catch (err) {
-        console.log(`[TOPICS] Sending topic was NOT successful: ${err.message}`)
+        console.log(
+          `[TOPICS] Sending topic to ${setup.guild_id} was NOT successful: ${err.message}`
+        )
         continue
       }
     }

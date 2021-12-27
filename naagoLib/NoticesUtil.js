@@ -78,7 +78,7 @@ module.exports = class NoticesUtil {
         await channel.send({ embeds: [embed] })
       } catch (err) {
         console.log(
-          `[NOTICES] Sending notice was NOT successful: ${err.message}`
+          `[NOTICES] Sending notice to ${setup.guild_id} was NOT successful: ${err.message}`
         )
         continue
       }

@@ -78,7 +78,7 @@ module.exports = class StatusUtil {
         await channel.send({ embeds: [embed] })
       } catch (err) {
         console.log(
-          `[STATUS] Sending status was NOT successful: ${err.message}`
+          `[STATUS] Sending status to ${setup.guild_id} was NOT successful: ${err.message}`
         )
         continue
       }
