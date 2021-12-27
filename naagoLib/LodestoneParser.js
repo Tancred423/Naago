@@ -17,7 +17,9 @@ module.exports = class LodestoneParser {
 
     const turndownService = new TurndownService()
     let markdown = turndownService.turndown(html)
-    markdown = markdown.replaceAll('\\', '')
+    markdown = markdown
+      .replaceAll('\\', '')
+      .replaceAll('](/lodestone', '](https://eu.finalfantasyxiv.com/lodestone')
 
     return markdown
   }
