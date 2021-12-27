@@ -64,19 +64,13 @@ module.exports = {
         }
 
         // Get character
-        let characterIds
-        try {
-          characterIds = await FfxivUtil.getCharacterIdsByName(name, server)
-        } catch (error) {
-          return
-        }
+        const characterIds = await FfxivUtil.getCharacterIdsByName(name, server)
 
         if (characterIds.length > 1) {
           const embed = DiscordUtil.getErrorEmbed(
             `Multiple characters were found for \`${name}\` on \`${server}\`.\nPlease provide the command with the full name of your character to get rid of duplicates.`
           )
-          await interaction.deleteReply()
-          await interaction.followUp({
+          await interaction.editReply({
             embeds: [embed],
             ephemeral: true
           })
@@ -84,8 +78,7 @@ module.exports = {
           const embed = DiscordUtil.getErrorEmbed(
             `No characters were found for \`${name}\` on \`${server}\``
           )
-          await interaction.deleteReply()
-          await interaction.followUp({
+          await interaction.editReply({
             embeds: [embed],
             ephemeral: true
           })
@@ -100,8 +93,7 @@ module.exports = {
             const embed = DiscordUtil.getErrorEmbed(
               `Could not fetch the character.\nPlease try again later.`
             )
-            await interaction.deleteReply()
-            await interaction.followUp({
+            await interaction.editReply({
               embeds: [embed],
               ephemeral: true
             })
@@ -249,45 +241,31 @@ module.exports = {
         ephemeral: true
       })
     } else {
-      try {
-        const profileImage = await ProfileUtil.getImage(
-          interaction,
-          character,
-          false,
-          'profile'
-        )
-        if (!profileImage)
-          throw new Error('[/favorite] profileImage is undefined')
+      const profileImage = await ProfileUtil.getImage(
+        interaction,
+        character,
+        false,
+        'profile'
+      )
+      if (!profileImage)
+        throw new Error('[/favorite] profileImage is undefined')
 
-        const file = new MessageAttachment(profileImage)
+      const file = new MessageAttachment(profileImage)
 
-        const components = ProfileUtil.getComponents(
-          'profile',
-          null,
-          'find',
-          characterId
-        )
+      const components = ProfileUtil.getComponents(
+        'profile',
+        null,
+        'find',
+        characterId
+      )
 
-        await interaction.editReply({
-          content: ' ',
-          files: [file],
-          embeds: [],
-          attachments: [],
-          components: components
-        })
-      } catch (error) {
-        console.error(error)
-
-        await interaction.deleteReply()
-        await interaction.followUp({
-          embeds: [
-            DiscordUtil.getErrorEmbed(
-              'There was an error while executing this command.'
-            )
-          ],
-          ephemeral: true
-        })
-      }
+      await interaction.editReply({
+        content: ' ',
+        files: [file],
+        embeds: [],
+        attachments: [],
+        components: components
+      })
     }
   },
 

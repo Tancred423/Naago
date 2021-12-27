@@ -41,71 +41,57 @@ module.exports = {
     const profilePage = profilePages.profilePage ?? 'profile'
     const subProfilePage = profilePages.subProfilePage
 
-    try {
-      if (!profilePage) throw new Error('[/me] profilePage is undefined')
+    if (!profilePage) throw new Error('[/me] profilePage is undefined')
 
-      if (profilePage === 'socialmedia') {
-        const profileEmbed = await ProfileUtil.getEmbed(
-          interaction,
-          character,
-          true,
-          profilePage,
-          true
-        )
-        if (!profileEmbed) throw new Error('[/me] profileEmbed is undefined')
+    if (profilePage === 'socialmedia') {
+      const profileEmbed = await ProfileUtil.getEmbed(
+        interaction,
+        character,
+        true,
+        profilePage,
+        true
+      )
+      if (!profileEmbed) throw new Error('[/me] profileEmbed is undefined')
 
-        const components = ProfileUtil.getComponents(
-          profilePage,
-          subProfilePage,
-          'me',
-          characterId
-        )
+      const components = ProfileUtil.getComponents(
+        profilePage,
+        subProfilePage,
+        'me',
+        characterId
+      )
 
-        await interaction.editReply({
-          content: ' ',
-          files: [],
-          embeds: [profileEmbed],
-          attachments: [],
-          components: components
-        })
-      } else {
-        const profileImage = await ProfileUtil.getImage(
-          interaction,
-          character,
-          true,
-          profilePage,
-          subProfilePage
-        )
-        if (!profileImage) throw new Error('[/me] profileImage is undefined')
+      await interaction.editReply({
+        content: ' ',
+        files: [],
+        embeds: [profileEmbed],
+        attachments: [],
+        components: components
+      })
+    } else {
+      const profileImage = await ProfileUtil.getImage(
+        interaction,
+        character,
+        true,
+        profilePage,
+        subProfilePage
+      )
+      if (!profileImage) throw new Error('[/me] profileImage is undefined')
 
-        const file = new MessageAttachment(profileImage)
+      const file = new MessageAttachment(profileImage)
 
-        const components = ProfileUtil.getComponents(
-          profilePage,
-          subProfilePage,
-          'me',
-          characterId
-        )
+      const components = ProfileUtil.getComponents(
+        profilePage,
+        subProfilePage,
+        'me',
+        characterId
+      )
 
-        await interaction.editReply({
-          content: ' ',
-          files: [file],
-          embeds: [],
-          attachments: [],
-          components: components
-        })
-      }
-    } catch (error) {
-      console.error(error)
-
-      await interaction.deleteReply()
-      await interaction.followUp({
-        embeds: [
-          DiscordUtil.getErrorEmbed(
-            'There was an error while executing this command.'
-          )
-        ],
-        ephemeral: true
+      await interaction.editReply({
+        content: ' ',
+        files: [file],
+        embeds: [],
+        attachments: [],
+        components: components
       })
     }
   },

@@ -103,29 +103,24 @@ client.on('interactionCreate', async (interaction) => {
     } catch (err) {
       console.error(err)
 
+      const embed = DiscordUtil.getErrorEmbed(
+        'There was an error while executing this command.'
+      )
       if (interaction.ephemeral) {
         await interaction.editReply({
-          embeds: [
-            DiscordUtil.getErrorEmbed(
-              'There was an error while executing this command.'
-            )
-          ]
+          embeds: [embed]
         })
       } else {
         await interaction.deleteReply()
         await interaction.followUp({
-          embeds: [
-            DiscordUtil.getErrorEmbed(
-              'There was an error while executing this command.'
-            )
-          ],
+          embeds: [embed],
           ephemeral: true
         })
       }
     }
   } else if (interaction.isButton()) {
     try {
-      ButtonUtil.execute(interaction)
+      await ButtonUtil.execute(interaction)
     } catch (err) {
       console.error(err)
       const embed = DiscordUtil.getErrorEmbed(
@@ -138,7 +133,7 @@ client.on('interactionCreate', async (interaction) => {
     }
   } else if (interaction.isSelectMenu()) {
     try {
-      SelectMenuUtil.execute(interaction)
+      await SelectMenuUtil.execute(interaction)
     } catch (err) {
       console.error(err)
       const embed = DiscordUtil.getErrorEmbed(
@@ -153,16 +148,23 @@ client.on('interactionCreate', async (interaction) => {
     const command = client.commands.get(interaction.commandName)
 
     try {
-      command.execute(interaction)
+      await command.execute(interaction)
     } catch (err) {
       console.error(err)
       const embed = DiscordUtil.getErrorEmbed(
         'There was an error while executing this command.'
       )
-      await interaction.followUp({
-        embeds: [embed],
-        ephemeral: true
-      })
+      if (interaction.ephemeral) {
+        await interaction.editReply({
+          embeds: [embed]
+        })
+      } else {
+        await interaction.deleteReply()
+        await interaction.followUp({
+          embeds: [embed],
+          ephemeral: true
+        })
+      }
     }
   }
 })

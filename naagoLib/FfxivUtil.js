@@ -24,27 +24,18 @@ module.exports = class FfxivUtil {
   }
 
   static async getCharacterIdsByName(name, server) {
-    try {
-      const nameEncoded = encodeURIComponent(name)
-      const res = await axios.get(
-        `http://localhost:8081/character/search?name=${nameEncoded}&worldname=${server}`
-      )
-
-      if (res.status !== 200) return []
-      else return res.data.List.map((a) => a.ID)
-    } catch (err) {
-      return []
-    }
+    const nameEncoded = encodeURIComponent(name)
+    const res = await axios.get(
+      `http://localhost:8081/character/search?name=${nameEncoded}&worldname=${server}`
+    )
+    if (res.status !== 200) return []
+    else return res.data.List.map((a) => a.ID)
   }
 
   static async getCharacterById(id) {
-    try {
-      const res = await axios.get(`http://localhost:8081/character/${id}`)
-      if (res.status !== 200) return undefined
-      else return res.data.Character
-    } catch (err) {
-      return undefined
-    }
+    const res = await axios.get(`http://localhost:8081/character/${id}`)
+    if (res.status !== 200) return undefined
+    else return res?.data?.Character
   }
 
   static generateVerificationCode() {

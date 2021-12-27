@@ -30,49 +30,36 @@ module.exports = {
 
     await interaction.deferReply()
 
-    try {
-      const character = await DbUtil.fetchCharacter(
-        interaction,
-        characterCache.ID
-      )
+    const character = await DbUtil.fetchCharacter(
+      interaction,
+      characterCache.ID
+    )
 
-      const profileImage = await ProfileUtil.getImage(
-        interaction,
-        character,
-        isVerified,
-        'profile'
-      )
-      if (!profileImage)
-        throw new Error('[context_find] profileImage is undefined')
+    const profileImage = await ProfileUtil.getImage(
+      interaction,
+      character,
+      isVerified,
+      'profile'
+    )
 
-      const file = new MessageAttachment(profileImage)
+    if (!profileImage)
+      throw new Error('[context_find] profileImage is undefined')
 
-      const components = ProfileUtil.getComponents(
-        'profile',
-        null,
-        'find',
-        character.ID
-      )
+    const file = new MessageAttachment(profileImage)
 
-      await interaction.editReply({
-        content: ' ',
-        files: [file],
-        embeds: [],
-        attachments: [],
-        components: components
-      })
-    } catch (error) {
-      console.error(error)
+    const components = ProfileUtil.getComponents(
+      'profile',
+      null,
+      'find',
+      character.ID
+    )
 
-      await interaction.deleteReply()
-      await interaction.followUp({
-        embeds: [
-          DiscordUtil.getErrorEmbed(
-            'There was an error while executing this command.'
-          )
-        ],
-        ephemeral: true
-      })
-    }
+    await interaction.editReply({
+      content: ' ',
+      files: [file],
+      embeds: [],
+      attachments: [],
+      components: components
+    })
   }
 }
