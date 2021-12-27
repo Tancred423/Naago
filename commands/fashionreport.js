@@ -2,8 +2,8 @@ const { SlashCommandBuilder } = require('@discordjs/builders')
 const { MessageEmbed } = require('discord.js')
 const DbUtil = require('../naagoLib/DbUtil')
 const DiscordUtil = require('../naagoLib/DiscordUtil')
-const { getBotColor } = require('../naagoLib/DiscordUtil')
 const moment = require('moment')
+const { colorTwitter, twitterIconLink } = require('../config.json')
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -36,7 +36,7 @@ module.exports = {
 
     // Output data
     const embed = new MessageEmbed()
-      .setColor(await getBotColor(interaction.client, interaction.guild))
+      .setColor(colorTwitter)
       .setAuthor(
         `${myTweet.nickname}${myTweet.verified ? ' ✅' : ''} (@${
           myTweet.username
@@ -47,7 +47,7 @@ module.exports = {
       .setTitle(myTweet.title)
       .setURL(myTweet.tweet_url)
       .setImage(myTweet.image_url)
-      .setFooter('Posted at')
+      .setFooter('Twitter', twitterIconLink)
       .setTimestamp(myTweet.timestamp)
 
     await interaction.reply({

@@ -100,6 +100,8 @@ module.exports = class DiscordUtil {
       return await naagoEmoteServer.emojis.fetch('922959045277650994')
     } else if (name === 'updates') {
       return await naagoEmoteServer.emojis.fetch('922959045466398770')
+    } else if (name === 'doggo_smile') {
+      return await naagoEmoteServer.emojis.fetch('924901318718521415')
     } else return null
   }
 

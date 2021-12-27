@@ -4,6 +4,7 @@ const { unsetup, unset } = require('../commands/setup')
 const { verifyUser, unverifyUser } = require('../commands/verify')
 const DbUtil = require('./DbUtil')
 const DiscordUtil = require('./DiscordUtil')
+const HelpUtil = require('./HelpUtil')
 const ProfileUtil = require('./ProfileUtil')
 
 module.exports = class ButtonUtil {
@@ -209,6 +210,31 @@ module.exports = class ButtonUtil {
     } else if (buttonId.startsWith('setup.unset')) {
       await interaction.deferUpdate()
       unset(interaction)
+    } else if (buttonId.startsWith('help')) {
+      await interaction.deferUpdate()
+
+      const page = buttonId.split('-')[1]
+
+      switch (page) {
+        case 'profiles':
+          await interaction.editReply(await HelpUtil.getProfiles(interaction))
+          break
+        case 'news':
+          await interaction.editReply(await HelpUtil.getNews(interaction))
+          break
+        case 'setup':
+          await interaction.editReply(await HelpUtil.getSetup(interaction))
+          break
+        case 'technical':
+          await interaction.editReply(await HelpUtil.getTechnical(interaction))
+          break
+        default:
+          const embed = DiscordUtil.getErrorEmbed(
+            'There was an error while using this button. Please try again later.'
+          )
+          await interaction.followUp({ embeds: [embed], ephemeral: true })
+          break
+      }
     }
   }
 }

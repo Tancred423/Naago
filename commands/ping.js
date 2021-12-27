@@ -1,6 +1,9 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
-const { MessageActionRow, MessageButton } = require('discord.js')
-const { getEmote } = require('../naagoLib/DiscordUtil')
+const { MessageActionRow, MessageButton, MessageEmbed } = require('discord.js')
+const {
+  getEmote,
+  getBotColorByInteraction
+} = require('../naagoLib/DiscordUtil')
 const GlobalUtil = require('../naagoLib/GlobalUtil')
 const NaagoUtil = require('../naagoLib/NaagoUtil')
 
@@ -12,14 +15,14 @@ module.exports = {
     const client = interaction.client
     const uptimeFormatted = NaagoUtil.convertMsToDigitalClock(client.uptime)
 
+    const embed = new MessageEmbed()
+      .setColor(await getBotColorByInteraction(interaction))
+      .addField('Ping', `${client.ws.ping} ms`, true)
+      .addField('Uptime', uptimeFormatted, true)
+      .addField('Servers', (await client.guilds.fetch())?.size.toString(), true)
+
     await interaction.reply({
-      content: `Ping to Websocket: \`${
-        client.ws.ping
-      } ms\`\nUptime: \`${uptimeFormatted}\`\nServer Count: \`${
-        (
-          await client.guilds.fetch()
-        )?.size
-      }\``,
+      embeds: [embed],
       ephemeral: true
     })
   }

@@ -61,7 +61,7 @@ for (const ownerfile of ownerCommandFiles) {
 // Discord events
 client.once('ready', () => {
   console.log(`Connected: Discord (${client.user.tag})`)
-  client.user.setActivity('Endwalker', { type: 'PLAYING' })
+  client.user.setActivity('/help', { type: 'WATCHING' })
 
   GlobalUtil.client = client
 
