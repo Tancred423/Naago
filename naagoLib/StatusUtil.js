@@ -39,7 +39,7 @@ module.exports = class StatusUtil {
       status.details = Parser.convertHtmlToMarkdown(status.details)
       status.details = Parser.convertTitles(status.details)
       status.details = Parser.convertDates('status', status.details)
-      status.details = NaagoUtil.cutString(status.details, 2500)
+      status.details = NaagoUtil.cutString(status.details, 2000, status.link)
 
       // Tag
       status.tag = Parser.convertTag('status', status.tag)

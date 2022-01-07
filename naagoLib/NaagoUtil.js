@@ -69,10 +69,13 @@ module.exports = class NaagoUtil {
     }
   }
 
-  static cutString(string, length) {
+  static cutString(string, length, link = null) {
     if (!string) return string
     else if (string.length > length)
-      return string.substring(0, length - 3) + '...'
+      return (
+        string.substring(0, length - 3) +
+        (link ? `\n\n*[Continue reading...](${link})*` : '...')
+      )
     else return string
   }
 

@@ -43,7 +43,7 @@ module.exports = class MaintenancesUtil {
       maint.details = enrich.details
       maint.from = enrich.from
       maint.to = enrich.to
-      maint.details = NaagoUtil.cutString(maint.details, 2500)
+      maint.details = NaagoUtil.cutString(maint.details, 2000, maint.link)
 
       // Tag
       maint.tag = maint.tag === '[Maintenance]' ? undefined : maint.tag

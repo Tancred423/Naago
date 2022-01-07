@@ -38,7 +38,7 @@ module.exports = class UpdatesUtil {
       update.details = Parser.convertHtmlToMarkdown(update.details)
       update.details = Parser.convertTitles(update.details)
       update.details = Parser.convertDates('updates', update.details)
-      update.details = NaagoUtil.cutString(update.details, 2500)
+      update.details = NaagoUtil.cutString(update.details, 2000, update.link)
       newUpdates.push(update)
     }
 

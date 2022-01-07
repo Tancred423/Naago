@@ -57,16 +57,23 @@ module.exports = class LodestoneParser {
     const paragraphs = markdown.split('\n')
     let imageCounter = 0
 
+    if (paragraphs[0].startsWith('[![](') || paragraphs[0].startsWith('![]('))
+      paragraphs.shift()
+
     paragraphs.forEach((item, index, arr) => {
       item = item.trim()
 
-      if (item.startsWith('[![](')) {
-        const imageLink = item.split(')](')[1]?.slice(0, -1)
+      if (item.startsWith('[![](') || item.startsWith('![](')) {
+        const imageLink = item.split('](')[1]?.slice(0, -1)
         if (imageLink && new RegExp('.jpg|.png').test(imageLink)) {
           imageLinks.push(imageLink)
           imageCounter += 1
         }
-      } else if (!item.startsWith('[![](') && item !== '' && imageCounter > 0) {
+      } else if (
+        (!item.startsWith('[![](') || item.startsWith('![](')) &&
+        item !== '' &&
+        imageCounter > 0
+      ) {
         arr[index - 1] = `\n\n*${imageCounter} image${
           imageCounter === 1 ? '' : 's'
         }*\n`
@@ -77,6 +84,7 @@ module.exports = class LodestoneParser {
     markdown = paragraphs.join('\n')
     if (imageLinks.length === 1) markdown = markdown.replaceAll('*1 image*', '')
     markdown = markdown.replaceAll(/\[\!\[\].*\?.*\)/g, '')
+    markdown = markdown.replaceAll(/\!\[\].*\?.*\)/g, '')
     markdown = markdown.replaceAll(/\n{3,}/g, '\n\n')
 
     return {

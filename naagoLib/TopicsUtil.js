@@ -39,7 +39,11 @@ module.exports = class TopicsUtil {
       const imageLinks = Parser.convertImageLinks(topic.description)
       topic.description = imageLinks.description
       topic.description = Parser.convertDates('topics', topic.description)
-      topic.description = NaagoUtil.cutString(topic.description, 2500)
+      topic.description = NaagoUtil.cutString(
+        topic.description,
+        2000,
+        topic.link
+      )
 
       // Image
       if (imageLinks.links.length === 1) topic.banner = imageLinks.links[0]
