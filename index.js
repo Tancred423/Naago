@@ -1,9 +1,13 @@
 const fs = require('fs')
 const { Client, Collection, Intents } = require('discord.js')
 const {
+  guildId,
   token,
   twitterStreamEnabled,
-  lodestoneCheckOnStart
+  lodestoneCheckOnStart,
+  resendFrId,
+  shutdownId,
+  checkCommandIds
 } = require('./config.json')
 const { CanvasRenderingContext2D } = require('canvas')
 const DiscordUtil = require('./naagoLib/DiscordUtil')
@@ -84,6 +88,9 @@ client.once('ready', () => {
   } catch (err) {
     console.error(err)
   }
+
+  // Update owner command permissions
+  updateOwnerCommands(client)
 })
 
 async function checkLodestone() {
@@ -92,6 +99,31 @@ async function checkLodestone() {
   await MaintenancesUtil.updateDb()
   await UpdatesUtil.updateDb()
   await StatusUtil.updateDb()
+}
+
+async function updateOwnerCommands(client) {
+  const guild = await client.guilds.fetch(guildId)
+
+  if (checkCommandIds) {
+    const commands = await guild?.commands.fetch()
+    commands.forEach((command) => {
+      console.log(`${command.name}: ${command.id}`)
+    })
+  } else {
+    const resendFr = await guild?.commands.fetch(resendFrId)
+    const shutdown = await guild?.commands.fetch(shutdownId)
+
+    const permissions = [
+      {
+        id: '181896377486278657',
+        type: 'USER',
+        permission: true
+      }
+    ]
+
+    await resendFr?.permissions.set({ permissions })
+    await shutdown?.permissions.set({ permissions })
+  }
 }
 
 client.on('interactionCreate', async (interaction) => {

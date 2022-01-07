@@ -18,7 +18,9 @@ module.exports = {
     }
   ],
   async execute(interaction) {
-    await interaction.deferReply()
+    await interaction.deferReply({
+      ephemeral: true
+    })
 
     const tweet = await DbUtil.getFashionReportData()
 
