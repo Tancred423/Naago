@@ -83,9 +83,10 @@ module.exports = class LodestoneParser {
 
     markdown = paragraphs.join('\n')
     if (imageLinks.length === 1) markdown = markdown.replaceAll('*1 image*', '')
-    markdown = markdown.replaceAll(/\[\!\[\].*\?.*\)/g, '')
-    markdown = markdown.replaceAll(/\!\[\].*\?.*\)/g, '')
-    markdown = markdown.replaceAll(/\n{3,}/g, '\n\n')
+    markdown = markdown
+      .replaceAll(/\[\!\[\].*\?.*\)/g, '')
+      .replaceAll(/\!\[\].*\?.*\)/g, '')
+      .replaceAll(/\n{3,}/g, '\n\n')
 
     return {
       description: markdown,
@@ -102,7 +103,6 @@ module.exports = class LodestoneParser {
       case 'maints':
         return this.convertDatesMaints(markdown)
       case 'updates':
-        return this.convertDatesUpdatesStatus(markdown)
       case 'status':
         return this.convertDatesUpdatesStatus(markdown)
       default:
@@ -136,6 +136,8 @@ module.exports = class LodestoneParser {
           to = year + ' ' + to
 
           toDate = moment.utc(to, 'YYYY dddd D MMMM H:mm')
+
+          if (fromDate.isAfter(toDate)) toDate = toDate.add(1, 'days')
         } else {
           fromDate = moment.utc(item, 'dddd D MMMM H:mm')
         }
@@ -172,6 +174,8 @@ module.exports = class LodestoneParser {
 
           fromDate = moment.utc(from, 'MMM D YYYY')
           toDate = moment.utc(to, 'MMM D YYYY')
+
+          if (fromDate.isAfter(toDate)) toDate = toDate.add(1, 'days')
         } else {
           fromDate = moment.utc(item, 'MMM D YYYY')
         }
@@ -206,6 +210,8 @@ module.exports = class LodestoneParser {
 
           fromDate = moment.utc(from, 'MMM D YYYY H:mm')
           toDate = moment.utc(to, 'MMM D YYYY H:mm')
+
+          if (fromDate.isAfter(toDate)) toDate = toDate.add(1, 'days')
         } else {
           fromDate = moment.utc(item.replaceAll('GMT', ''), 'MMM D YYYY H:mm')
         }
@@ -244,6 +250,8 @@ module.exports = class LodestoneParser {
 
           fromDate = moment.utc(from, 'MMM D YYYY H:mm')
           toDate = moment.utc(to, 'MMM D YYYY H:mm')
+
+          if (fromDate.isAfter(toDate)) toDate = toDate.add(1, 'days')
         } else {
           fromDate = moment.utc(item.replaceAll('GMT', ''), 'MMM D YYYY H:mm')
         }

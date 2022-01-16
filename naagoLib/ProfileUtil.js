@@ -185,7 +185,7 @@ class Profile {
     ////////////////////////////////////////////
     if (this.isVerified) {
       const verificationSticker = await loadImage('./images/naago_verified.png')
-      ctx.drawImage(verificationSticker, 800 - 80 - 5, 45, 80, 80)
+      ctx.drawImage(verificationSticker, 800 - 50 - 10, 35, 50, 50)
     }
 
     ////////////////////////////////////////////
@@ -281,7 +281,11 @@ class Profile {
     await profileBlock.add(
       'Free Company',
       this.character.free_company?.name ?? '-',
-      this.character.free_company?.icon,
+      [
+        this.character.free_company?.icon_layer_0,
+        this.character.free_company?.icon_layer_1,
+        this.character.free_company?.icon_layer_2
+      ],
       true
     )
     await profileBlock.add(
@@ -419,7 +423,7 @@ class Profile {
     ////////////////////////////////////////////
     if (this.isVerified) {
       const verificationSticker = await loadImage('./images/naago_verified.png')
-      ctx.drawImage(verificationSticker, 690, 40, 90, 90)
+      ctx.drawImage(verificationSticker, 800 - 50 - 10, 35, 50, 50)
     }
 
     ////////////////////////////////////////////
@@ -654,7 +658,7 @@ class Profile {
     ////////////////////////////////////////////
     if (this.isVerified) {
       const verificationSticker = await loadImage('./images/naago_verified.png')
-      ctx.drawImage(verificationSticker, 690, 40, 90, 90)
+      ctx.drawImage(verificationSticker, 800 - 50 - 10, 35, 50, 50)
     }
 
     ////////////////////////////////////////////
@@ -870,7 +874,7 @@ class Profile {
     const acjLevel = `Level ${this.character.active_classjob.level}`
     ctx.fillStyle = theme.acj_level
     ctx.font = `normal 16px MiedingerMediumW00-Regular`
-    ctx.fillText(acjLevel, 300, 132 - 35 + 3 - 20 - 14, 330)
+    ctx.fillText(acjLevel, 300, 70, 330)
 
     // ACJ icon
     const acjIcon = await loadImage(this.character.active_classjob.icon)
@@ -878,14 +882,14 @@ class Profile {
 
     // ACJ name
     const acjName = await loadImage(this.character.active_classjob.name)
-    ctx.drawImage(acjName, 300 + 30, 90, 320, 35)
+    ctx.drawImage(acjName, 300 + 30, 93, 280, 30)
 
     ////////////////////////////////////////////
     // Verification sticker
     ////////////////////////////////////////////
     if (this.isVerified) {
       const verificationSticker = await loadImage('./images/naago_verified.png')
-      ctx.drawImage(verificationSticker, 500 - 50, 40, 45, 45)
+      ctx.drawImage(verificationSticker, 500 - 50, 40, 50, 50)
     }
 
     ////////////////////////////////////////////
@@ -1027,7 +1031,7 @@ class Profile {
     ////////////////////////////////////////////
     if (this.isVerified) {
       const verificationSticker = await loadImage('./images/naago_verified.png')
-      ctx.drawImage(verificationSticker, 690, 40, 90, 90)
+      ctx.drawImage(verificationSticker, 800 - 50 - 10, 35, 50, 50)
     }
 
     ////////////////////////////////////////////
@@ -1369,13 +1373,24 @@ class ProfileBlock {
       maxWidth
     )
 
-    if (iconLink) {
+    if (iconLink instanceof Array) {
+      for (const link of iconLink)
+        if (link) await this.drawIcon(link, fWidth, rightSide)
+    } else if (iconLink) await this.drawIcon(iconLink, fWidth, rightSide)
+  }
+
+  async drawIcon(iconLink, fWidth, rightSide) {
+    try {
       const icon = await loadImage(iconLink)
       this.ctx.drawImage(
         icon,
-        fWidth - icon.width / 2 - 5 + (rightSide ? fWidth + 10 : 0),
-        this.yAdd + 10
+        fWidth - 32 / 2 - 5 + (rightSide ? fWidth + 10 : 0),
+        this.yAdd + 10,
+        32,
+        32
       )
+    } catch (err) {
+      console.log(err)
     }
   }
 }

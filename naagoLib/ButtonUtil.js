@@ -5,11 +5,25 @@ const Setup = require('../commands/setup')
 const Verify = require('../commands/verify')
 const DiscordUtil = require('./DiscordUtil')
 const HelpUtil = require('./HelpUtil')
+const NaagoUtil = require('./NaagoUtil')
 
 module.exports = class ButtonUtil {
+  static cooldown = []
+
   static async execute(interaction) {
     const userId = interaction.user.id
     const messageAuthorId = interaction.message.interaction?.user.id
+
+    const isOnCooldown = this.cooldown.includes(userId)
+    if (isOnCooldown) {
+      await interaction.deferUpdate()
+      return
+    }
+    this.cooldown.push(userId)
+
+    setTimeout(() => {
+      NaagoUtil.removeItemFromArray(this.cooldown, userId)
+    }, 1000)
 
     if (userId !== messageAuthorId) {
       await interaction.deferUpdate()

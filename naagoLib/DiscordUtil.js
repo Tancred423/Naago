@@ -82,11 +82,11 @@ module.exports = class DiscordUtil {
       case 'theme_classic':
         return await naagoEmoteServer.emojis.fetch('922677850522390529')
       case 'theme_final_days':
-        return await naagoEmoteServer.emojis.fetch('922689049569931304')
+        return await naagoEmoteServer.emojis.fetch('922681780606230629')
       case 'theme_ultima_thule':
-        return await naagoEmoteServer.emojis.fetch('922689049569931304')
+        return await naagoEmoteServer.emojis.fetch('932065506343657502')
       case 'theme_moon':
-        return await naagoEmoteServer.emojis.fetch('922689049569931304')
+        return await naagoEmoteServer.emojis.fetch('922718025654886400')
       case 'theme_amaurot':
         return await naagoEmoteServer.emojis.fetch('922699017337597952')
       case 'theme_character_selection':
