@@ -127,8 +127,11 @@ module.exports = class TwitterUtil {
           console.log(
             `[${moment().format(
               'YYYY-MM-DD HH:mm'
-            )}] [TWITTER] An error occured: ${err.message}`
+            )}] [TWITTER] Sending fashion report to ${
+              setup.guild_id
+            } was NOT successful: ${err.message}`
           )
+          continue
         }
       }
     })

@@ -31,27 +31,38 @@ module.exports = {
     if (!setups || setups?.length < 1) return
 
     for (const setup of setups) {
-      const guild = await client.guilds.fetch(setup.guild_id)
-      if (!guild) continue
-      const channel = await guild.channels.fetch(setup.channel_id)
-      if (!channel) continue
+      try {
+        const guild = await client.guilds.fetch(setup.guild_id)
+        if (!guild) continue
+        const channel = await guild.channels.fetch(setup.channel_id)
+        if (!channel) continue
 
-      const embed = new MessageEmbed()
-        .setColor(colorTwitter)
-        .setAuthor(
-          `${tweet.nickname}${tweet.verified ? ' ✅' : ''} (@${
-            tweet.username
-          })`,
-          tweet.avatar,
-          tweet.profile_url
+        const embed = new MessageEmbed()
+          .setColor(colorTwitter)
+          .setAuthor(
+            `${tweet.nickname}${tweet.verified ? ' ✅' : ''} (@${
+              tweet.username
+            })`,
+            tweet.avatar,
+            tweet.profile_url
+          )
+          .setTitle(tweet.title)
+          .setURL(tweet.tweet_url)
+          .setImage(tweet.image_url)
+          .setFooter('Twitter', twitterIconLink)
+          .setTimestamp(tweet.timestamp)
+
+        await channel.send({ embeds: [embed] })
+      } catch (err) {
+        console.log(
+          `[${moment().format(
+            'YYYY-MM-DD HH:mm'
+          )}] [TWITTER] Sending fashion report to ${
+            setup.guild_id
+          } was NOT successful: ${err.message}`
         )
-        .setTitle(tweet.title)
-        .setURL(tweet.tweet_url)
-        .setImage(tweet.image_url)
-        .setFooter('Twitter', twitterIconLink)
-        .setTimestamp(tweet.timestamp)
-
-      await channel.send({ embeds: [embed] })
+        continue
+      }
     }
 
     await interaction.editReply({
