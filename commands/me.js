@@ -3,6 +3,7 @@ const { MessageAttachment } = require('discord.js')
 const DiscordUtil = require('../naagoLib/DiscordUtil')
 const DbUtil = require('../naagoLib/DbUtil')
 const ProfileUtil = require('../naagoLib/ProfileUtil')
+const axios = require('axios')
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -43,15 +44,10 @@ module.exports = {
 
     if (!profilePage) throw new Error('[/me] profilePage is undefined')
 
-    if (profilePage === 'socialmedia') {
-      const profileEmbed = await ProfileUtil.getEmbed(
-        interaction,
-        character,
-        true,
-        profilePage,
-        true
-      )
-      if (!profileEmbed) throw new Error('[/me] profileEmbed is undefined')
+    if (profilePage === 'portrait') {
+      const response = await axios.get(character.portrait, { responseType: 'arraybuffer' })
+      const buffer = Buffer.from(response.data, "utf-8")
+      const file = new MessageAttachment(buffer)
 
       const components = ProfileUtil.getComponents(
         profilePage,
@@ -61,9 +57,9 @@ module.exports = {
       )
 
       await interaction.editReply({
-        content: ' ',
-        files: [],
-        embeds: [profileEmbed],
+        content: `${character.name}🌸${character.server.world}`,
+        files: [file],
+        embeds: [],
         attachments: [],
         components: components
       })
@@ -131,15 +127,10 @@ module.exports = {
       // Update profile page
       DbUtil.updateProfilePage(userId, profilePage, subProfilePage)
 
-      if (profilePage === 'socialmedia') {
-        const profileEmbed = await ProfileUtil.getEmbed(
-          interaction,
-          character,
-          true,
-          profilePage,
-          subProfilePage,
-          true
-        )
+      if (profilePage === 'portrait') {
+        const response = await axios.get(character.portrait, { responseType: 'arraybuffer' })
+        const buffer = Buffer.from(response.data, "utf-8")
+        const file = new MessageAttachment(buffer)
 
         const components = ProfileUtil.getComponents(
           profilePage,
@@ -149,9 +140,9 @@ module.exports = {
         )
 
         await interaction.editReply({
-          content: ' ',
-          files: [],
-          embeds: [profileEmbed],
+          content: `${character.name}🌸${character.server.world}`,
+          files: [file],
+          embeds: [],
           attachments: [],
           components: components
         })

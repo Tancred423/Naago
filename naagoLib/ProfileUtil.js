@@ -24,18 +24,14 @@ module.exports = class ProfileUtil {
     profilePage,
     subProfilePage = null
   ) {
-    try {
-      const profile = new Profile(interaction, character, isVerified)
+    const profile = new Profile(interaction, character, isVerified)
 
-      if (profilePage === 'profile') return await profile.getProfile()
-      else if (profilePage === 'classesjobs') {
-        if (subProfilePage === 'dohdol') return await profile.getDohDol()
-        else return await profile.getDowDom()
-      } else if (profilePage === 'equipment') return await profile.getEquipment()
-      else if (profilePage === 'attributes') return await profile.getAttributes()
-    } catch (err) {
-      console.error(err)
-    }
+    if (profilePage === 'profile') return await profile.getProfile()
+    else if (profilePage === 'classesjobs') {
+      if (subProfilePage === 'dohdol') return await profile.getDohDol()
+      else return await profile.getDowDom()
+    } else if (profilePage === 'equipment') return await profile.getEquipment()
+    else if (profilePage === 'attributes') return await profile.getAttributes()
   }
 
   static getEmbed(interaction, character, isVerified, profilePage, isMe) {
@@ -66,9 +62,9 @@ module.exports = class ProfileUtil {
           .setCustomId(`${commandName}.attributes.${characterId}`)
           .setStyle(profilePage === 'attributes' ? 'PRIMARY' : 'SECONDARY'),
         new MessageButton()
-          .setLabel('Social Media')
-          .setCustomId(`${commandName}.socialmedia.${characterId}`)
-          .setStyle(profilePage === 'socialmedia' ? 'PRIMARY' : 'SECONDARY')
+          .setLabel('Portrait')
+          .setCustomId(`${commandName}.portrait.${characterId}`)
+          .setStyle(profilePage === 'portrait' ? 'PRIMARY' : 'SECONDARY')
       )
     )
 
