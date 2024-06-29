@@ -24,14 +24,18 @@ module.exports = class ProfileUtil {
     profilePage,
     subProfilePage = null
   ) {
-    const profile = new Profile(interaction, character, isVerified)
+    try {
+      const profile = new Profile(interaction, character, isVerified)
 
-    if (profilePage === 'profile') return await profile.getProfile()
-    else if (profilePage === 'classesjobs') {
-      if (subProfilePage === 'dohdol') return await profile.getDohDol()
-      else return await profile.getDowDom()
-    } else if (profilePage === 'equipment') return await profile.getEquipment()
-    else if (profilePage === 'attributes') return await profile.getAttributes()
+      if (profilePage === 'profile') return await profile.getProfile()
+      else if (profilePage === 'classesjobs') {
+        if (subProfilePage === 'dohdol') return await profile.getDohDol()
+        else return await profile.getDowDom()
+      } else if (profilePage === 'equipment') return await profile.getEquipment()
+      else if (profilePage === 'attributes') return await profile.getAttributes()
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   static getEmbed(interaction, character, isVerified, profilePage, isMe) {
@@ -299,8 +303,8 @@ class Profile {
       this.character.amount_achievements === 'Private'
         ? 'Private'
         : `${Math.round(
-            (this.character.amount_achievements / maxAchievements) * 100
-          )} % (${this.character.ap} AP)`,
+          (this.character.amount_achievements / maxAchievements) * 100
+        )} % (${this.character.ap} AP)`,
       './images/achievements.png',
       false,
       false,
@@ -763,7 +767,7 @@ class Profile {
     ctx.fillText(
       bozja
         ? `${bozja.name}: ${bozja.level}` +
-            (bozja.Mettle !== '--' ? ` (${bozja.Mettle} mettle)` : '')
+        (bozja.Mettle !== '--' ? ` (${bozja.Mettle} mettle)` : '')
         : '-',
       x + 10,
       yAdd + 30,
@@ -791,9 +795,9 @@ class Profile {
     ctx.fillText(
       eureka
         ? `${eureka.name}: ${eureka.level}` +
-            (eureka.CurrentEXP !== '--'
-              ? ` (${eureka.CurrentEXP} / ${eureka.MaxEXP} exp)`
-              : '')
+        (eureka.CurrentEXP !== '--'
+          ? ` (${eureka.CurrentEXP} / ${eureka.MaxEXP} exp)`
+          : '')
         : '-',
       x + 10,
       yAdd + 30,
@@ -1303,22 +1307,19 @@ class Profile {
 
     if (socialMedias.length === 0) {
       embed.setDescription(
-        `No social medias were linked yet. ${
-          isMe ? 'You' : 'They'
+        `No social medias were linked yet. ${isMe ? 'You' : 'They'
         } can do so with \`/socialmedia add\`.`
       )
     } else {
       for (const socialMedia of socialMedias) {
         embed.setDescription(
           embed.description +
-            `\n${
-              (await DiscordUtil.getEmote(
-                client,
-                socialMedia.platform.split('.')[0]
-              )) ?? ''
-            } [${NaagoUtil.getWebsiteName(socialMedia.platform)}](${
-              socialMedia.url
-            })`
+          `\n${(await DiscordUtil.getEmote(
+            client,
+            socialMedia.platform.split('.')[0]
+          )) ?? ''
+          } [${NaagoUtil.getWebsiteName(socialMedia.platform)}](${socialMedia.url
+          })`
         )
       }
     }
