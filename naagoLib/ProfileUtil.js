@@ -1529,7 +1529,7 @@ class Gear {
 
     if (!gear) {
       this.x = this.isLeft ? this.x + 10 : this.x - 10
-      this.y -= this.isLeft ? 4 : type === 'facewear' ? 54 : 20
+      this.y -= this.isLeft ? 4 : type === 'facewear' ? 52 : 18
 
       return
     }
@@ -1722,7 +1722,7 @@ class Gear {
     }
 
     this.x = this.isLeft ? this.x + 10 : this.x - 10
-    this.y -= this.isLeft ? 4 : type === 'facewear' ? 54 : 20
+    this.y -= this.isLeft ? 4 : type === 'facewear' ? 52 : 18
   }
 
   getDefaultIcon(type) {
