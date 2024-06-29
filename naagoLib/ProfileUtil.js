@@ -940,7 +940,7 @@ class Profile {
     await gear.add(this.character.bracelets, 'bracelets')
     await gear.add(this.character.ring1, 'ring')
     await gear.add(this.character.ring2, 'ring')
-    await gear.add(this.character.facewear, 'facewear')
+    if (this.character.facewear) await gear.add(this.character.facewear, 'facewear')
     await gear.add(this.character.soulcrystal, 'soulcrystal')
 
     ////////////////////////////////////////////
