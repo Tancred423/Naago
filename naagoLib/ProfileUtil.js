@@ -940,7 +940,8 @@ class Profile {
     await gear.add(this.character.bracelets, 'bracelets')
     await gear.add(this.character.ring1, 'ring')
     await gear.add(this.character.ring2, 'ring')
-    // await gear.add(this.character.soulcrystal)
+    await gear.add(this.character.facewear, 'facewear')
+    await gear.add(this.character.soulcrystal, 'soulcrystal')
 
     ////////////////////////////////////////////
     // Return buffer
@@ -1502,7 +1503,11 @@ class Gear {
         this.isLeft ? 5 : this.x + 5,
         this.y,
         this.width,
-        this.isLeft || isFirst ? this.height : this.height - 15,
+        this.isLeft || isFirst 
+        ? this.height 
+        : type === 'facewear' || type === 'soulcrystal'
+        ? this.height - 50
+        : this.height - 15,
         borderRadius
       )
       .fill()
@@ -1530,14 +1535,16 @@ class Gear {
     }
 
     // Item level
-    this.ctx.font = `normal 18px roboto condensed`
-    this.ctx.fillStyle = this.theme.block_title
-    this.ctx.fillText(
-      gear.item_level,
-      this.isLeft ? this.x - 45 : this.x + 45,
-      this.y,
-      30
-    )
+    if (type !== 'facewear' && type !== 'soulcrystal') {
+      this.ctx.font = `normal 18px roboto condensed`
+      this.ctx.fillStyle = this.theme.block_title
+      this.ctx.fillText(
+        gear.item_level,
+        this.isLeft ? this.x - 45 : this.x + 45,
+        this.y,
+        30
+      )
+    }
 
     // Materia
     if (gear.materia_1) {
@@ -1603,7 +1610,7 @@ class Gear {
     this.ctx.fillText(
       gear.name?.split('<')[0],
       this.isLeft ? this.x - 45 : this.x + 45,
-      this.y + 17,
+      type === 'facewear' || type === 'soulcrystal' ? this.y + 7 : this.y + 17,
       this.fWidth
     )
 
@@ -1715,7 +1722,7 @@ class Gear {
     }
 
     this.x = this.isLeft ? this.x + 10 : this.x - 10
-    this.y -= this.isLeft ? 5 : 20
+    this.y -= this.isLeft ? 4 : type === 'facewear' ? 56 : 20
   }
 
   getDefaultIcon(type) {
