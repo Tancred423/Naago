@@ -479,33 +479,9 @@ class Profile {
     await classJobBlock.add(this.character.gunbreaker)
 
     ////////////////////////////////////////////
-    // Melee DPS
-    ////////////////////////////////////////////
-    yAdd = 237
-    ctx.fillStyle = theme.block_background
-    ctx.roundRect(x, yAdd, fWidth / 2, 235, borderRadius).fill()
-
-    const meleeIcon = await loadImage('./images/dps_melee.png')
-    ctx.drawImage(meleeIcon, x + 10, yAdd + 8, 20, 20)
-
-    ctx.fillStyle = theme.block_title
-    ctx.font = `normal 16px roboto condensed`
-    ctx.fillText('Melee DPS', x + 35, yAdd + 8)
-
-    // Classes / Jobs
-    yAdd -= 30
-    classJobBlock = new ClassJobBlock(theme, ctx, x, yAdd)
-    await classJobBlock.add(this.character.monk)
-    await classJobBlock.add(this.character.dragoon)
-    await classJobBlock.add(this.character.ninja)
-    await classJobBlock.add(this.character.samurai)
-    await classJobBlock.add(this.character.reaper)
-
-    ////////////////////////////////////////////
     // Healer
     ////////////////////////////////////////////
-    x = 225
-    yAdd = 40
+    yAdd = 237
     ctx.fillStyle = theme.block_background
     ctx.roundRect(x, yAdd, fWidth / 2, 195, borderRadius).fill()
 
@@ -527,7 +503,7 @@ class Profile {
     ////////////////////////////////////////////
     // Ranged DPS
     ////////////////////////////////////////////
-    yAdd = 237
+    yAdd = 434
     ctx.fillStyle = theme.block_background
     ctx.roundRect(x, yAdd, fWidth / 2, 155, borderRadius).fill()
 
@@ -546,11 +522,36 @@ class Profile {
     await classJobBlock.add(this.character.dancer)
 
     ////////////////////////////////////////////
+    // Melee DPS
+    ////////////////////////////////////////////
+    x = 225
+    yAdd = 40
+    ctx.fillStyle = theme.block_background
+    ctx.roundRect(x, yAdd, fWidth / 2, 275, borderRadius).fill()
+
+    const meleeIcon = await loadImage('./images/dps_melee.png')
+    ctx.drawImage(meleeIcon, x + 10, yAdd + 8, 20, 20)
+
+    ctx.fillStyle = theme.block_title
+    ctx.font = `normal 16px roboto condensed`
+    ctx.fillText('Melee DPS', x + 35, yAdd + 8)
+
+    // Classes / Jobs
+    yAdd -= 30
+    classJobBlock = new ClassJobBlock(theme, ctx, x, yAdd)
+    await classJobBlock.add(this.character.monk)
+    await classJobBlock.add(this.character.dragoon)
+    await classJobBlock.add(this.character.ninja)
+    await classJobBlock.add(this.character.samurai)
+    await classJobBlock.add(this.character.reaper)
+    await classJobBlock.add(this.character.viper)
+
+    ////////////////////////////////////////////
     // Magical DPS
     ////////////////////////////////////////////
-    yAdd = 394
+    yAdd = 317
     ctx.fillStyle = theme.block_background
-    ctx.roundRect(x, yAdd, fWidth / 2, 193, borderRadius).fill()
+    ctx.roundRect(x, yAdd, fWidth / 2, 193 + 40, borderRadius).fill()
 
     const magicIcon = await loadImage('./images/dps_magic.png')
     ctx.drawImage(magicIcon, x + 10, yAdd + 8, 20, 20)
@@ -565,6 +566,7 @@ class Profile {
     await classJobBlock.add(this.character.blackmage)
     await classJobBlock.add(this.character.summoner)
     await classJobBlock.add(this.character.redmage)
+    await classJobBlock.add(this.character.pictomancer)
     await classJobBlock.add(this.character.bluemage)
 
     ////////////////////////////////////////////
@@ -1418,20 +1420,20 @@ class ClassJobBlock {
         ? this.theme.block_content_highlight
         : this.theme.block_content
     this.ctx.font = `bold 30px arial`
-    this.ctx.fillText(job.level, this.x + 80, this.yAdd + 23)
+    this.ctx.fillText(job.level, this.x + 90, this.yAdd + 23)
     this.ctx.textAlign = 'left'
 
     this.ctx.fillStyle = this.theme.block_content
     this.ctx.font = `bold 16px arial`
-    this.ctx.fillText(job.unlockstate, this.x + 85, this.yAdd + 27)
+    this.ctx.fillText(job.unlockstate, this.x + 92, this.yAdd + 27)
 
     this.ctx.fillStyle = this.theme.exp_bar
-    this.ctx.roundRect(this.x + 85, this.yAdd + 47, 100, 5, borderRadius).fill()
+    this.ctx.roundRect(this.x + 92, this.yAdd + 47, 100, 5, borderRadius).fill()
 
     this.ctx.fillStyle = this.theme.exp_bar_filled
     this.ctx
       .roundRect(
-        this.x + 85,
+        this.x + 92,
         this.yAdd + 47,
         this.getLevelPercent(job),
         5,

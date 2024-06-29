@@ -1,8 +1,9 @@
-const { dbHost, dbUser, dbPass, dbDatabase } = require('../config.json')
+const { dbHost, dbUser, dbPass, dbDatabase, dbPort } = require('../config.json')
 const mysql = require('mysql2')
 
 const pool = mysql.createPool({
   host: dbHost,
+  port: dbPort,
   user: dbUser,
   password: dbPass,
   database: dbDatabase,
