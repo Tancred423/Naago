@@ -8,7 +8,8 @@
     "coms": "node ./deploy-commands.js",
     "start": "node ./index.js",
     "check-prettier": "npx prettier . --check",
-    "write-prettier": "npx prettier . --write"
+    "write-prettier": "npx prettier . --write",
+    "lint": "npx eslint ."
   },
   "keywords": [
     "ffxiv",
@@ -34,6 +35,9 @@
     "twitter-api-v2": "^1.7.2"
   },
   "devDependencies": {
+    "@eslint/js": "^9.6.0",
+    "eslint": "^9.6.0",
+    "globals": "^15.7.0",
     "nodemon": "^3.1.4",
     "prettier": "3.3.2"
   }

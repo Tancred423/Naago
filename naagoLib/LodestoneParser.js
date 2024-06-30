@@ -85,8 +85,8 @@ module.exports = class LodestoneParser {
     markdown = paragraphs.join('\n')
     if (imageLinks.length === 1) markdown = markdown.replaceAll('*1 image*', '')
     markdown = markdown
-      .replaceAll(/\[\!\[\].*\?.*\)/g, '')
-      .replaceAll(/\!\[\].*\?.*\)/g, '')
+      .replaceAll(/\[!\[\].*\?.*\)/g, '')
+      .replaceAll(/!\[\].*\?.*\)/g, '')
       .replaceAll(/\n{3,}/g, '\n\n')
 
     return {
@@ -153,7 +153,7 @@ module.exports = class LodestoneParser {
       }
     })
 
-    return paragraphs.join('\n').replaceAll(/\_\_\*\*\n+/g, '__**\n')
+    return paragraphs.join('\n').replaceAll(/__\*\*\n+/g, '__**\n')
   }
 
   static convertDatesNotices(markdown) {

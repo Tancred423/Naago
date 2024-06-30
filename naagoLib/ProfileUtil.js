@@ -1824,7 +1824,7 @@ class Gear {
         return './images/materia/sks_2.png'
       case 'Quickarm Materia III':
         return './images/materia/sks_3.png'
-      case 'Quickarm Materia VI':
+      case 'Quickarm Materia IV':
         return './images/materia/sks_4.png'
       case 'Quickarm Materia V':
         return './images/materia/sks_5.png'

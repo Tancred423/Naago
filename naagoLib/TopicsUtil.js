@@ -85,7 +85,7 @@ module.exports = class TopicsUtil {
         `[${moment().format(
           'YYYY-MM-DD HH:mm',
         )}] [TOPICS] Sending topics was NOT successful because setups cannot be found! | Is setups null: ${!setups} | Is setups not null but empty: ${
-          setups?.length < 1 ?? 'null...'
+          setups?.length < 1 ? 'null...' : setups?.length
         }`,
       )
 
