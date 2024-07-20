@@ -129,11 +129,39 @@ async function updateOwnerCommands(client) {
   }
 }
 
+const cooldown = new Set()
+
 client.on('interactionCreate', async (interaction) => {
   if (interaction.isCommand()) {
     const command = client.commands.get(interaction.commandName)
 
     try {
+      // hacky solution. todo: database cache with timestamp and then error output shows time remaining
+      if (command.data.name === 'clearcache') {
+        if (cooldown.has(interaction.user.id)) {
+          const embed = DiscordUtil.getErrorEmbed(
+            `Please wait before using the command again.`,
+          )
+          if (interaction.ephemeral) {
+            await interaction.reply({
+              ephemeral: true,
+              embeds: [embed],
+            })
+          } else {
+            await interaction.reply({
+              ephemeral: true,
+              embeds: [embed],
+            })
+          }
+          return
+        }
+
+        cooldown.add(interaction.user.id)
+        setTimeout(() => {
+          cooldown.delete(interaction.user.id)
+        }, 15 * 60 * 1000)
+      }
+
       await command.execute(interaction)
     } catch (err) {
       console.error(err)

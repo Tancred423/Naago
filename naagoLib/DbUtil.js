@@ -238,6 +238,40 @@ module.exports = class DbUtil {
   }
 
   ////////////////////////////////////////////
+  // Clear Cache
+  ////////////////////////////////////////////
+
+  static async clearCache(userId) {
+    try {
+      // Get character id
+      let sql = `
+        SELECT character_id
+        FROM verifications
+        WHERE user_id=${mysql.escape(userId)}
+      `
+
+      const res = await this.getMysqlResult(sql)
+      if (!res) return false
+
+      const characterId = res.character_id
+
+      sql = `
+        DELETE FROM character_data
+        WHERE character_id=${mysql.escape(characterId)}
+      `
+
+      await mysql.query(sql)
+
+      return true
+    } catch (err) {
+      console.error(
+        `[ERROR] Clearing cache was NOT successful. Error: ${err.message}`,
+      )
+      return false
+    }
+  }
+
+  ////////////////////////////////////////////
   // Profile Pages
   ////////////////////////////////////////////
 
