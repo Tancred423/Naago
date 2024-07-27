@@ -84,7 +84,10 @@ module.exports = {
           })
         } else {
           const characterId = characterIds[0]
-          const characterDataDto = await DbUtil.fetchCharacter(interaction, characterId)
+          const characterDataDto = await DbUtil.fetchCharacter(
+            interaction,
+            characterId,
+          )
           const character = characterDataDto.characterData
 
           if (!characterDataDto) {
@@ -227,7 +230,10 @@ module.exports = {
 
   async get(interaction) {
     const characterId = interaction.values[0]
-    const characterDataDto = await DbUtil.fetchCharacter(interaction, characterId)
+    const characterDataDto = await DbUtil.fetchCharacter(
+      interaction,
+      characterId,
+    )
     const character = characterDataDto.characterData
 
     if (!character) {

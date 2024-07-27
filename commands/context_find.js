@@ -30,7 +30,10 @@ module.exports = {
 
     await interaction.deferReply()
 
-    const characterDataDto = await DbUtil.fetchCharacter(interaction, characterCache.ID)
+    const characterDataDto = await DbUtil.fetchCharacter(
+      interaction,
+      characterCache.ID,
+    )
     const character = characterDataDto.characterData
 
     const profileImage = await ProfileUtil.getImage(

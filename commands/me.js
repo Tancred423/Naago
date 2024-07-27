@@ -24,10 +24,13 @@ module.exports = {
     await interaction.deferReply()
 
     const characterId = verification.character_id
-    const characterDataDto = await DbUtil.fetchCharacter(interaction, characterId)
+    const characterDataDto = await DbUtil.fetchCharacter(
+      interaction,
+      characterId,
+    )
     const character = characterDataDto.characterData
 
-    if (!characterDataDto) {
+    if (!characterDataDto || !character) {
       const embed = DiscordUtil.getErrorEmbed(
         `Could not fetch your character.\nPlease try again later.`,
       )
@@ -103,7 +106,10 @@ module.exports = {
     if (verification?.is_verified) {
       // Get character
       const characterId = verification.character_id
-      const characterDataDto = await DbUtil.fetchCharacterCached(interaction, characterId)
+      const characterDataDto = await DbUtil.fetchCharacterCached(
+        interaction,
+        characterId,
+      )
       const character = characterDataDto.characterData
 
       if (!characterDataDto) {

@@ -3,6 +3,7 @@ const FfxivUtil = require('../naagoLib/FfxivUtil')
 const moment = require('moment-timezone')
 const DiscordUtil = require('./DiscordUtil')
 const CharacterDataDto = require('../dto/CharacterDataDto')
+const ConsoleUtil = require('./ConsoleUtil')
 
 module.exports = class DbUtil {
   static async getMysqlResult(sql) {
@@ -26,8 +27,9 @@ module.exports = class DbUtil {
 
       return await this.getMysqlResult(sql)
     } catch (err) {
-      console.error(
-        `[ERROR] Getting verification code was NOT successful. Error: ${err.message}`,
+      ConsoleUtil.logError(
+        `Getting verification code was NOT successful. Error: ${err.message}`,
+        err,
       )
       return undefined
     }
@@ -61,8 +63,9 @@ module.exports = class DbUtil {
 
       return true
     } catch (err) {
-      console.error(
-        `[ERROR] Setting verification code was NOT successful. Error: ${err.message}`,
+      ConsoleUtil.logError(
+        `Setting verification code was NOT successful. Error: ${err.message}`,
+        err,
       )
       return false
     }
@@ -81,8 +84,9 @@ module.exports = class DbUtil {
 
       return true
     } catch (err) {
-      console.error(
-        `[ERROR] Verifying character was NOT successful. Error: ${err.message}`,
+      ConsoleUtil.logError(
+        `Verifying character was NOT successful. Error: ${err.message}`,
+        err,
       )
       return false
     }
@@ -118,7 +122,7 @@ module.exports = class DbUtil {
           ? JSON.parse(characterDataRes.json_string)
           : undefined
 
-      const characterDataDto = new CharacterDataDto(latestUpdate, characterData)
+      let characterDataDto = new CharacterDataDto(latestUpdate, characterData)
 
       if (characterDataDto.characterData) {
         return characterDataDto
@@ -137,9 +141,7 @@ module.exports = class DbUtil {
       if (!character) return undefined
 
       const now = Date.now()
-      const nowSQL = moment(now)
-        .tz('UTC')
-        .format('YYYY-MM-DD HH:mm:ss')
+      const nowSQL = moment(now).tz('UTC').format('YYYY-MM-DD HH:mm:ss')
 
       sql = `
         INSERT INTO character_data (character_id,latest_update,json_string)
@@ -162,7 +164,7 @@ module.exports = class DbUtil {
 
       characterDataDto = new CharacterDataDto(
         moment(new Date(res.latest_update)),
-        JSON.parse(res.json_string)
+        JSON.parse(res.json_string),
       )
 
       return res ? characterDataDto : undefined
@@ -205,9 +207,7 @@ module.exports = class DbUtil {
       if (characterDataDto.characterData) {
         const lastUpdate = characterDataDto.latestUpdate
         const now = Date.now()
-        const nowSQL = moment(now)
-          .tz('UTC')
-          .format('YYYY-MM-DD HH:mm:ss')
+        const nowSQL = moment(now).tz('UTC').format('YYYY-MM-DD HH:mm:ss')
 
         if (now - lastUpdate > 15 * 60 * 1000) {
           // Last update was >= 15 minutes ago. Update data now.
@@ -237,7 +237,12 @@ module.exports = class DbUtil {
 
           const res = await this.getMysqlResult(sql)
 
-          return res ? JSON.parse(res.json_string) : undefined
+          const characterDataDto = new CharacterDataDto(
+            moment(new Date(res.latest_update)),
+            JSON.parse(res.json_string),
+          )
+
+          return res ? characterDataDto : undefined
         } else {
           // Last update was for < 2 hours. Use cached data.
           return characterDataDto
@@ -256,9 +261,7 @@ module.exports = class DbUtil {
         if (!character) return undefined
 
         const now = Date.now()
-        const nowSQL = moment(now)
-          .tz('UTC')
-          .format('YYYY-MM-DD HH:mm:ss')
+        const nowSQL = moment(now).tz('UTC').format('YYYY-MM-DD HH:mm:ss')
 
         sql = `
           INSERT INTO character_data (character_id,latest_update,json_string)
@@ -281,15 +284,17 @@ module.exports = class DbUtil {
 
         const characterDataDto = new CharacterDataDto(
           moment(new Date(res.latest_update)),
-          JSON.parse(res.json_string)
+          JSON.parse(res.json_string),
         )
 
         return res ? characterDataDto : undefined
       }
     } catch (err) {
-      console.error(
-        `[ERROR] Fetching character was NOT successful. Error: ${err.message}`,
+      ConsoleUtil.logError(
+        `Fetching character was NOT successful. Error: ${err.message}`,
+        err,
       )
+
       return undefined
     }
   }
@@ -325,8 +330,9 @@ module.exports = class DbUtil {
         server: characterData?.server,
       }
     } catch (err) {
-      console.error(
-        `[ERROR] Getting character was NOT successful. Error: ${err.message}`,
+      ConsoleUtil.logError(
+        `Getting character was NOT successful. Error: ${err.message}`,
+        err,
       )
       return undefined
     }
@@ -348,14 +354,12 @@ module.exports = class DbUtil {
 
       return res
         ? {
-          profilePage: res.profile_page,
-          subProfilePage: res.sub_profile_page,
-        }
+            profilePage: res.profile_page,
+            subProfilePage: res.sub_profile_page,
+          }
         : { profilePage: 'profile', subProfilePage: undefined }
     } catch (err) {
-      console.error(
-        `[ERROR] Getting profile page was NOT successful. Error: ${err.message}`,
-      )
+      ConsoleUtil.logError(`Getting profile page was NOT successful.`, err)
       return { profilePage: 'profile', subProfilePage: undefined }
     }
   }
@@ -396,9 +400,7 @@ module.exports = class DbUtil {
 
       return true
     } catch (err) {
-      console.error(
-        `[ERROR] Updating profile page was NOT successful. Error: ${err.message}`,
-      )
+      ConsoleUtil.logError(`Updating profile page was NOT successful.`, err)
       return false
     }
   }
@@ -418,9 +420,7 @@ module.exports = class DbUtil {
       const res = await this.getMysqlResult(sql)
       return res?.theme ?? 'dark'
     } catch (err) {
-      console.error(
-        `[ERROR] Getting theme was NOT successful. Error: ${err.message}`,
-      )
+      ConsoleUtil.logError(`Getting theme was NOT successful.`, err)
       return undefined
     }
   }
@@ -459,9 +459,7 @@ module.exports = class DbUtil {
 
       return true
     } catch (err) {
-      console.error(
-        `[ERROR] Setting theme was NOT successful. Error: ${err.message}`,
-      )
+      ConsoleUtil.logError(`Setting theme was NOT successful.`, err)
       return false
     }
   }
@@ -481,9 +479,7 @@ module.exports = class DbUtil {
       const res = await mysql.query(sql)
       return res?.[0]
     } catch (err) {
-      console.error(
-        `[ERROR] Getting favorites was NOT successful. Error: ${err.message}`,
-      )
+      ConsoleUtil.logError(`Getting favorites was NOT successful.`, err)
       return undefined
     }
   }
@@ -513,9 +509,7 @@ module.exports = class DbUtil {
 
       return 'existant'
     } catch (err) {
-      console.error(
-        `[ERROR] Adding favorite was NOT successful. Error: ${err.message}`,
-      )
+      ConsoleUtil.logError(`Adding favorite was NOT successful.`, err)
       return false
     }
   }
@@ -538,9 +532,7 @@ module.exports = class DbUtil {
 
       return 'notfound'
     } catch (err) {
-      console.error(
-        `[ERROR] Removing favorite was NOT successful. Error: ${err.message}`,
-      )
+      ConsoleUtil.logError(`Removing favorite was NOT successful.`, err)
       return false
     }
   }
@@ -561,8 +553,9 @@ module.exports = class DbUtil {
 
       return res?.[0]?.[0]
     } catch (err) {
-      console.error(
-        `[ERROR] Getting fashion report data was NOT successful. Error: ${err.message}`,
+      ConsoleUtil.logError(
+        `Getting fashion report data was NOT successful.`,
+        err,
       )
       return undefined
     }
@@ -612,8 +605,9 @@ module.exports = class DbUtil {
 
       return true
     } catch (err) {
-      console.error(
-        `[ERROR] Setting fashion report data was NOT successful. Error: ${err.message}`,
+      ConsoleUtil.logError(
+        `Setting fashion report data was NOT successful.`,
+        err,
       )
       return false
     }
@@ -629,17 +623,15 @@ module.exports = class DbUtil {
         FROM topic_data
         WHERE title=${mysql.escape(title)}
         AND date=${mysql.escape(
-        moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
-      )}
+          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
+        )}
       `
 
       const res = await mysql.query(sql)
 
       return res?.[0]?.[0]
     } catch (err) {
-      console.error(
-        `[ERROR] Getting topic by title was NOT successful. Error: ${err.message}`,
-      )
+      ConsoleUtil.logError(`Getting topic by title was NOT successful.`, err)
       return undefined
     }
   }
@@ -653,10 +645,10 @@ module.exports = class DbUtil {
           VALUES (
             ${mysql.escape(topic.title)},
             ${mysql.escape(
-          moment(topic.date)
-            .tz('Europe/London')
-            .format('YYYY-MM-DD HH:mm:ss'),
-        )}
+              moment(topic.date)
+                .tz('Europe/London')
+                .format('YYYY-MM-DD HH:mm:ss'),
+            )}
           )
         `
 
@@ -665,9 +657,7 @@ module.exports = class DbUtil {
         return true
       } else return 'existant'
     } catch (err) {
-      console.error(
-        `[ERROR] Adding topic was NOT successful. Error: ${err.message}`,
-      )
+      ConsoleUtil.logError(`Adding topic was NOT successful.`, err)
       return false
     }
   }
@@ -682,17 +672,15 @@ module.exports = class DbUtil {
         FROM notice_data
         WHERE title=${mysql.escape(title)}
         AND date=${mysql.escape(
-        moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
-      )}
+          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
+        )}
       `
 
       const res = await mysql.query(sql)
 
       return res?.[0]?.[0]
     } catch (err) {
-      console.error(
-        `[ERROR] Getting notices by title was NOT successful. Error: ${err.message}`,
-      )
+      ConsoleUtil.logError(`Getting notice by title was NOT successful.`, err)
       return undefined
     }
   }
@@ -707,10 +695,10 @@ module.exports = class DbUtil {
             ${mysql.escape(notice.title)},
             ${mysql.escape(notice.tag)},
             ${mysql.escape(
-          moment(notice.date)
-            .tz('Europe/London')
-            .format('YYYY-MM-DD HH:mm:ss'),
-        )},
+              moment(notice.date)
+                .tz('Europe/London')
+                .format('YYYY-MM-DD HH:mm:ss'),
+            )},
             ${mysql.escape(notice.link)},
             ${mysql.escape(notice.details)}
           )
@@ -721,9 +709,7 @@ module.exports = class DbUtil {
         return true
       } else return 'existant'
     } catch (err) {
-      console.error(
-        `[ERROR] Adding notice was NOT successful. Error: ${err.message}`,
-      )
+      ConsoleUtil.logError(`Adding notice was NOT successful.`, err)
       return false
     }
   }
@@ -750,8 +736,9 @@ module.exports = class DbUtil {
 
       return res
     } catch (err) {
-      console.error(
-        `[ERROR] Getting current maintenance was NOT successful. Error: ${err.message}`,
+      ConsoleUtil.logError(
+        `Getting current maintenances was NOT successful.`,
+        err,
       )
       return undefined
     }
@@ -764,16 +751,17 @@ module.exports = class DbUtil {
         FROM maintenance_data
         WHERE title=${mysql.escape(title)}
         AND date=${mysql.escape(
-        moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
-      )}
+          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
+        )}
       `
 
       const res = await mysql.query(sql)
 
       return res?.[0]?.[0]
     } catch (err) {
-      console.error(
-        `[ERROR] Getting maintenance by title was NOT successful. Error: ${err.message}`,
+      ConsoleUtil.logError(
+        `Getting maintenance by title was NOT successful.`,
+        err,
       )
       return undefined
     }
@@ -791,20 +779,20 @@ module.exports = class DbUtil {
             ${mysql.escape(maintenance.title)},
             ${mysql.escape(maintenance.tag)},
             ${mysql.escape(
-          moment(maintenance.date)
-            .tz('Europe/London')
-            .format('YYYY-MM-DD HH:mm:ss'),
-        )},
+              moment(maintenance.date)
+                .tz('Europe/London')
+                .format('YYYY-MM-DD HH:mm:ss'),
+            )},
             ${mysql.escape(maintenance.link)},
             ${mysql.escape(maintenance.details)},
             ${mysql.escape(
-          maintenance.from
-            ?.tz('Europe/London')
-            .format('YYYY-MM-DD HH:mm:ss'),
-        )},
+              maintenance.from
+                ?.tz('Europe/London')
+                .format('YYYY-MM-DD HH:mm:ss'),
+            )},
             ${mysql.escape(
-          maintenance.to?.tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
-        )}
+              maintenance.to?.tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
+            )}
           )
         `
 
@@ -813,9 +801,7 @@ module.exports = class DbUtil {
         return true
       } else return 'existant'
     } catch (err) {
-      console.error(
-        `[ERROR] Adding maintenance was NOT successful. Error: ${err.message}`,
-      )
+      ConsoleUtil.logError(`Adding maintenance was NOT successful.`, err)
       return false
     }
   }
@@ -830,17 +816,15 @@ module.exports = class DbUtil {
         FROM update_data
         WHERE title=${mysql.escape(title)}
         AND date=${mysql.escape(
-        moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
-      )}
+          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
+        )}
       `
 
       const res = await mysql.query(sql)
 
       return res?.[0]?.[0]
     } catch (err) {
-      console.error(
-        `[ERROR] Getting update by title was NOT successful. Error: ${err.message}`,
-      )
+      ConsoleUtil.logError(`Getting update by title was NOT successful.`, err)
       return undefined
     }
   }
@@ -854,10 +838,10 @@ module.exports = class DbUtil {
           VALUES (
             ${mysql.escape(update.title)},
             ${mysql.escape(
-          moment(update.date)
-            .tz('Europe/London')
-            .format('YYYY-MM-DD HH:mm:ss'),
-        )},
+              moment(update.date)
+                .tz('Europe/London')
+                .format('YYYY-MM-DD HH:mm:ss'),
+            )},
             ${mysql.escape(update.link)},
             ${mysql.escape(update.details)}
           )
@@ -868,9 +852,7 @@ module.exports = class DbUtil {
         return true
       } else return 'existant'
     } catch (err) {
-      console.error(
-        `[ERROR] Adding update was NOT successful. Error: ${err.message}`,
-      )
+      ConsoleUtil.logError(`Adding update was NOT successful.`, err)
       return false
     }
   }
@@ -885,17 +867,15 @@ module.exports = class DbUtil {
         FROM status_data
         WHERE title=${mysql.escape(title)}
         AND date=${mysql.escape(
-        moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
-      )}
+          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
+        )}
       `
 
       const res = await mysql.query(sql)
 
       return res?.[0]?.[0]
     } catch (err) {
-      console.error(
-        `[ERROR] Getting status by title was NOT successful. Error: ${err.message}`,
-      )
+      ConsoleUtil.logError(`Getting status by title was NOT successful.`, err)
       return undefined
     }
   }
@@ -910,10 +890,10 @@ module.exports = class DbUtil {
             ${mysql.escape(status.title)},
             ${mysql.escape(status.tag)},
             ${mysql.escape(
-          moment(status.date)
-            .tz('Europe/London')
-            .format('YYYY-MM-DD HH:mm:ss'),
-        )},
+              moment(status.date)
+                .tz('Europe/London')
+                .format('YYYY-MM-DD HH:mm:ss'),
+            )},
             ${mysql.escape(status.link)},
             ${mysql.escape(status.details)}
           )
@@ -924,9 +904,7 @@ module.exports = class DbUtil {
         return true
       } else return 'existant'
     } catch (err) {
-      console.error(
-        `[ERROR] Adding status was NOT successful. Error: ${err.message}`,
-      )
+      ConsoleUtil.logError(`Adding status was NOT successful.`, err)
       return false
     }
   }
@@ -946,9 +924,7 @@ module.exports = class DbUtil {
 
       return res?.[0]
     } catch (err) {
-      console.error(
-        `[ERROR] Getting ${type} channel IDs was NOT successful. Error: ${err.message}`,
-      )
+      ConsoleUtil.logError(`Getting setups was NOT successful.`, err)
       return undefined
     }
   }
@@ -966,8 +942,9 @@ module.exports = class DbUtil {
 
       return res?.channel_id
     } catch (err) {
-      console.error(
-        `[ERROR] Getting ${type} channel ID was NOT successful. Error: ${err.message}`,
+      ConsoleUtil.logError(
+        `Getting ${type} channel ID was NOT successful.`,
+        err,
       )
       return undefined
     }
@@ -1000,8 +977,9 @@ module.exports = class DbUtil {
       }
       return true
     } catch (err) {
-      console.error(
-        `[ERROR] Setting ${type} channel ID was NOT successful. Error: ${err.message}`,
+      ConsoleUtil.logError(
+        `Setting ${type} channel ID was NOT successful.`,
+        err,
       )
       return false
     }
@@ -1019,8 +997,9 @@ module.exports = class DbUtil {
 
       return true
     } catch (err) {
-      console.error(
-        `[ERROR] Unsetting ${type} channel ID was NOT successful. Error: ${err.message}`,
+      ConsoleUtil.logError(
+        `Unsetting ${type} channel ID was NOT successful.`,
+        err,
       )
       return false
     }
@@ -1041,9 +1020,7 @@ module.exports = class DbUtil {
 
       return true
     } catch (err) {
-      console.error(
-        `[ERROR] Guild purge was NOT successful. Error: ${err.message}`,
-      )
+      ConsoleUtil.logError(`Guild purge was NOT successful.`, err)
       return false
     }
   }
@@ -1099,8 +1076,9 @@ module.exports = class DbUtil {
 
       return true
     } catch (err) {
-      console.error(
-        `[ERROR] User purge was NOT successful. Error: ${err.message}`,
+      ConsoleUtil.logError(
+        `User purge was NOT successful. Error: ${err.message}`,
+        err,
       )
       return false
     }

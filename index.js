@@ -3,7 +3,6 @@ const { Client, Collection, Intents } = require('discord.js')
 const {
   guildId,
   token,
-  twitterStreamEnabled,
   lodestoneCheckOnStart,
   checkCommandIds,
 } = require('./config.json')
@@ -11,7 +10,6 @@ const { CanvasRenderingContext2D } = require('canvas')
 const DiscordUtil = require('./naagoLib/DiscordUtil')
 const ButtonUtil = require('./naagoLib/ButtonUtil')
 const SelectMenuUtil = require('./naagoLib/SelectMenuUtil')
-const TwitterUtil = require('./naagoLib/TwitterUtil')
 const GlobalUtil = require('./naagoLib/GlobalUtil')
 const moment = require('moment')
 const cron = require('node-cron')
@@ -20,6 +18,7 @@ const NoticesUtil = require('./naagoLib/NoticesUtil')
 const MaintenancesUtil = require('./naagoLib/MaintenancesUtil')
 const UpdatesUtil = require('./naagoLib/UpdatesUtil')
 const StatusUtil = require('./naagoLib/StatusUtil')
+const ConsoleUtil = require('./naagoLib/ConsoleUtil')
 
 // Locale
 moment.locale('en')
@@ -67,13 +66,6 @@ client.once('ready', () => {
 
   GlobalUtil.client = client
 
-  // Twitter Bot
-  try {
-    if (twitterStreamEnabled) TwitterUtil.streamTweets()
-  } catch (err) {
-    console.error(err)
-  }
-
   // Lodestone checker
   try {
     if (lodestoneCheckOnStart) {
@@ -85,7 +77,7 @@ client.once('ready', () => {
       })
     }
   } catch (err) {
-    console.error(err)
+    ConsoleUtil.logError('Lodestone checker failed.', err)
   }
 
   // Update owner command permissions
@@ -114,18 +106,6 @@ async function updateOwnerCommands(client) {
     commands.forEach((command) => {
       console.log(`${command.name}: ${command.id}`)
     })
-  } else {
-    // const resendFr = await guild?.commands.fetch(resendFrId)
-    // const shutdown = await guild?.commands.fetch(shutdownId)
-    // const permissions = [
-    //   {
-    //     id: '181896377486278657',
-    //     type: 'USER',
-    //     permission: true
-    //   }
-    // ]
-    // await resendFr?.permissions.set({ permissions })
-    // await shutdown?.permissions.set({ permissions })
   }
 }
 
@@ -136,7 +116,7 @@ client.on('interactionCreate', async (interaction) => {
     try {
       await command.execute(interaction)
     } catch (err) {
-      console.error(err)
+      ConsoleUtil.logError('Error while executing command.', err)
 
       const embed = DiscordUtil.getErrorEmbed(
         'There was an error while executing this command.',
@@ -157,7 +137,7 @@ client.on('interactionCreate', async (interaction) => {
     try {
       await ButtonUtil.execute(interaction)
     } catch (err) {
-      console.error(err)
+      ConsoleUtil.logError('Error while executing button.', err)
       const embed = DiscordUtil.getErrorEmbed(
         'There was an error while executing this button.',
       )
@@ -170,7 +150,7 @@ client.on('interactionCreate', async (interaction) => {
     try {
       await SelectMenuUtil.execute(interaction)
     } catch (err) {
-      console.error(err)
+      ConsoleUtil.logError('Error while executing menu.', err)
       const embed = DiscordUtil.getErrorEmbed(
         'There was an error while executing this menu.',
       )
@@ -185,7 +165,7 @@ client.on('interactionCreate', async (interaction) => {
     try {
       await command.execute(interaction)
     } catch (err) {
-      console.error(err)
+      ConsoleUtil.logError('Error while executing context command.', err)
       const embed = DiscordUtil.getErrorEmbed(
         'There was an error while executing this command.',
       )

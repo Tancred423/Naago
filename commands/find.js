@@ -62,7 +62,10 @@ module.exports = {
       })
     } else {
       const characterId = characterIds[0]
-      const characterDataDto = await DbUtil.fetchCharacter(interaction, characterId)
+      const characterDataDto = await DbUtil.fetchCharacter(
+        interaction,
+        characterId,
+      )
       const character = characterDataDto.characterData
 
       if (!characterDataDto) {
@@ -109,7 +112,10 @@ module.exports = {
       throw new Error('[/find - button] button id length is !== 3')
 
     const characterId = buttonIdSplit[2]
-    const characterDataDto = await DbUtil.fetchCharacterCached(interaction, characterId)
+    const characterDataDto = await DbUtil.fetchCharacterCached(
+      interaction,
+      characterId,
+    )
     const character = characterDataDto.characterData
 
     if (!characterDataDto) {
