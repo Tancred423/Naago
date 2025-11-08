@@ -1,6 +1,6 @@
 import { ContextMenuCommandBuilder } from "@discordjs/builders";
 import { ApplicationCommandType } from "discord-api-types/v10";
-import { ContextMenuCommandInteraction } from "discord.js";
+import { ContextMenuCommandInteraction, MessageFlags } from "discord.js";
 import { FavoritesRepository } from "../database/repository/FavoritesRepository.ts";
 import { NotInDatabaseError } from "../database/error/NotInDatabaseError.ts";
 import { FetchCharacterService } from "../service/FetchCharacterService.ts";
@@ -11,7 +11,7 @@ export default {
     .setName("Remove Favorite")
     .setType(ApplicationCommandType.User),
   async execute(interaction: ContextMenuCommandInteraction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const user = interaction.user;
     const targetCharacterDataDto = await FetchCharacterService

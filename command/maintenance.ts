@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { ChatInputCommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, MessageFlags } from "discord.js";
 
 import { MaintenancesRepository } from "../database/repository/MaintenancesRepository.ts";
 import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
@@ -13,7 +13,7 @@ export default {
 
     if (activeMaintenances.length === 0) {
       await interaction.reply({
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
         content: "There is no active maintenance.",
       });
     }

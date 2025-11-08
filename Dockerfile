@@ -7,7 +7,6 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libgif-dev \
     librsvg2-dev \
-    libexpat1-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -15,8 +14,8 @@ WORKDIR /app
 COPY deno.json deno.lock* ./
 COPY . .
 
+RUN deno install --allow-scripts=npm:canvas
 RUN deno cache index.ts deploy-commands.ts
-RUN deno install --allow-scripts=npm:canvas --entrypoint index.ts
 RUN chmod +x docker-entrypoint.sh
 
 EXPOSE 3000

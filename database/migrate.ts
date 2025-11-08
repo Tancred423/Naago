@@ -17,7 +17,7 @@ const connection = await mysql.createConnection({
 const db = drizzle(connection);
 
 log.info("Running migrations...");
-await migrate(db, { migrationsFolder: "./db/migrations" });
+await migrate(db, { migrationsFolder: "./database/migrations" });
 log.info("Migrations complete!");
 
 await connection.end();

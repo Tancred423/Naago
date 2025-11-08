@@ -3,6 +3,7 @@ import {
   AttachmentBuilder,
   ButtonInteraction,
   ChatInputCommandInteraction,
+  MessageFlags,
 } from "discord.js";
 import { ProfileGeneratorService } from "../service/ProfileGeneratorService.ts";
 import { FfxivServerValidationService } from "../service/FfxivServerValidationService.ts";
@@ -43,7 +44,7 @@ export default {
       await interaction.deleteReply();
       await interaction.followUp({
         embeds: [embed],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -60,7 +61,7 @@ export default {
       await interaction.deleteReply();
       await interaction.followUp({
         embeds: [embed],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (characterIds.length < 1) {
       const embed = DiscordEmbedService.getErrorEmbed(
@@ -69,7 +70,7 @@ export default {
       await interaction.deleteReply();
       await interaction.followUp({
         embeds: [embed],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else {
       const characterId = characterIds[0];
@@ -136,7 +137,7 @@ export default {
       );
       await interaction.followUp({
         embeds: [embed],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }

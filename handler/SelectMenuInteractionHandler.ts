@@ -1,4 +1,4 @@
-import { StringSelectMenuInteraction } from "discord.js";
+import { MessageFlags, StringSelectMenuInteraction } from "discord.js";
 import Favorite from "../command/favorite.ts";
 import Theme from "../command/theme.ts";
 import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
@@ -16,7 +16,7 @@ export class SelectMenuInteractionHandler {
       );
       await interaction.reply({
         embeds: [embed],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }

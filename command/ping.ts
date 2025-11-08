@@ -1,5 +1,9 @@
 import { SlashCommandBuilder, time } from "@discordjs/builders";
-import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
+import {
+  ChatInputCommandInteraction,
+  EmbedBuilder,
+  MessageFlags,
+} from "discord.js";
 import moment from "moment";
 import { DiscordColorService } from "../service/DiscordColorService.ts";
 
@@ -31,7 +35,7 @@ export default {
 
     await interaction.reply({
       embeds: [embed],
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   },
 };

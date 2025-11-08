@@ -1,4 +1,4 @@
-import { ButtonInteraction } from "discord.js";
+import { ButtonInteraction, MessageFlags } from "discord.js";
 import Favorite from "../command/favorite.ts";
 import Me from "../command/me.ts";
 import Find from "../command/find.ts";
@@ -33,7 +33,7 @@ export class ButtonInteractionHandler {
       );
       await interaction.followUp({
         embeds: [embed],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }

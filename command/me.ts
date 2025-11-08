@@ -3,6 +3,7 @@ import {
   AttachmentBuilder,
   ButtonInteraction,
   ChatInputCommandInteraction,
+  MessageFlags,
 } from "discord.js";
 import { ProfileGeneratorService } from "../service/ProfileGeneratorService.ts";
 import { Buffer } from "node:buffer";
@@ -23,7 +24,10 @@ export default {
       const embed = DiscordEmbedService.getErrorEmbed(
         "Please verify your character first. See `/verify set`.",
       );
-      await interaction.reply({ ephemeral: true, embeds: [embed] });
+      await interaction.reply({
+        flags: MessageFlags.Ephemeral,
+        embeds: [embed],
+      });
       return;
     }
 
@@ -42,7 +46,7 @@ export default {
       await interaction.deleteReply();
       await interaction.followUp({
         embeds: [embed],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -128,7 +132,7 @@ export default {
         );
         await interaction.followUp({
           embeds: [embed],
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         return;
       }

@@ -1,6 +1,7 @@
 import {
   CommandInteraction,
   GuildMember,
+  MessageFlags,
   PermissionsBitField,
 } from "discord.js";
 import { DiscordEmbedService } from "./DiscordEmbedService.ts";
@@ -48,7 +49,7 @@ export class DiscordPermissionService {
 
       await interaction.reply({
         embeds: [embed],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
 
       return false;

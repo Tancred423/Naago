@@ -8,6 +8,7 @@ import {
   CommandInteraction,
   ContextMenuCommandInteraction,
   GatewayIntentBits,
+  MessageFlags,
   StringSelectMenuInteraction,
 } from "discord.js";
 import { CanvasRenderingContext2D } from "canvas";
@@ -96,21 +97,7 @@ for (const file of commandFiles) {
   client.commands.set(command.default.data.name, command.default);
 }
 
-try {
-  const ownerCommandFiles = readdirSync("./command/owner")
-    .filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
-
-  for (const ownerfile of ownerCommandFiles) {
-    const ownerCommand = await import(`./command/owner/${ownerfile}`);
-    client.commands.set(ownerCommand.default.data.name, ownerCommand.default);
-  }
-} catch (error: unknown) {
-  if (error instanceof Error) {
-    log.error(`No owner commands directory found: ${error.message}`);
-  }
-}
-
-client.once("ready", () => {
+client.once("clientReady", () => {
   log.info(`Connected: Discord (${client.user?.tag})`);
 
   GlobalClient.client = client;
@@ -169,11 +156,16 @@ client.on("interactionCreate", async (interaction) => {
         await interaction.editReply({
           embeds: [embed],
         });
-      } else {
+      } else if (interaction.replied) {
         await interaction.deleteReply();
         await interaction.followUp({
           embeds: [embed],
           ephemeral: true,
+        });
+      } else {
+        await interaction.reply({
+          embeds: [embed],
+          flags: MessageFlags.Ephemeral,
         });
       }
     }
@@ -187,7 +179,7 @@ client.on("interactionCreate", async (interaction) => {
       );
       await interaction.followUp({
         embeds: [embed],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   } else if (interaction.isStringSelectMenu()) {
@@ -202,7 +194,7 @@ client.on("interactionCreate", async (interaction) => {
       );
       await interaction.followUp({
         embeds: [embed],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   } else if (interaction.isUserContextMenuCommand()) {
@@ -223,7 +215,7 @@ client.on("interactionCreate", async (interaction) => {
         await interaction.deleteReply();
         await interaction.followUp({
           embeds: [embed],
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     }

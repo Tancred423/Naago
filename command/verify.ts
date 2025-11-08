@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { ActionRowBuilder, ButtonBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, MessageFlags } from "discord.js";
 import { ButtonInteraction, ChatInputCommandInteraction } from "discord.js";
 import { FfxivServerValidationService } from "../service/FfxivServerValidationService.ts";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
@@ -37,7 +37,7 @@ export default {
         )
     ),
   async execute(interaction: ChatInputCommandInteraction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     if (interaction.options.getSubcommand() === "set") {
       const name = StringManipulationService.formatName(

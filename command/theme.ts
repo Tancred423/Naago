@@ -3,6 +3,7 @@ import {
   ActionRow,
   ActionRowBuilder,
   ChatInputCommandInteraction,
+  MessageFlags,
   StringSelectMenuBuilder,
   StringSelectMenuComponent,
   StringSelectMenuInteraction,
@@ -26,11 +27,14 @@ export default {
       const embed = DiscordEmbedService.getErrorEmbed(
         "Please verify your character first. See `/verify set`.",
       );
-      await interaction.reply({ ephemeral: true, embeds: [embed] });
+      await interaction.reply({
+        flags: MessageFlags.Ephemeral,
+        embeds: [embed],
+      });
       return;
     }
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
       new StringSelectMenuBuilder()

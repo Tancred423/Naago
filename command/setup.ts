@@ -3,6 +3,7 @@ import { ChannelType } from "discord-api-types/v10";
 import {
   ActionRowBuilder,
   ButtonBuilder,
+  MessageFlags,
   PermissionsBitField,
 } from "discord.js";
 import {
@@ -97,7 +98,7 @@ export default {
         );
 
         await interaction.reply({
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
           content:
             `${channel.toString()} is already set as ${typeName} notification channel. Do you want to unset it?`,
           components: [row],
@@ -119,7 +120,7 @@ export default {
 
         await interaction.reply({
           embeds: [embed],
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
 
         return;

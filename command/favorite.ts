@@ -3,6 +3,7 @@ import {
   ActionRowBuilder,
   AttachmentBuilder,
   ButtonBuilder,
+  MessageFlags,
   StringSelectMenuBuilder,
 } from "discord.js";
 import {
@@ -63,7 +64,7 @@ export default {
 
     if (verification?.isVerified) {
       if (interaction.options.getSubcommand() === "add") {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const name = StringManipulationService.formatName(
           interaction.options.getString("name")!,
@@ -77,7 +78,7 @@ export default {
           await interaction.deleteReply();
           await interaction.followUp({
             embeds: [embed],
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           return;
         }
@@ -149,7 +150,7 @@ export default {
           }
         }
       } else if (interaction.options.getSubcommand() === "remove") {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const favorites = await FavoritesRepository.get(userId);
 
@@ -221,7 +222,10 @@ export default {
       const embed = DiscordEmbedService.getErrorEmbed(
         "Please verify your character first. See `/verify set`.",
       );
-      await interaction.reply({ ephemeral: true, embeds: [embed] });
+      await interaction.reply({
+        flags: MessageFlags.Ephemeral,
+        embeds: [embed],
+      });
     }
   },
 
@@ -239,7 +243,7 @@ export default {
       await interaction.deleteReply();
       await interaction.followUp({
         embeds: [embed],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else {
       const character = characterDataDto.character;
@@ -381,6 +385,6 @@ async function sendErrorFollowUp(
   await interaction.deleteReply();
   await interaction.followUp({
     embeds: [embed],
-    ephemeral: true,
+    flags: MessageFlags.Ephemeral,
   });
 }
