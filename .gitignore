@@ -1,3 +1,15 @@
-node_modules/*
 config.json
+config.docker.json
+config.example.json
 *.psd
+
+backup_*.sql
+*.sql.gz
+.env
+.env.local
+.env.production
+
+.DS_Store
+*.log
+db/test-connection.ts
+node_modules
