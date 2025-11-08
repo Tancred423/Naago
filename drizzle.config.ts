@@ -1,11 +1,11 @@
 import { load } from "@std/dotenv";
 import { defineConfig } from "drizzle-kit";
 
-await load({ export: true });
+load({ export: true });
 
 export default defineConfig({
-  schema: "./db/schema/*.ts",
-  out: "./db/migrations",
+  schema: "./database/schema/*.ts",
+  out: "./database/migrations",
   dialect: "mysql",
   dbCredentials: {
     host: Deno.env.get("DB_HOST")!,

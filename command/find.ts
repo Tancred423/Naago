@@ -5,12 +5,12 @@ import {
   ChatInputCommandInteraction,
 } from "discord.js";
 import { ProfileGeneratorService } from "../service/ProfileGeneratorService.ts";
-import { Buffer } from "node:buffer";
-import { StringManipulationService } from "../service/StringManipulationService.ts";
 import { FfxivServerValidationService } from "../service/FfxivServerValidationService.ts";
-import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
+import { Buffer } from "node:buffer";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
 import { FetchCharacterService } from "../service/FetchCharacterService.ts";
+import { StringManipulationService } from "../service/StringManipulationService.ts";
+import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
 
 export default {
   data: new SlashCommandBuilder()

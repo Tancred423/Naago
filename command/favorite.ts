@@ -14,17 +14,17 @@ import {
   StringSelectMenuComponent,
   StringSelectMenuInteraction,
 } from "discord.js";
+import * as log from "@std/log";
+import { FfxivServerValidationService } from "../service/FfxivServerValidationService.ts";
 import { ProfileGeneratorService } from "../service/ProfileGeneratorService.ts";
 import { VerificationsRepository } from "../database/repository/VerificationsRepository.ts";
+import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
+import { FetchCharacterService } from "../service/FetchCharacterService.ts";
 import { FavoritesRepository } from "../database/repository/FavoritesRepository.ts";
 import { MaximumAmountReachedError } from "../database/error/MaximumAmountReachedError.ts";
 import { NotInDatabaseError } from "../database/error/NotInDatabaseError.ts";
 import { StringManipulationService } from "../service/StringManipulationService.ts";
-import { FfxivServerValidationService } from "../service/FfxivServerValidationService.ts";
 import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
-import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
-import { FetchCharacterService } from "../service/FetchCharacterService.ts";
-import * as log from "@std/log";
 
 export default {
   data: new SlashCommandBuilder()

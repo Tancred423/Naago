@@ -9,30 +9,46 @@ import {
   ContextMenuCommandInteraction,
   GatewayIntentBits,
   StringSelectMenuInteraction,
-} from "npm:discord.js@^14.24.2";
-import { CanvasRenderingContext2D } from "npm:canvas@^3.2.0";
-import moment from "npm:moment@^2.30.1";
-import cron from "npm:node-cron@^3.0.3";
-import DiscordUtil from "./naagoLib/DiscordUtil.ts";
-import ButtonUtil from "./naagoLib/ButtonUtil.ts";
-import SelectMenuUtil from "./naagoLib/SelectMenuUtil.ts";
-import GlobalUtil from "./naagoLib/GlobalUtil.ts";
-import TopicsUtil from "./naagoLib/TopicsUtil.ts";
-import NoticesUtil from "./naagoLib/NoticesUtil.ts";
-import MaintenancesUtil from "./naagoLib/MaintenancesUtil.ts";
-import UpdatesUtil from "./naagoLib/UpdatesUtil.ts";
-import StatusUtil from "./naagoLib/StatusUtil.ts";
-import ConsoleUtil from "./naagoLib/ConsoleUtil.ts";
+} from "discord.js";
+import { CanvasRenderingContext2D } from "canvas";
+import moment from "moment";
+import cron from "node-cron";
+import * as log from "@std/log";
 
+import StatusSenderService from "./service/StatusSenderService.ts";
+import { DiscordEmbedService } from "./service/DiscordEmbedService.ts";
+import { NoticeSenderService } from "./service/NoticeSenderService.ts";
+import { TopicSenderService } from "./service/TopicSenderService.ts";
+import { MaintenanceSenderService } from "./service/MaintenanceSenderService.ts";
+import { UpdateSenderService } from "./service/UpdateSenderService.ts";
+import { ButtonInteractionHandler } from "./handler/ButtonInteractionHandler.ts";
+import { SelectMenuInteractionHandler } from "./handler/SelectMenuInteractionHandler.ts";
+
+// Env
 await load({ export: true });
 
-const guildId = Deno.env.get("DISCORD_GUILD_ID")!;
-const token = Deno.env.get("DISCORD_TOKEN")!;
-const lodestoneCheckOnStart =
-  Deno.env.get("LODESTONE_CHECK_ON_START") === "true";
-const checkCommandIds = Deno.env.get("CHECK_COMMAND_IDS") === "true";
+// Logger
+log.setup({
+  handlers: {
+    console: new log.ConsoleHandler("DEBUG", {
+      formatter: (logRecord) =>
+        `${logRecord.datetime.toISOString()} [${logRecord.levelName}] ${logRecord.msg}`,
+    }),
+  },
+  loggers: {
+    default: {
+      level: "DEBUG",
+      handlers: ["console"],
+    },
+  },
+});
 
-// Locale
+// Client
+export class GlobalClient {
+  static client: Client;
+}
+
+// Moment
 moment.locale("en");
 
 // Canvas lib - Add roundRect method to CanvasRenderingContext2D
@@ -62,6 +78,10 @@ CanvasRenderingContext2D.prototype.roundRect = function (
 };
 
 // Discord bot setup
+const token = Deno.env.get("DISCORD_TOKEN")!;
+const lodestoneCheckOnStart =
+  Deno.env.get("LODESTONE_CHECK_ON_START") === "true";
+
 const client = new Client({ intents: [GatewayIntentBits.Guilds] }) as Client & {
   commands: Collection<string, any>;
 };
@@ -72,25 +92,45 @@ const commandFiles = readdirSync("./commands")
   .filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
 
 for (const file of commandFiles) {
-  const command = await import(`./commands/${file}`);
+  const command = await import(`./command/${file}`);
   client.commands.set(command.default.data.name, command.default);
 }
 
 try {
-  const ownerCommandFiles = readdirSync("./commands/owner")
+  const ownerCommandFiles = readdirSync("./command/owner")
     .filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
 
   for (const ownerfile of ownerCommandFiles) {
-    const ownerCommand = await import(`./commands/owner/${ownerfile}`);
+    const ownerCommand = await import(`./command/owner/${ownerfile}`);
     client.commands.set(ownerCommand.default.data.name, ownerCommand.default);
   }
-} catch (err) {
-  console.log("No owner commands directory found.");
+} catch (error: unknown) {
+  if (error instanceof Error) {
+    log.error(`No owner commands directory found: ${error.message}`);
+  }
 }
 
-// Discord events
 client.once("ready", () => {
-  console.log(`Connected: Discord (${client.user?.tag})`);
+  log.info(`Connected: Discord (${client.user?.tag})`);
+
+  GlobalClient.client = client;
+  setPresence();
+
+  try {
+    if (lodestoneCheckOnStart) {
+      checkLodestone();
+    }
+
+    cron.schedule("1-56/5 * * * *", () => {
+      checkLodestone();
+      setPresence();
+    });
+  } catch (err) {
+    log.error("Lodestone checker failed.", err);
+  }
+});
+
+function setPresence(): void {
   client.user?.setPresence({
     activities: [{
       name: "naago.tancred.de",
@@ -99,71 +139,30 @@ client.once("ready", () => {
     }],
     status: "online",
   });
-
-  GlobalUtil.client = client;
-
-  // Lodestone checker
-  try {
-    if (lodestoneCheckOnStart) {
-      checkLodestone();
-    } else {
-      cron.schedule("1-59/15 * * * *", () => {
-        checkLodestone();
-        client.user?.setPresence({
-          activities: [{
-            name: "naago.tancred.de",
-            type: ActivityType.Custom,
-            state: "🔗 naago.tancred.de",
-          }],
-          status: "online",
-        });
-      });
-    }
-  } catch (err) {
-    ConsoleUtil.logError("Lodestone checker failed.", err);
-  }
-
-  // Update owner command permissions
-  updateOwnerCommands(client);
-});
+}
 
 async function checkLodestone(): Promise<void> {
-  const topics = await TopicsUtil.updateDb();
-  const notices = await NoticesUtil.updateDb();
-  const maintenances = await MaintenancesUtil.updateDb();
-  const updates = await UpdatesUtil.updateDb();
-  const status = await StatusUtil.updateDb();
+  const topics = await TopicSenderService.checkForNew();
+  const notices = await NoticeSenderService.checkForNew();
+  const maintenances = await MaintenanceSenderService.checkForNew();
+  const updates = await UpdateSenderService.checkForNew();
+  const status = await StatusSenderService.checkForNew();
 
-  console.log(
-    `[${
-      moment().format(
-        "YYYY-MM-DD HH:mm",
-      )
-    }] Sent ${topics} topics, ${notices} notices, ${maintenances} maintenances, ${updates} updates and ${status} status.`,
+  log.info(
+    `Sent ${topics} topics, ${notices} notices, ${maintenances} maintenances, ${updates} updates and ${status} status.`,
   );
 }
 
-async function updateOwnerCommands(client: Client): Promise<void> {
-  const guild = await client.guilds.fetch(guildId);
-
-  if (checkCommandIds) {
-    const commands = await guild?.commands.fetch();
-    commands?.forEach((command) => {
-      console.log(`${command.name}: ${command.id}`);
-    });
-  }
-}
-
 client.on("interactionCreate", async (interaction) => {
-  if (interaction.isCommand()) {
+  if (interaction.isChatInputCommand()) {
     const command = client.commands.get(interaction.commandName);
 
     try {
       await command.execute(interaction as CommandInteraction);
     } catch (err) {
-      ConsoleUtil.logError("Error while executing command.", err);
+      log.error("Error while executing command.", err);
 
-      const embed = DiscordUtil.getErrorEmbed(
+      const embed = DiscordEmbedService.getErrorEmbed(
         "There was an error while executing this command.",
       );
       if ((interaction as any).ephemeral) {
@@ -180,10 +179,10 @@ client.on("interactionCreate", async (interaction) => {
     }
   } else if (interaction.isButton()) {
     try {
-      await ButtonUtil.execute(interaction as ButtonInteraction);
+      await ButtonInteractionHandler.execute(interaction as ButtonInteraction);
     } catch (err) {
-      ConsoleUtil.logError("Error while executing button.", err);
-      const embed = DiscordUtil.getErrorEmbed(
+      log.error("Error while executing button.", err);
+      const embed = DiscordEmbedService.getErrorEmbed(
         "There was an error while executing this button.",
       );
       await interaction.followUp({
@@ -193,10 +192,12 @@ client.on("interactionCreate", async (interaction) => {
     }
   } else if (interaction.isStringSelectMenu()) {
     try {
-      await SelectMenuUtil.execute(interaction as StringSelectMenuInteraction);
+      await SelectMenuInteractionHandler.execute(
+        interaction as StringSelectMenuInteraction,
+      );
     } catch (err) {
-      ConsoleUtil.logError("Error while executing menu.", err);
-      const embed = DiscordUtil.getErrorEmbed(
+      log.error("Error while executing menu.", err);
+      const embed = DiscordEmbedService.getErrorEmbed(
         "There was an error while executing this menu.",
       );
       await interaction.followUp({
@@ -204,14 +205,14 @@ client.on("interactionCreate", async (interaction) => {
         ephemeral: true,
       });
     }
-  } else if (interaction.isContextMenu()) {
+  } else if (interaction.isUserContextMenuCommand()) {
     const command = client.commands.get(interaction.commandName);
 
     try {
       await command.execute(interaction as ContextMenuCommandInteraction);
     } catch (err) {
-      ConsoleUtil.logError("Error while executing context command.", err);
-      const embed = DiscordUtil.getErrorEmbed(
+      log.error("Error while executing context command.", err);
+      const embed = DiscordEmbedService.getErrorEmbed(
         "There was an error while executing this command.",
       );
       if ((interaction as any).ephemeral) {

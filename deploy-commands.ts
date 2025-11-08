@@ -2,6 +2,7 @@ import { load } from "@std/dotenv";
 import { readdirSync } from "node:fs";
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v10";
+import * as log from "@std/log";
 
 await load({ export: true });
 
@@ -16,17 +17,17 @@ if (isProd) {
     .filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
 
   for (const file of commandFiles) {
-    const command = await import(`./commands/${file}`);
+    const command = await import(`./command/${file}`);
     commands.push(command.default.data.toJSON());
   }
 
   // Owner commands
   const ownerCommands: any[] = [];
-  const ownerCommandFiles = readdirSync("./commands/owner")
+  const ownerCommandFiles = readdirSync("./command/owner")
     .filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
 
   for (const ownerFile of ownerCommandFiles) {
-    const ownerCommand = await import(`./commands/owner/${ownerFile}`);
+    const ownerCommand = await import(`./command/owner/${ownerFile}`);
     ownerCommands.push(ownerCommand.default.data.toJSON());
   }
 
@@ -36,7 +37,7 @@ if (isProd) {
   rest
     .put(Routes.applicationCommands(clientId), { body: commands })
     .then(() =>
-      console.log("Successfully registered global application commands.")
+      log.info("Successfully registered global application commands.")
     )
     .catch(console.error);
 
@@ -44,9 +45,7 @@ if (isProd) {
     .put(Routes.applicationGuildCommands(clientId, guildId), {
       body: ownerCommands,
     })
-    .then(() =>
-      console.log("Successfully registered owner application commands.")
-    )
+    .then(() => log.info("Successfully registered owner application commands."))
     .catch(console.error);
 } else {
   const commands: any[] = [];
@@ -54,16 +53,16 @@ if (isProd) {
     .filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
 
   for (const file of commandFiles) {
-    const command = await import(`./commands/${file}`);
+    const command = await import(`./command/${file}`);
     commands.push(command.default.data.toJSON());
   }
 
   // Owner commands
-  const ownerCommandFiles = readdirSync("./commands/owner")
+  const ownerCommandFiles = readdirSync("./command/owner")
     .filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
 
   for (const ownerFile of ownerCommandFiles) {
-    const ownerCommand = await import(`./commands/owner/${ownerFile}`);
+    const ownerCommand = await import(`./command/owner/${ownerFile}`);
     commands.push(ownerCommand.default.data.toJSON());
   }
 
@@ -72,8 +71,6 @@ if (isProd) {
 
   rest
     .put(Routes.applicationGuildCommands(clientId, guildId), { body: commands })
-    .then(() =>
-      console.log("Successfully registered guild application commands.")
-    )
+    .then(() => log.info("Successfully registered guild application commands."))
     .catch(console.error);
 }

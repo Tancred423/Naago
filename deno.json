@@ -3,19 +3,21 @@
   "compilerOptions": {
     "allowJs": true,
     "lib": ["deno.window"],
-    "strict": false
+    "strict": true,
+    "strictNullChecks": true
   },
   "tasks": {
     "dev": "deno run --allow-all --unstable-detect-cjs --watch index.ts",
     "start": "deno run --allow-all --unstable-detect-cjs index.ts",
     "deploy-commands": "deno run --allow-all --unstable-detect-cjs deploy-commands.ts",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "deno run --allow-all --unstable-detect-cjs db/migrate.ts",
+    "db:migrate": "deno run --allow-all --unstable-detect-cjs database/migrate.ts",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },
   "imports": {
     "@std/dotenv": "https://deno.land/std@0.224.0/dotenv/mod.ts",
+    "@std/log": "https://deno.land/std@0.224.0/log/mod.ts",
     "@discordjs/builders": "npm:@discordjs/builders@^1.13.0",
     "@discordjs/rest": "npm:@discordjs/rest@^2.0.0",
     "canvas": "npm:canvas@^3.0.0",

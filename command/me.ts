@@ -7,9 +7,9 @@ import {
 import { ProfileGeneratorService } from "../service/ProfileGeneratorService.ts";
 import { Buffer } from "node:buffer";
 import { VerificationsRepository } from "../database/repository/VerificationsRepository.ts";
+import { FetchCharacterService } from "../service/FetchCharacterService.ts";
 import { ProfilePagesRepository } from "../database/repository/ProfilePagesRepository.ts";
 import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
-import { FetchCharacterService } from "../service/FetchCharacterService.ts";
 
 export default {
   data: new SlashCommandBuilder()

@@ -1,0 +1,92 @@
+import {
+  ButtonInteraction,
+  CommandInteraction,
+  StringSelectMenuInteraction,
+} from "discord.js";
+import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
+import { CharacterDataRepository } from "../database/repository/CharacterDataRepository.ts";
+import { Character } from "../naagostone/type/CharacterTypes.ts";
+import moment from "moment";
+import { VerificationsRepository } from "../database/repository/VerificationsRepository.ts";
+import { CharacterDataDto } from "../naagostone/dto/CharacterDataDto.ts";
+import { DiscordEmoteService } from "./DiscordEmoteService.ts";
+
+export class FetchCharacterService {
+  static async findVerifiedCharacterByUserId(
+    userId: string,
+  ): Promise<CharacterDataDto | null> {
+    const verification = await VerificationsRepository.find(userId);
+    if (!verification) return null;
+
+    const characterData = await CharacterDataRepository.find(
+      verification.characterId,
+    );
+    if (!characterData) return null;
+
+    const latestUpdate = moment(new Date(characterData.latestUpdate));
+    return new CharacterDataDto(
+      latestUpdate,
+      JSON.parse(characterData.jsonString) as Character,
+    );
+  }
+
+  static async fetchCharacterCached(
+    interaction:
+      | CommandInteraction
+      | StringSelectMenuInteraction
+      | ButtonInteraction,
+    characterId: number,
+  ): Promise<CharacterDataDto | null> {
+    const characterData = await CharacterDataRepository.find(
+      characterId,
+    );
+
+    if (!characterData) {
+      return this.fetchCharacterForced(interaction, characterId);
+    }
+
+    const latestUpdate = moment(new Date(characterData.latestUpdate));
+    if (latestUpdate.isBefore(moment().subtract(10, "minutes"))) {
+      return this.fetchCharacterForced(interaction, characterId);
+    }
+
+    return new CharacterDataDto(
+      latestUpdate,
+      JSON.parse(characterData.jsonString) as Character,
+    );
+  }
+
+  static async fetchCharacterForced(
+    interaction:
+      | CommandInteraction
+      | StringSelectMenuInteraction
+      | ButtonInteraction,
+    characterId: number,
+  ): Promise<CharacterDataDto | null> {
+    await this.prepareInteraction(interaction);
+
+    const character = await NaagostoneApiService.fetchCharacterById(
+      characterId,
+    );
+    if (!character) return null;
+
+    CharacterDataRepository.set(character);
+    return new CharacterDataDto(moment(), character);
+  }
+
+  private static async prepareInteraction(
+    interaction:
+      | CommandInteraction
+      | StringSelectMenuInteraction
+      | ButtonInteraction,
+  ): Promise<void> {
+    const loadingEmote = await DiscordEmoteService.get(
+      interaction.client,
+      "loading",
+    );
+    await interaction.editReply({
+      content:
+        `${loadingEmote} Updating lodestone data. This might take several seconds.`,
+    });
+  }
+}

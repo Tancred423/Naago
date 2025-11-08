@@ -1,12 +1,12 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { ActionRowBuilder, ButtonBuilder } from "discord.js";
 import { ButtonInteraction, ChatInputCommandInteraction } from "discord.js";
-import { VerificationsRepository } from "../database/repository/VerificationsRepository.ts";
-import { StringManipulationService } from "../service/StringManipulationService.ts";
 import { FfxivServerValidationService } from "../service/FfxivServerValidationService.ts";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
-import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
+import { VerificationsRepository } from "../database/repository/VerificationsRepository.ts";
 import { PurgeUserDataService } from "../service/PurgeUserDataService.ts";
+import { StringManipulationService } from "../service/StringManipulationService.ts";
+import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
 
 export default {
   data: new SlashCommandBuilder()

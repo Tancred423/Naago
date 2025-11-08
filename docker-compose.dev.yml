@@ -60,14 +60,13 @@ services:
     volumes:
       # Mount source code for hot reloading
       - ./commands:/app/commands
-      - ./db:/app/db
+      - ./database:/app/database
       - ./dto:/app/dto
       - ./naagoLib:/app/naagoLib
       - ./naagostone:/app/naagostone
       - ./types:/app/types
       - ./index.ts:/app/index.ts
       - ./deploy-commands.ts:/app/deploy-commands.ts
-      - ./dev-watch.ts:/app/dev-watch.ts
       - ./deno.json:/app/deno.json
       - ./drizzle.config.ts:/app/drizzle.config.ts
       - ./servers.txt:/app/servers.txt
