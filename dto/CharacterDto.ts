@@ -47,19 +47,19 @@ export interface ClassJob {
   icon: string;
   level: number;
   unlockstate: string;
-  CurrentEXP: string;
-  MaxEXP: string;
+  current_exp: string;
+  max_exp: string;
 }
 
 export interface Bozja {
   level: number;
-  Mettle: string;
+  mettle: string;
   name: string;
 }
 
 export interface Eureka {
-  CurrentEXP: string;
-  MaxEXP: string;
+  current_exp: string;
+  max_exp: string;
   level: number;
   name: string;
 }
@@ -88,7 +88,7 @@ export interface Character {
   title: string;
   avatar: string;
   portrait: string;
-  characteristics: Characteristics;
+  characteristics?: Characteristics;
   server: Server;
   nameday: string;
   guardian_deity: GuardianDeity;
@@ -99,9 +99,9 @@ export interface Character {
   amount_mounts: number;
   amount_minions: number;
   active_classjob: ActiveClassJob;
-  grand_company: GrandCompany;
-  free_company: FreeCompany | null;
-  pvp_team: string | null;
+  grand_company?: GrandCompany;
+  free_company?: FreeCompany;
+  pvp_team?: string;
   strength: number;
   dexterity: number;
   vitality: number;
@@ -122,8 +122,8 @@ export interface Character {
   hp: number;
   mp_gp_cp: number;
   mp_gp_cp_parameter_name: string;
-  bozja: Bozja;
-  eureka: Eureka;
+  bozja?: Bozja;
+  eureka?: Eureka;
   paladin: ClassJob;
   warrior: ClassJob;
   darkknight: ClassJob;
@@ -170,10 +170,10 @@ export interface Character {
   ring1: Equipment | null;
   ring2: Equipment | null;
   soulcrystal: Equipment | null;
-  facewear: Equipment | null;
+  facewear?: Equipment;
   item_level: string;
 }
 
 export interface CharacterResponse {
-  Character: Character;
+  character: Character;
 }

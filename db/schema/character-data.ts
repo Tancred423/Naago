@@ -1,7 +1,7 @@
-import { mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { int, mysqlTable, text, timestamp } from "drizzle-orm/mysql-core";
 
 export const characterData = mysqlTable("character_data", {
-  characterId: varchar("character_id", { length: 255 }).primaryKey().notNull(),
+  characterId: int("character_id").primaryKey().notNull(),
   latestUpdate: timestamp("latest_update"),
   jsonString: text("json_string"),
   createdAt: timestamp("created_at").defaultNow(),

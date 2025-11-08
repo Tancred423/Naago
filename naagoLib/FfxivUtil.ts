@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { readFileSync } from "node:fs";
 import type { Character, CharacterResponse } from "../dto/CharacterDto.ts";
+import type { CharacterSearchResponse } from "../naagostone/types/CharacterSearchTypes.ts";
 
 const naagostoneHost = Deno.env.get("NAAGOSTONE_HOST") || "localhost";
 const naagostonePort = Deno.env.get("NAAGOSTONE_PORT")!;
@@ -33,14 +34,14 @@ export default class FfxivUtil {
   static async getCharacterIdsByName(
     name: string,
     server: string,
-  ): Promise<string[]> {
+  ): Promise<number[]> {
     const nameEncoded = encodeURIComponent(name);
     const res = await fetch(
       `http://${naagostoneHost}:${naagostonePort}/character/search?name=${nameEncoded}&worldname=${server}`,
     );
     if (!res.ok) return [];
-    const data = await res.json();
-    return data.List.map((a: any) => a.ID);
+    const data = await res.json() as CharacterSearchResponse;
+    return data.list.map((character) => character.id);
   }
 
   static async getCharacterById(id: number): Promise<Character | null> {
@@ -49,7 +50,7 @@ export default class FfxivUtil {
     );
     if (!res.ok) return undefined;
     const data = await res.json() as CharacterResponse;
-    return data?.Character ?? null;
+    return data?.character ?? null;
   }
 
   static generateVerificationCode(): string {

@@ -10,7 +10,7 @@ import {
 export const favorites = mysqlTable("favorites", {
   id: int("id").primaryKey().autoincrement(),
   userId: varchar("user_id", { length: 255 }).notNull(),
-  characterId: varchar("character_id", { length: 255 }).notNull(),
+  characterId: int("character_id").notNull(),
   characterName: varchar("character_name", { length: 255 }).notNull(),
   server: varchar("server", { length: 255 }).notNull(),
   createdAt: timestamp("created_at").defaultNow(),

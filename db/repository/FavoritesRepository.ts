@@ -33,7 +33,7 @@ export class FavoritesRepository {
 
     if (
       userFavorites?.find((userFavorite) =>
-        userFavorite.characterId == characterId
+        userFavorite.characterId === characterId
       )
     ) {
       throw new AlreadyInDatabaseError("The character is already a favorite.");
@@ -49,13 +49,13 @@ export class FavoritesRepository {
 
   static async removeFavorite(
     userId: string,
-    characterId: string,
+    characterId: number,
   ): Promise<void> {
     const userFavorites = await this.getFavorites(userId);
 
     if (
       !userFavorites?.find((userFavorite) =>
-        userFavorite.characterId == characterId
+        userFavorite.characterId === characterId
       )
     ) {
       throw new NotInDatabaseError("This character is not a favorite.");

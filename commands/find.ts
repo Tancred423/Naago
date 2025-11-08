@@ -63,7 +63,7 @@ export default {
         ephemeral: true,
       });
     } else {
-      const characterId = parseInt(characterIds[0]);
+      const characterId = characterIds[0];
       const characterDataDto = await DbUtil.fetchCharacter(
         interaction,
         characterId,
@@ -114,7 +114,7 @@ export default {
       throw new Error("[/find - button] button id length is !== 3");
     }
 
-    const characterId = buttonIdSplit[2];
+    const characterId = parseInt(buttonIdSplit[2]);
     const characterDataDto = await DbUtil.fetchCharacterCached(
       interaction,
       characterId,

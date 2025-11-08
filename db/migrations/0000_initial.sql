@@ -1,5 +1,5 @@
 CREATE TABLE `character_data` (
-	`character_id` varchar(255) NOT NULL,
+	`character_id` int UNSIGNED NOT NULL,
 	`latest_update` timestamp,
 	`json_string` text,
 	`created_at` timestamp DEFAULT (now()),
@@ -10,8 +10,8 @@ CREATE TABLE `character_data` (
 CREATE TABLE `favorites` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`user_id` varchar(255) NOT NULL,
-	`character_id` varchar(255) NOT NULL,
-	`character_name` varchar(255),
+	`character_id` int UNSIGNED NOT NULL,
+	`character_name` varchar(255) NOT NULL,
 	`server` varchar(255),
 	`created_at` timestamp DEFAULT (now()),
 	CONSTRAINT `favorites_id` PRIMARY KEY(`id`),
@@ -20,7 +20,7 @@ CREATE TABLE `favorites` (
 --> statement-breakpoint
 CREATE TABLE `verifications` (
 	`user_id` varchar(255) NOT NULL,
-	`character_id` varchar(255) NOT NULL,
+	`character_id` int UNSIGNED NOT NULL,
 	`verification_code` varchar(255),
 	`is_verified` boolean DEFAULT false,
 	`created_at` timestamp DEFAULT (now()),
@@ -111,7 +111,7 @@ CREATE TABLE `setups` (
 --> statement-breakpoint
 CREATE TABLE `social_medias` (
 	`id` int AUTO_INCREMENT NOT NULL,
-	`character_id` varchar(255) NOT NULL,
+	`character_id` int UNSIGNED NOT NULL,
 	`platform` varchar(255),
 	`url` text,
 	`created_at` timestamp DEFAULT (now()),

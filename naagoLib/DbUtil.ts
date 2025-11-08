@@ -125,7 +125,7 @@ export default class DbUtil {
 
   static async fetchCharacterCached(
     interaction: BaseInteraction,
-    characterId: string,
+    characterId: number,
   ): Promise<CharacterDataDto | undefined> {
     try {
       const loadingEmote = await DiscordUtil.getEmote(
@@ -136,7 +136,7 @@ export default class DbUtil {
       const result = await db
         .select()
         .from(characterData)
-        .where(eq(characterData.characterId, characterId))
+        .where(eq(characterData.characterId, characterId.toString()))
         .limit(1);
 
       const characterDataRes = result[0];

@@ -1,14 +1,20 @@
 import {
   Client,
+  ColorResolvable,
   CommandInteraction,
   EmbedBuilder,
   Guild,
   GuildEmoji,
   GuildMember,
   PermissionsBitField,
-} from "npm:discord.js@^14.24.2";
+} from "discord.js";
 import NaagoUtil from "./NaagoUtil.ts";
-import moment from "npm:moment@^2.30.1";
+import moment from "moment";
+import { Topic } from "../naagostone/types/Topic.ts";
+import { Notice } from "../naagostone/types/Notice.ts";
+import { Maintenance } from "../naagostone/types/Maintenance.ts";
+import { Update } from "../naagostone/types/Updates.ts";
+import { Status } from "../naagostone/types/Status.ts";
 
 const green = Deno.env.get("COLOR_GREEN")!;
 const red = Deno.env.get("COLOR_RED")!;
@@ -54,11 +60,15 @@ type EmoteName =
 
 export default class DiscordUtil {
   static getSuccessEmbed(message: string): EmbedBuilder {
-    return new EmbedBuilder().setColor(green).setDescription(`✅ ${message}`);
+    return new EmbedBuilder().setColor(green as ColorResolvable).setDescription(
+      `✅ ${message}`,
+    );
   }
 
   static getErrorEmbed(message: string): EmbedBuilder {
-    return new EmbedBuilder().setColor(red).setDescription(`:x: ${message}`);
+    return new EmbedBuilder().setColor(red as ColorResolvable).setDescription(
+      `:x: ${message}`,
+    );
   }
 
   static async getBotColorByInteraction(
@@ -138,7 +148,7 @@ export default class DiscordUtil {
   ): Promise<boolean> {
     let hasAllPermissions = true;
 
-    const neededPerms = new Permissions(permissions).toArray();
+    const neededPerms = new PermissionsBitField(permissions).toArray();
     const missingPermsTmp: bigint[] = [];
 
     for (const permission of permissions) {
@@ -148,22 +158,23 @@ export default class DiscordUtil {
       }
     }
 
-    const missingPerms = new Permissions(missingPermsTmp).toArray();
+    const missingPerms = new PermissionsBitField(missingPermsTmp).toArray();
 
     if (hasAllPermissions) return true;
     else {
       const embed = DiscordUtil.getErrorEmbed(
         "Not enough permissions to execute this command.",
       )
-        .addField(
-          "For this command you will need",
-          NaagoUtil.prettifyPermissionArray(neededPerms, false),
-        )
-        .addField(
-          "But you are missing",
-          NaagoUtil.prettifyPermissionArray(missingPerms),
-          false,
-        );
+        .addFields([
+          {
+            name: "For this command you will need",
+            value: NaagoUtil.prettifyPermissionArray(neededPerms, false),
+          },
+          {
+            name: "But you are missing",
+            value: NaagoUtil.prettifyPermissionArray(missingPerms),
+          },
+        ]);
 
       await interaction.reply({
         embeds: [embed],
@@ -174,9 +185,9 @@ export default class DiscordUtil {
     }
   }
 
-  static getTopicEmbed(topic: any): EmbedBuilder {
+  static getTopicEmbed(topic: Topic): EmbedBuilder {
     return new EmbedBuilder()
-      .setColor(colorTopics)
+      .setColor(colorTopics as ColorResolvable)
       .setAuthor({
         name: "Topic",
         iconURL: topicIconLink,
@@ -192,16 +203,16 @@ export default class DiscordUtil {
       .setTimestamp(moment(topic.date).toDate());
   }
 
-  static getNoticesEmbed(notice: any): EmbedBuilder {
+  static getNoticesEmbed(notice: Notice): EmbedBuilder {
     return new EmbedBuilder()
-      .setColor(colorNotices)
+      .setColor(colorNotices as ColorResolvable)
       .setAuthor({
         name: notice.tag,
         iconURL: noticeIconLink,
       })
       .setTitle(notice.title)
       .setURL(notice.link)
-      .setDescription(notice.details.markdown)
+      .setDescription(notice.description.markdown)
       .setFooter({
         text: "Lodestone",
         iconURL: lodestoneIconLink,
@@ -209,33 +220,33 @@ export default class DiscordUtil {
       .setTimestamp(notice.date);
   }
 
-  static getMaintenanceEmbed(maint: any): EmbedBuilder {
+  static getMaintenanceEmbed(maintenance: Maintenance): EmbedBuilder {
     return new EmbedBuilder()
-      .setColor(colorMaintenances)
+      .setColor(colorMaintenances as ColorResolvable)
       .setAuthor({
-        name: maint.tag,
+        name: maintenance.tag ?? "Maintenance",
         iconURL: maintenanceIconLink,
       })
-      .setTitle(maint.title)
-      .setURL(maint.link)
-      .setDescription(maint.details.markdown)
+      .setTitle(maintenance.title)
+      .setURL(maintenance.link)
+      .setDescription(maintenance.description.markdown)
       .setFooter({
         text: "Lodestone",
         iconURL: lodestoneIconLink,
       })
-      .setTimestamp(maint.date);
+      .setTimestamp(maintenance.date);
   }
 
-  static getUpdatesEmbed(update: any): EmbedBuilder {
+  static getUpdatesEmbed(update: Update): EmbedBuilder {
     return new EmbedBuilder()
-      .setColor(colorUpdates)
+      .setColor(colorUpdates as ColorResolvable)
       .setAuthor({
         name: "Update",
         iconURL: updateIconLink,
       })
       .setTitle(update.title)
       .setURL(update.link)
-      .setDescription(update.details.markdown)
+      .setDescription(update.description.markdown)
       .setFooter({
         text: "Lodestone",
         iconURL: lodestoneIconLink,
@@ -243,16 +254,16 @@ export default class DiscordUtil {
       .setTimestamp(update.date);
   }
 
-  static getStatusEmbed(status: any): EmbedBuilder {
+  static getStatusEmbed(status: Status): EmbedBuilder {
     return new EmbedBuilder()
-      .setColor(colorStatus)
+      .setColor(colorStatus as ColorResolvable)
       .setAuthor({
-        name: status.tag,
+        name: status.tag ?? "Status",
         iconURL: statusIconLink,
       })
       .setTitle(status.title)
       .setURL(status.link)
-      .setDescription(status.details.markdown)
+      .setDescription(status.description.markdown)
       .setFooter({
         text: "Lodestone",
         iconURL: lodestoneIconLink,

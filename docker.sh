@@ -2,16 +2,27 @@
 
 case "$1" in
   start)
-    echo "Starting Naago services..."
+    echo "Starting Naago services (PRODUCTION)..."
     docker-compose up -d --build
     echo "Waiting for services to be ready..."
     sleep 5
     docker-compose ps
     ;;
   
+  dev)
+    echo "Starting Naago services (DEVELOPMENT with hot reloading)..."
+    docker-compose -f docker-compose.dev.yml up -d --build
+    echo "Waiting for services to be ready..."
+    sleep 5
+    docker-compose -f docker-compose.dev.yml ps
+    echo ""
+    echo "✅ Development mode active - code changes will auto-reload!"
+    ;;
+  
   stop)
     echo "Stopping Naago services..."
     docker-compose down
+    docker-compose -f docker-compose.dev.yml down
     ;;
   
   restart)
@@ -19,9 +30,19 @@ case "$1" in
     docker-compose restart
     ;;
   
+  restart-dev)
+    echo "Restarting Naago services (DEV)..."
+    docker-compose -f docker-compose.dev.yml restart
+    ;;
+  
   rebuild)
-    echo "Rebuilding and restarting app..."
+    echo "Rebuilding and restarting app (PRODUCTION)..."
     docker-compose up -d --build app
+    ;;
+  
+  rebuild-dev)
+    echo "Rebuilding and restarting app (DEVELOPMENT)..."
+    docker-compose -f docker-compose.dev.yml up -d --build app
     ;;
   
   status)
@@ -29,15 +50,27 @@ case "$1" in
     ;;
   
   logs)
-    if [ -z "$2" ]; then
-      docker-compose logs -f
+    if [ "$2" = "dev" ]; then
+      echo "Showing DEV logs..."
+      if [ -z "$3" ]; then
+        docker-compose -f docker-compose.dev.yml logs -f
+      else
+        docker-compose -f docker-compose.dev.yml logs -f "$3"
+      fi
     else
-      docker-compose logs -f "$2"
+      if [ -z "$2" ]; then
+        docker-compose logs -f
+      else
+        docker-compose logs -f "$2"
+      fi
     fi
     ;;
   
   shell)
-    if [ "$2" = "app" ]; then
+    if [ "$2" = "dev" ]; then
+      echo "Opening shell in DEV app container..."
+      docker exec -it naago-app-dev /bin/sh
+    elif [ "$2" = "app" ]; then
       echo "Opening shell in app container..."
       docker exec -it naago-app /bin/sh
     else
@@ -47,8 +80,13 @@ case "$1" in
     ;;
   
   connect)
-    echo "Connecting to MySQL (password: Naago123456)..."
-    docker exec -it naago-mysql mysql -u naago -p
+    if [ "$2" = "dev" ]; then
+      echo "Connecting to MySQL DEV (password: Naago123456)..."
+      docker exec -it naago-mysql-dev mysql -u naago -p
+    else
+      echo "Connecting to MySQL (password: Naago123456)..."
+      docker exec -it naago-mysql mysql -u naago -p
+    fi
     ;;
   
   backup)
@@ -69,12 +107,19 @@ case "$1" in
     ;;
   
   reset)
+    MODE="${2:-prod}"
     echo "⚠️  WARNING: This will delete all database data!"
     read -p "Are you sure? (yes/no): " confirm
     if [ "$confirm" = "yes" ]; then
-      echo "Resetting database..."
-      docker-compose down -v
-      docker-compose up -d --build
+      if [ "$MODE" = "dev" ]; then
+        echo "Resetting DEV database..."
+        docker-compose -f docker-compose.dev.yml down -v
+        docker-compose -f docker-compose.dev.yml up -d --build
+      else
+        echo "Resetting PROD database..."
+        docker-compose down -v
+        docker-compose up -d --build
+      fi
       echo "Database reset complete"
     else
       echo "Reset cancelled"
@@ -82,33 +127,50 @@ case "$1" in
     ;;
   
   deploy-commands)
-    echo "Deploying Discord commands..."
-    docker exec naago-app deno run --allow-all --unstable-detect-cjs deploy-commands.ts
+    if [ "$2" = "dev" ]; then
+      echo "Deploying Discord commands (DEV)..."
+      docker exec naago-app-dev deno run --allow-all --unstable-detect-cjs deploy-commands.ts
+    else
+      echo "Deploying Discord commands (PROD)..."
+      docker exec naago-app deno run --allow-all --unstable-detect-cjs deploy-commands.ts
+    fi
     ;;
   
   *)
     echo "Naago Management Script"
     echo ""
-    echo "Usage: $0 {start|stop|restart|rebuild|status|logs|shell|connect|backup|restore|reset|deploy-commands}"
+    echo "Usage: $0 {command} [options]"
     echo ""
-    echo "Commands:"
-    echo "  start           - Start all services (MySQL + App)"
-    echo "  stop            - Stop all services"
-    echo "  restart         - Restart all services"
-    echo "  rebuild         - Rebuild and restart app container"
-    echo "  status          - Show container status"
-    echo "  logs [service]  - Show and follow logs (all or specific service)"
-    echo "  shell [app]     - Open shell in app or MySQL container"
-    echo "  connect         - Connect to MySQL shell"
-    echo "  backup          - Create a database backup"
-    echo "  restore <file>  - Restore from a backup file"
-    echo "  reset           - Reset database (deletes all data)"
-    echo "  deploy-commands - Deploy Discord slash commands"
+    echo "🚀 Main Commands:"
+    echo "  start              - Start all services in PRODUCTION mode"
+    echo "  dev                - Start all services in DEVELOPMENT mode (with hot reloading)"
+    echo "  stop               - Stop all services (both prod and dev)"
+    echo "  restart            - Restart all services (production)"
+    echo "  restart-dev        - Restart all services (development)"
+    echo "  rebuild            - Rebuild and restart app (production)"
+    echo "  rebuild-dev        - Rebuild and restart app (development)"
     echo ""
-    echo "Examples:"
-    echo "  $0 logs app     - Show app logs"
-    echo "  $0 logs mysql   - Show MySQL logs"
-    echo "  $0 shell app    - Open shell in app container"
+    echo "📊 Monitoring:"
+    echo "  status             - Show container status"
+    echo "  logs [dev] [svc]   - Show and follow logs"
+    echo "                       Examples: logs, logs dev, logs app, logs dev app"
+    echo ""
+    echo "🔧 Shell Access:"
+    echo "  shell [app|dev]    - Open shell in container"
+    echo "                       Examples: shell app, shell dev, shell (mysql)"
+    echo "  connect [dev]      - Connect to MySQL shell"
+    echo ""
+    echo "💾 Database:"
+    echo "  backup             - Create a database backup"
+    echo "  restore <file>     - Restore from a backup file"
+    echo "  reset [dev]        - Reset database (deletes all data)"
+    echo ""
+    echo "⚙️  Discord:"
+    echo "  deploy-commands [dev] - Deploy Discord slash commands"
+    echo ""
+    echo "💡 Quick Start:"
+    echo "  Development: $0 dev && $0 logs dev app"
+    echo "  Production:  $0 start"
     echo ""
     exit 1
     ;;

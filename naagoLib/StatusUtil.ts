@@ -32,7 +32,7 @@ export default class StatusUtil {
   static async getLast10(): Promise<Status[]> {
     try {
       const res = await fetch(
-        `http://${naagostoneHost}:${naagostonePort}/lodestone/status`,
+        `http://${naagostoneHost}:${naagostonePort}/lodestone/statuses`,
       );
       if (!res.ok) return [];
       const data = await res.json();

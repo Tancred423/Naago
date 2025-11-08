@@ -33,7 +33,7 @@ export default class MaintenancesUtil {
   static async getLast10(): Promise<Maintenance[]> {
     try {
       const res = await fetch(
-        `http://${naagostoneHost}:${naagostonePort}/lodestone/maintenance`,
+        `http://${naagostoneHost}:${naagostonePort}/lodestone/maintenances`,
       );
       if (!res.ok) return [];
       const data = await res.json();

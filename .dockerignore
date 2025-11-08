@@ -8,6 +8,7 @@
 *.log
 coverage/
 dist/
+node_modules/
 
 backup_*.sql
 *.sql.gz
@@ -18,8 +19,11 @@ config.docker.json
 config.example.json
 
 docker-compose.yml
+docker-compose.dev.yml
 Dockerfile
 .dockerignore
+docker.sh
 
 *.md
+README.md
 

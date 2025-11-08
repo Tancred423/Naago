@@ -5,7 +5,7 @@ import {
   ButtonBuilder,
   StringSelectMenuBuilder,
 } from "discord.js";
-import type {
+import {
   ActionRow,
   APISelectMenuOption,
   ButtonInteraction,
@@ -21,6 +21,7 @@ import ProfileUtil from "../naagoLib/ProfileUtil.ts";
 import { FavoritesRepository } from "../db/repository/FavoritesRepository.ts";
 import { MaximumAmountReachedError } from "../db/error/MaximumAmountReachedError.ts";
 import { NotInDatabaseError } from "../db/error/NotInDatabaseError.ts";
+import ConsoleUtil from "../naagoLib/ConsoleUtil.ts";
 
 export default {
   data: new SlashCommandBuilder()
@@ -135,6 +136,11 @@ export default {
                 interaction,
                 `An unknown error prevented \`${name}\` to be added as favorite. Please try again later.`,
               );
+
+              ConsoleUtil.logError(
+                "Error while adding favorite.",
+                error,
+              );
             }
           }
         }
@@ -156,7 +162,7 @@ export default {
           options.push({
             label: favorite.characterName,
             description: favorite.server,
-            value: favorite.characterId,
+            value: favorite.characterId.toString(),
           });
         }
 
@@ -190,7 +196,7 @@ export default {
           options.push({
             label: favorite.characterName,
             description: favorite.server,
-            value: favorite.characterId,
+            value: favorite.characterId.toString(),
           });
         }
 
@@ -216,7 +222,7 @@ export default {
   },
 
   async get(interaction: StringSelectMenuInteraction) {
-    const characterId = interaction.values[0];
+    const characterId = parseInt(interaction.values[0]);
     const characterDataDto = await DbUtil.fetchCharacter(
       interaction,
       characterId,
@@ -249,7 +255,7 @@ export default {
         "profile",
         null,
         "find",
-        parseInt(characterId),
+        characterId,
       );
 
       await interaction.editReply({
@@ -263,15 +269,15 @@ export default {
   },
 
   async remove(interaction: StringSelectMenuInteraction) {
-    const characterId = interaction.values[0];
+    const characterId = parseInt(interaction.values[0]);
     const messageRow = interaction.message.components[0] as ActionRow<
       MessageActionRowComponent
     >;
     const selectMenu = messageRow.components[0] as StringSelectMenuComponent;
     const characterName =
       selectMenu.options?.find((option: APISelectMenuOption) =>
-        option.value === characterId
-      )?.label ?? characterId;
+        option.value === characterId.toString()
+      )?.label ?? characterId.toString();
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
@@ -309,7 +315,7 @@ export default {
     }
 
     const userId = interaction.user.id;
-    const characterId = buttonIdSplit[2];
+    const characterId = parseInt(buttonIdSplit[2]);
     const characterName = buttonIdSplit[3];
 
     try {
