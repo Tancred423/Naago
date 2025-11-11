@@ -50,7 +50,7 @@ export class DiscordEmbedService {
         text: "Lodestone",
         iconURL: lodestoneIconLink,
       })
-      .setTimestamp(moment(topic.date).toDate());
+      .setTimestamp(moment(topic.date * 1000).toDate());
   }
 
   static getNoticesEmbed(notice: Notice): EmbedBuilder {
