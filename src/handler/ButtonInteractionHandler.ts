@@ -55,15 +55,10 @@ export class ButtonInteractionHandler {
         await interaction.deferUpdate();
         await Verify.update(interaction, buttonIdSplit);
         break;
-      case "favorite": {
-        const content = StringManipulationService.buildLoadingText(
-          "Generating profile image...",
-        );
-        await interaction.message.edit({ content });
+      case "favorite":
         await interaction.deferUpdate();
         await Favorite.update(interaction, buttonIdSplit);
         break;
-      }
       case "help":
         await interaction.deferUpdate();
         await HelpCommandHelper.update(interaction, buttonIdSplit);

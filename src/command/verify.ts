@@ -12,6 +12,8 @@ import { VerificationsRepository } from "../database/repository/VerificationsRep
 import { PurgeUserDataService } from "../service/PurgeUserDataService.ts";
 import { StringManipulationService } from "../service/StringManipulationService.ts";
 import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
+import * as log from "@std/log";
+import { ThemeRepository } from "../database/repository/ThemeRepository.ts";
 
 export default {
   data: new SlashCommandBuilder()
@@ -223,7 +225,7 @@ export default {
           }
         }
       }
-    } else {
+    } else if (interaction.options.getSubcommand() === "remove") {
       const userId = interaction.user.id;
       const verification = await VerificationsRepository.find(userId);
 
@@ -329,13 +331,23 @@ export default {
         const charBio = character.bio?.html;
         if (charBio.includes(verificationCode)) {
           try {
-            await VerificationsRepository.setIsVerifiedTrue(
+            if (verification) {
+              ThemeRepository.get(verification.characterId)
+                .then((theme) =>
+                  ThemeRepository.set(userId, characterId, theme)
+                )
+                .catch((error) =>
+                  log.error("Failed to update theme after verification", error)
+                );
+            }
+
+            await VerificationsRepository.setVerification(
               userId,
               characterId,
             );
           } catch (_error: unknown) {
             const embed = DiscordEmbedService.getErrorEmbed(
-              `Character could not be verified. Please contact Tancred#0001 for help.`,
+              `Character could not be verified. Please try again later.`,
             );
 
             await interaction.editReply({

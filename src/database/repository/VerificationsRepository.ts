@@ -26,7 +26,7 @@ export class VerificationsRepository {
       .onDuplicateKeyUpdate({ set: { verificationCode } });
   }
 
-  static async setIsVerifiedTrue(
+  static async setVerification(
     userId: string,
     characterId: number,
   ): Promise<void> {

@@ -21,7 +21,7 @@ export class ThemeRepository {
     await database
       .insert(themes)
       .values({ userId, characterId, theme })
-      .onDuplicateKeyUpdate({ set: { theme } });
+      .onDuplicateKeyUpdate({ set: { characterId, theme } });
   }
 
   static async delete(userId: string): Promise<void> {

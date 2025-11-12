@@ -95,13 +95,13 @@ export class HelpCommandHelper {
         {
           name: "/verify add",
           value:
-            "- Links your FFXIV character to your Discord account.\n- You will have to verify it by changing the bio of your Lodestone profile.\n- Verification is needed to use `/setup theme` and `/favorite`.",
+            "- Links your FFXIV character to your Discord account.\n- You will have to verify it by changing the bio of your Lodestone profile.\n- Verification is needed to show your profile via `/profile me`, manage and access favorites and to set a theme.",
           inline: false,
         },
         {
           name: "/verify remove",
           value:
-            "- Unlinks your FFXIV character from your Discord account.\n- Also removes any other information stored of you including `/setup theme` and `/favorite`.",
+            "- Unlinks your FFXIV character from your Discord account.\n- Also removes any other information stored of you including your favorites and your chosen theme.",
           inline: false,
         },
       ]);
@@ -166,7 +166,7 @@ export class HelpCommandHelper {
         {
           name: "/setup lodestone",
           value:
-            `- Set up which channels receive automated Lodestone news updates.\n- You can set or remove channels for each category in the modal.\n- Lodestone posts include:\n  - Topics (Latest news, PLL's and patch notes)\n  - Notices (Secondary news)\n  - Maintenances (All kind of maintenances and their durations)\n  - Updates (Outcome from maintenances)\n  - Status (Technical difficulties and server statuses)\n- By default, it requires \`Manage Channels\` permission to execute.`,
+            `- Set up which channels receive automated Lodestone news updates.\n- You can set or remove channels for each category of news.\n- The Lodestone news categories are:\n  - Topic (Latest news, PLL's and patch notes)\n  - Notice (Secondary news)\n  - Maintenance (All kind of maintenances and their durations)\n  - Update (Outcome from maintenances)\n  - Status (Technical difficulties and server statuses)\n- By default, this command requires \`Manage Channels\` permission to execute.`,
           inline: false,
         },
         {

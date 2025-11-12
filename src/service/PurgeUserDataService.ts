@@ -1,4 +1,3 @@
-import { CharacterDataRepository } from "../database/repository/CharacterDataRepository.ts";
 import { FavoritesRepository } from "../database/repository/FavoritesRepository.ts";
 import { ProfilePagesRepository } from "../database/repository/ProfilePagesRepository.ts";
 import { ThemeRepository } from "../database/repository/ThemeRepository.ts";
@@ -10,7 +9,6 @@ export class PurgeUserDataService {
       FavoritesRepository.deleteAll(userId),
       ProfilePagesRepository.delete(userId),
       ThemeRepository.delete(userId),
-      CharacterDataRepository.delete(characterId),
       VerificationsRepository.delete(userId, characterId),
     ]);
   }
