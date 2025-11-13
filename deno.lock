@@ -2,11 +2,8 @@
   "version": "5",
   "specifiers": {
     "npm:@discordjs/builders@0.9": "0.9.0",
-    "npm:@discordjs/builders@^1.13.0": "1.13.0",
-    "npm:@discordjs/rest@2": "2.6.0",
     "npm:@types/node@*": "24.2.0",
-    "npm:canvas@3": "3.2.0",
-    "npm:discord-api-types@0.37": "0.37.120",
+    "npm:canvas@^3.2.0": "3.2.0",
     "npm:discord.js@^13.17.1": "13.17.1",
     "npm:discord.js@^14.24.2": "14.24.2",
     "npm:drizzle-kit@~0.30.1": "0.30.6_esbuild@0.19.12",
@@ -484,9 +481,6 @@
     },
     "discord-api-types@0.36.3": {
       "integrity": "sha512-bz/NDyG0KBo/tY14vSkrwQ/n3HKPf87a0WFW/1M9+tXYK+vp5Z5EksawfCWo2zkAc6o7CClc0eff1Pjrqznlwg=="
-    },
-    "discord-api-types@0.37.120": {
-      "integrity": "sha512-7xpNK0EiWjjDFp2nAhHXezE4OUWm7s1zhc/UXXN6hnFFU8dfoPHgV0Hx0RPiCa3ILRpdeh152icc68DGCyXYIw=="
     },
     "discord-api-types@0.38.32": {
       "integrity": "sha512-UhIqkFuUVwBzejLPPWF18qixYPucMf718RnGh1NxZYNS7czXUmcUsWWkzWR7lRWj5pjfj4LwrnN9McvpfLvGqQ=="
@@ -1077,10 +1071,7 @@
   },
   "workspace": {
     "dependencies": [
-      "npm:@discordjs/builders@^1.13.0",
-      "npm:@discordjs/rest@2",
-      "npm:canvas@3",
-      "npm:discord-api-types@0.37",
+      "npm:canvas@^3.2.0",
       "npm:discord.js@^14.24.2",
       "npm:drizzle-kit@~0.30.1",
       "npm:drizzle-orm@~0.38.3",

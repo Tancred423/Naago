@@ -1,57 +1,51 @@
 import { ModalSubmitInteraction } from "discord.js";
-import Favorite from "../command/favorite.ts";
-import Profile from "../command/profile.ts";
-import Setup from "../command/setup.ts";
+import { FavoriteCommandHelper } from "../helper/FavoriteCommandHelper.ts";
+import { ProfileCommandHandler } from "../helper/ProfileCommandHelper.ts";
+import { SetupCommandHelper } from "../helper/SetupCommandHelper.ts";
+import { InvalidSubCommandError } from "./error/InvalidSubCommandError.ts";
+import { InvalidCommandError } from "./error/InvalidCommandError.ts";
 
 export class ModalInteractionHandler {
   static async execute(
     interaction: ModalSubmitInteraction,
   ): Promise<void> {
     const modalIdSplit = interaction.customId.split(".");
-    const commandName = modalIdSplit[0];
-    const action = modalIdSplit[1];
+    const command = modalIdSplit[0];
+    const subCommand = modalIdSplit[1];
 
-    switch (commandName) {
+    switch (command) {
       case "favorite":
-        switch (action) {
+        switch (subCommand) {
           case "remove":
-            await Favorite.remove(interaction);
+            await FavoriteCommandHelper.handleRemoveFavoriteModal(interaction);
             break;
           default:
-            throw new Error(
-              "ModalInteractionHandler#execute: Favorite action not recognized.",
-            );
+            throw new InvalidSubCommandError(subCommand);
         }
         break;
       case "profile":
-        switch (action) {
+        switch (subCommand) {
           case "favorite":
-            await Profile.handleFavoriteModal(interaction);
+            await ProfileCommandHandler.handleFavoriteModal(interaction);
             break;
           default:
-            throw new Error(
-              "ModalInteractionHandler#execute: Profile action not recognized.",
-            );
+            throw new InvalidSubCommandError(subCommand);
         }
         break;
       case "setup":
-        switch (action) {
+        switch (subCommand) {
           case "lodestone":
-            await Setup.handleModal(interaction);
+            await SetupCommandHelper.handleLodestoneModal(interaction);
             break;
           case "theme":
-            await Setup.handleThemeModal(interaction);
+            await SetupCommandHelper.handleThemeModal(interaction);
             break;
           default:
-            throw new Error(
-              "ModalInteractionHandler#execute: Setup action not recognized.",
-            );
+            throw new InvalidSubCommandError(subCommand);
         }
         break;
       default:
-        throw new Error(
-          "ModalInteractionHandler#execute: Command not recognized.",
-        );
+        throw new InvalidCommandError(command);
     }
   }
 }

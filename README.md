@@ -4,8 +4,7 @@ A FFXIV Discord Bot for character profiles and lodestone news.
 
 ## Features
 
-- 📰 Automated Lodestone news notifications (Topics, Notices, Maintenances,
-  Updates, Statuses)
+- 📰 Automated Lodestone news notifications (Topics, Notices, Maintenances, Updates, Statuses)
 - 🛠️ Command to view active maintenances
 - 🎮 Character profile lookup from FFXIV Lodestone
 - 🎨 Customizable profile themes
@@ -48,9 +47,8 @@ to add the bot to your server.
 
 2. **Create Discord application and upload emojis**
 
-If you haven't yet, create a Discord application on the Discord Developer
-Portal. After that, head to the emoji page and upload the ones from `emoji/`.
-Copy the markdown of these emojis and fill them into your `.env` file.
+If you haven't yet, create a Discord application on the Discord Developer Portal. After that, head to the emoji page and
+upload the ones from `emoji/`. Copy the markdown of these emojis and fill them into your `.env` file.
 
 3. **Start all services**
 

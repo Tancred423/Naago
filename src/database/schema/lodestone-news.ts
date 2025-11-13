@@ -1,11 +1,4 @@
-import {
-  index,
-  int,
-  mysqlTable,
-  text,
-  timestamp,
-  varchar,
-} from "drizzle-orm/mysql-core";
+import { index, int, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 export const topicData = mysqlTable("topic_data", {
   id: int("id").primaryKey().autoincrement(),

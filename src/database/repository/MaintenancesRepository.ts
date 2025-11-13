@@ -48,9 +48,7 @@ export class MaintenancesRepository {
         startDate: maintenance.start_timestamp
           ? moment(maintenance.start_timestamp).tz("Europe/London").toDate()
           : null,
-        endDate: maintenance.end_timestamp
-          ? moment(maintenance.end_timestamp).tz("Europe/London").toDate()
-          : null,
+        endDate: maintenance.end_timestamp ? moment(maintenance.end_timestamp).tz("Europe/London").toDate() : null,
       });
   }
 

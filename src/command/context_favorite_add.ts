@@ -8,25 +8,25 @@ import { FetchCharacterService } from "../service/FetchCharacterService.ts";
 import { FavoritesRepository } from "../database/repository/FavoritesRepository.ts";
 import { MaximumAmountReachedError } from "../database/error/MaximumAmountReachedError.ts";
 import { AlreadyInDatabaseError } from "../database/error/AlreadyInDatabaseError.ts";
-import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
+import { Command } from "./type/Command.ts";
+import { DiscordMessageService } from "../service/DiscordMessageService.ts";
 
-export default {
-  data: new ContextMenuCommandBuilder()
+class ContextFavoriteAddCommand extends Command {
+  readonly data = new ContextMenuCommandBuilder()
     .setName("Add Favorite")
-    .setType(ApplicationCommandType.User),
-  async execute(interaction: ContextMenuCommandInteraction) {
+    .setType(ApplicationCommandType.User);
+
+  async execute(interaction: ContextMenuCommandInteraction): Promise<void> {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const user = interaction.user;
-    const targetCharacterDataDto = await FetchCharacterService
-      .findVerifiedCharacterByUserId(interaction.targetId);
+    const targetCharacterDataDto = await FetchCharacterService.findVerifiedCharacterByUserId(interaction.targetId);
+
     if (!targetCharacterDataDto) {
-      await sendError(
-        interaction,
-        "This user does not have a verified character.",
-      );
+      await DiscordMessageService.editReplyError(interaction, "This user does not have a verified character.");
       return;
     }
+
     const targetCharacter = targetCharacterDataDto.character;
 
     try {
@@ -36,55 +36,28 @@ export default {
         targetCharacter.name,
         `${targetCharacter.server.world} (${targetCharacter.server.dc})`,
       );
-      await sendSuccess(
-        interaction,
-        `\`${targetCharacter.name}\` was added as favorite.`,
-      );
-    } catch (err: unknown) {
-      if (err instanceof MaximumAmountReachedError) {
-        await sendError(
+      await DiscordMessageService.editReplySuccess(interaction, `\`${targetCharacter.name}\` was added as favorite.`);
+    } catch (error: unknown) {
+      if (error instanceof MaximumAmountReachedError) {
+        await DiscordMessageService.editReplyError(
           interaction,
-          `\`${targetCharacter.name}\` was NOT added as favorite as you already reached the maximum of 25.\nPlease remove a favorite before adding a new one. See \`/favorite remove\`.`,
+          `\`${targetCharacter.name}\` was NOT added as favorite as you already reached the maximum of 25.` +
+            "\nPlease remove a favorite before adding a new one. See `/favorite remove`.",
         );
         return;
       }
 
-      if (err instanceof AlreadyInDatabaseError) {
-        await sendSuccess(
-          interaction,
-          `\`${targetCharacter.name}\` is already a favorite.`,
-        );
+      if (error instanceof AlreadyInDatabaseError) {
+        await DiscordMessageService.editReplySuccess(interaction, `\`${targetCharacter.name}\` is already a favorite.`);
         return;
       }
 
-      await sendError(
+      await DiscordMessageService.editReplyError(
         interaction,
         `An unknown error prevented \`${targetCharacter.name}\` from being added to your favorites. Please try again later.`,
       );
     }
-  },
-};
-
-async function sendSuccess(
-  interaction: ContextMenuCommandInteraction,
-  message: string,
-): Promise<void> {
-  const embed = DiscordEmbedService.getSuccessEmbed(message);
-
-  await interaction.editReply({
-    content: " ",
-    embeds: [embed],
-  });
+  }
 }
 
-async function sendError(
-  interaction: ContextMenuCommandInteraction,
-  message: string,
-): Promise<void> {
-  const embed = DiscordEmbedService.getErrorEmbed(message);
-
-  await interaction.editReply({
-    content: " ",
-    embeds: [embed],
-  });
-}
+export default new ContextFavoriteAddCommand();

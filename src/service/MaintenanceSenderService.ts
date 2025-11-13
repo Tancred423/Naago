@@ -25,9 +25,7 @@ export class MaintenanceSenderService {
       const date = moment(maintenance.date).tz("Europe/London").toDate();
       if (await MaintenancesRepository.find(maintenance.title, date)) continue;
 
-      maintenance.tag = maintenance.tag === "[Maintenance]"
-        ? null
-        : maintenance.tag;
+      maintenance.tag = maintenance.tag === "[Maintenance]" ? null : maintenance.tag;
       maintenance.tag = StringManipulationService.convertTag(
         "maintenance",
         maintenance.tag ?? null,

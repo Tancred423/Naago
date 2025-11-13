@@ -1,11 +1,11 @@
 import { ButtonInteraction, MessageFlags } from "discord.js";
-import Favorite from "../command/favorite.ts";
-import Profile from "../command/profile.ts";
-import Verify from "../command/verify.ts";
 import { ArrayManipulationService } from "../service/ArrayManipulationService.ts";
 import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
 import { HelpCommandHelper } from "../helper/HelpCommandHelper.ts";
 import { StringManipulationService } from "../service/StringManipulationService.ts";
+import { FavoriteCommandHelper } from "../helper/FavoriteCommandHelper.ts";
+import { ProfileCommandHandler } from "../helper/ProfileCommandHelper.ts";
+import { VerifyCommandHelper } from "../helper/VerifyCommandHelper.ts";
 
 export class ButtonInteractionHandler {
   static cooldown: string[] = [];
@@ -43,25 +43,23 @@ export class ButtonInteractionHandler {
 
     switch (commandName) {
       case "profile": {
-        const content = StringManipulationService.buildLoadingText(
-          "Generating profile image...",
-        );
+        const content = StringManipulationService.buildLoadingText("Generating profile image...");
         await interaction.message.edit({ content });
         await interaction.deferUpdate();
-        await Profile.update(interaction, buttonIdSplit);
+        await ProfileCommandHandler.handlePageSwapButton(interaction, buttonIdSplit);
         break;
       }
       case "verify":
         await interaction.deferUpdate();
-        await Verify.update(interaction, buttonIdSplit);
+        await VerifyCommandHelper.update(interaction, buttonIdSplit);
         break;
       case "favorite":
         await interaction.deferUpdate();
-        await Favorite.update(interaction, buttonIdSplit);
+        await FavoriteCommandHelper.handleRemoveFavoriteConfirmationButton(interaction, buttonIdSplit);
         break;
       case "help":
         await interaction.deferUpdate();
-        await HelpCommandHelper.update(interaction, buttonIdSplit);
+        await HelpCommandHelper.handlePageSwapButton(interaction, buttonIdSplit);
         break;
       default:
         throw new Error(

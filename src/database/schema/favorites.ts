@@ -1,11 +1,4 @@
-import {
-  index,
-  int,
-  mysqlTable,
-  primaryKey,
-  timestamp,
-  varchar,
-} from "drizzle-orm/mysql-core";
+import { index, int, mysqlTable, primaryKey, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 export const favorites = mysqlTable("favorites", {
   userId: varchar("user_id", { length: 255 }).notNull(),

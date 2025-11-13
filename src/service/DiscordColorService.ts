@@ -1,10 +1,4 @@
-import {
-  ButtonInteraction,
-  Client,
-  ColorResolvable,
-  CommandInteraction,
-  Guild,
-} from "discord.js";
+import { ButtonInteraction, Client, ColorResolvable, CommandInteraction, Guild } from "discord.js";
 
 const blurple = Deno.env.get("COLOR_BLURPLE")!;
 

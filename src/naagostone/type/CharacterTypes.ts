@@ -41,6 +41,7 @@ export interface FreeCompany {
   name: string;
   icon_layer_0: string;
   icon_layer_1: string;
+  icon_layer_2: string;
 }
 
 export interface ClassJob {
@@ -70,13 +71,21 @@ export interface Equipment {
   mirage_name?: string;
   mirage_icon?: string;
   rarity?: string;
-  color_code?: string;
-  color_name?: string;
+  color_code: string | null;
+  color_name: string | null;
+  color_code2: string | null;
+  color_name2: string | null;
   amount_dye_slots?: number;
   materia_1?: string;
   materia_1_stats?: string;
   materia_2?: string;
   materia_2_stats?: string;
+  materia_3?: string;
+  materia_3_stats?: string;
+  materia_4?: string;
+  materia_4_stats?: string;
+  materia_5?: string;
+  materia_5_stats?: string;
   type?: string;
   item_level?: string;
 }
@@ -93,9 +102,9 @@ export interface Character {
   nameday: string;
   guardian_deity: GuardianDeity;
   town: Town;
-  started: number;
+  started: string;
   ap: number;
-  amount_achievements: number;
+  amount_achievements: string;
   amount_mounts: number;
   amount_minions: number;
   active_classjob: ActiveClassJob;
@@ -170,7 +179,7 @@ export interface Character {
   ring1: Equipment | null;
   ring2: Equipment | null;
   soulcrystal: Equipment | null;
-  facewear?: Equipment;
+  facewear: Equipment | null;
   item_level: string;
 }
 

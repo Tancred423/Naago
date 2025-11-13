@@ -12,14 +12,10 @@ const rest = new REST({ version: "10" }).setToken(token);
 
 rest
   .put(Routes.applicationCommands(clientId), { body: [] })
-  .then(() =>
-    log.info("Successfully removed all global application (/) commands.")
-  )
+  .then(() => log.info("Successfully removed all global application (/) commands."))
   .catch(console.error);
 
 rest
   .put(Routes.applicationGuildCommands(clientId, guildId), { body: [] })
-  .then(() =>
-    log.info("Successfully removed all guild application (/) commands.")
-  )
+  .then(() => log.info("Successfully removed all guild application (/) commands."))
   .catch(console.error);

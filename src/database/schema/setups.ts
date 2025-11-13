@@ -1,10 +1,4 @@
-import {
-  index,
-  mysqlTable,
-  primaryKey,
-  timestamp,
-  varchar,
-} from "drizzle-orm/mysql-core";
+import { index, mysqlTable, primaryKey, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 export const setups = mysqlTable("setups", {
   guildId: varchar("guild_id", { length: 255 }).notNull(),

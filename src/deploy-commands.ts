@@ -1,6 +1,7 @@
 import { load } from "@std/dotenv";
-import { readdirSync } from "node:fs";
+import { readdirSync, statSync } from "node:fs";
 import { REST, Routes } from "discord.js";
+import { RESTPostAPIApplicationCommandsJSONBody } from "discord.js";
 import * as log from "@std/log";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,8 +14,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 log.setup({
   handlers: {
     console: new log.ConsoleHandler("DEBUG", {
-      formatter: (logRecord) =>
-        `${logRecord.datetime.toISOString()} [${logRecord.levelName}] ${logRecord.msg}`,
+      formatter: (logRecord) => `${logRecord.datetime.toISOString()} [${logRecord.levelName}] ${logRecord.msg}`,
     }),
   },
   loggers: {
@@ -31,9 +31,13 @@ const token = Deno.env.get("DISCORD_TOKEN")!;
 const isProd = Deno.env.get("IS_PROD")! === "true";
 
 if (isProd) {
-  const commands: any[] = [];
+  const commands: RESTPostAPIApplicationCommandsJSONBody[] = [];
   const commandFiles = readdirSync(join(__dirname, "command"))
-    .filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
+    .filter((file) => {
+      const filePath = join(__dirname, "command", file);
+      return (file.endsWith(".ts") || file.endsWith(".js")) &&
+        statSync(filePath).isFile();
+    });
 
   for (const file of commandFiles) {
     const command = await import(join(__dirname, "command", file));
@@ -46,14 +50,16 @@ if (isProd) {
 
   rest
     .put(Routes.applicationCommands(clientId), { body: commands })
-    .then(() =>
-      log.info("Successfully registered global application commands.")
-    )
+    .then(() => log.info("Successfully registered global application commands."))
     .catch(console.error);
 } else {
-  const commands: any[] = [];
+  const commands: RESTPostAPIApplicationCommandsJSONBody[] = [];
   const commandFiles = readdirSync(join(__dirname, "command"))
-    .filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
+    .filter((file) => {
+      const filePath = join(__dirname, "command", file);
+      return (file.endsWith(".ts") || file.endsWith(".js")) &&
+        statSync(filePath).isFile();
+    });
 
   for (const file of commandFiles) {
     const command = await import(join(__dirname, "command", file));

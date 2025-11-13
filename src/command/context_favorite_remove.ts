@@ -7,70 +7,48 @@ import {
 import { FavoritesRepository } from "../database/repository/FavoritesRepository.ts";
 import { NotInDatabaseError } from "../database/error/NotInDatabaseError.ts";
 import { FetchCharacterService } from "../service/FetchCharacterService.ts";
-import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
+import { Command } from "./type/Command.ts";
+import { DiscordMessageService } from "../service/DiscordMessageService.ts";
 
-export default {
-  data: new ContextMenuCommandBuilder()
+class ContextFavoriteRemoveCommand extends Command {
+  readonly data = new ContextMenuCommandBuilder()
     .setName("Remove Favorite")
-    .setType(ApplicationCommandType.User),
-  async execute(interaction: ContextMenuCommandInteraction) {
+    .setType(ApplicationCommandType.User);
+
+  async execute(interaction: ContextMenuCommandInteraction): Promise<void> {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const user = interaction.user;
-    const targetCharacterDataDto = await FetchCharacterService
-      .findVerifiedCharacterByUserId(interaction.targetId);
+    const targetCharacterDataDto = await FetchCharacterService.findVerifiedCharacterByUserId(interaction.targetId);
+
     if (!targetCharacterDataDto) {
-      await sendError(
-        interaction,
-        "This user does not have a verified character.",
-      );
+      await DiscordMessageService.editReplyError(interaction, "This user does not have a verified character.");
       return;
     }
+
     const targetCharacter = targetCharacterDataDto.character;
 
     try {
       await FavoritesRepository.delete(user.id, targetCharacter.id);
-      await sendSuccess(
+      await DiscordMessageService.editReplySuccess(
         interaction,
         `\`${targetCharacter.name}\` has been removed from your favorites.`,
       );
     } catch (error: unknown) {
       if (error instanceof NotInDatabaseError) {
-        await sendSuccess(
+        await DiscordMessageService.editReplySuccess(
           interaction,
           `\`${targetCharacter.name}\` is not a favorite.`,
         );
         return;
       }
 
-      await sendError(
+      await DiscordMessageService.editReplyError(
         interaction,
-        `\`${targetCharacter.name}\` could not be removed from your favorites. Please contact Tancred#0001 for help.`,
+        `\`${targetCharacter.name}\` could not be removed from your favorites. Please try again later.`,
       );
     }
-  },
-};
-
-async function sendSuccess(
-  interaction: ContextMenuCommandInteraction,
-  message: string,
-): Promise<void> {
-  const embed = DiscordEmbedService.getSuccessEmbed(message);
-
-  await interaction.editReply({
-    content: " ",
-    embeds: [embed],
-  });
+  }
 }
 
-async function sendError(
-  interaction: ContextMenuCommandInteraction,
-  message: string,
-): Promise<void> {
-  const embed = DiscordEmbedService.getErrorEmbed(message);
-
-  await interaction.editReply({
-    content: " ",
-    embeds: [embed],
-  });
-}
+export default new ContextFavoriteRemoveCommand();

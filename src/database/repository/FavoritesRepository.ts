@@ -30,9 +30,7 @@ export class FavoritesRepository {
     }
 
     if (
-      userFavorites?.find((userFavorite) =>
-        userFavorite.characterId === characterId
-      )
+      userFavorites?.find((userFavorite) => userFavorite.characterId === characterId)
     ) {
       throw new AlreadyInDatabaseError("The character is already a favorite.");
     }
@@ -52,9 +50,7 @@ export class FavoritesRepository {
     const userFavorites = await this.get(userId);
 
     if (
-      !userFavorites?.find((userFavorite) =>
-        userFavorite.characterId === characterId
-      )
+      !userFavorites?.find((userFavorite) => userFavorite.characterId === characterId)
     ) {
       throw new NotInDatabaseError("This character is not a favorite.");
     }

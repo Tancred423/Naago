@@ -1,14 +1,14 @@
 import { readFileSync } from "node:fs";
-import { createCanvas, loadImage } from "canvas";
+import { CanvasRenderingContext2D, createCanvas, loadImage } from "canvas";
 import { ActionRowBuilder, ButtonBuilder } from "discord.js";
-import { BaseInteraction } from "discord.js";
 import moment from "moment";
 import { Buffer } from "node:buffer";
-import { Character } from "../naagostone/type/CharacterTypes.ts";
+import { Character, ClassJob, Equipment } from "../naagostone/type/CharacterTypes.ts";
 import { ThemeRepository } from "../database/repository/ThemeRepository.ts";
 import * as log from "@std/log";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { Theme } from "./type/Theme.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const BASE_PATH = join(__dirname, "..");
@@ -35,19 +35,14 @@ type ProfilePage =
   | "portrait";
 type SubProfilePage = "dowdom" | "dohdol" | null;
 
-interface Theme {
-  [key: string]: any;
-}
-
 export class ProfileGeneratorService {
   static async getImage(
-    interaction: BaseInteraction,
     character: Character,
     isVerified: boolean,
     profilePage: ProfilePage,
     subProfilePage: SubProfilePage = null,
   ): Promise<Buffer | string> {
-    const profile = new Profile(interaction, character, isVerified);
+    const profile = new Profile(character, isVerified);
 
     if (profilePage === "profile") return await profile.getProfile();
     else if (profilePage === "classesjobs") {
@@ -113,18 +108,15 @@ export class ProfileGeneratorService {
 }
 
 class Profile {
-  private character: any;
+  private character: Character;
   private isVerified: boolean;
-  private userId: string;
 
   constructor(
-    interaction: BaseInteraction,
-    character: any,
+    character: Character,
     isVerified: boolean,
   ) {
     this.character = character;
     this.isVerified = isVerified;
-    this.userId = interaction.user.id;
   }
 
   async getTheme(): Promise<Theme> {
@@ -294,7 +286,7 @@ class Profile {
       "Started",
       this.character.started === "Private"
         ? "Private"
-        : moment(this.character.started * 1000).format("Do MMM Y"),
+        : moment(parseInt(this.character.started) * 1000).format("Do MMM Y"),
     );
     await profileBlock.add(
       "City-state",
@@ -305,8 +297,10 @@ class Profile {
     );
     await profileBlock.add(
       "Characteristics",
-      `${this.character.characteristics.race} (${this.character.characteristics.tribe})`,
-      this.character.characteristics.gender == "♀"
+      `${this.character.characteristics?.race ?? "Unknown Race"} (${
+        this.character.characteristics?.tribe ?? "Uknown Tribe"
+      })`,
+      this.character.characteristics?.gender === "♀"
         ? join(
           BASE_PATH,
           "image",
@@ -333,11 +327,13 @@ class Profile {
     await profileBlock.add(
       "Free Company",
       this.character.free_company?.name ?? "-",
-      [
-        this.character.free_company?.icon_layer_0,
-        this.character.free_company?.icon_layer_1,
-        this.character.free_company?.icon_layer_2,
-      ],
+      this.character.free_company
+        ? [
+          this.character.free_company?.icon_layer_0,
+          this.character.free_company?.icon_layer_1,
+          this.character.free_company?.icon_layer_2,
+        ]
+        : null,
       true,
     );
     await profileBlock.add(
@@ -348,13 +344,12 @@ class Profile {
     );
     await profileBlock.add(
       "Achievements",
-      this.character.amount_achievements === "Private"
-        ? "Private"
-        : `${
-          Math.round(
-            (this.character.amount_achievements / maxAchievements) * 100,
-          )
-        } % (${this.character.ap} AP)`,
+      this.character.amount_achievements === "Private" ? "Private" : `${
+        Math.round(
+          (parseInt(this.character.amount_achievements) / maxAchievements) *
+            100,
+        )
+      } % (${this.character.ap} AP)`,
       join(BASE_PATH, "image", "achievements.png"),
       false,
       false,
@@ -364,9 +359,7 @@ class Profile {
     ctx.textAlign = "center";
     await profileBlock.add(
       "Mounts",
-      this.character.amount_mounts
-        ? `${Math.round((this.character.amount_mounts / maxMounts) * 100)} %`
-        : "0 %",
+      this.character.amount_mounts ? `${Math.round((this.character.amount_mounts / maxMounts) * 100)} %` : "0 %",
       null,
       false,
       true,
@@ -375,9 +368,7 @@ class Profile {
     );
     await profileBlock.add(
       "Minions",
-      this.character.amount_minions
-        ? `${Math.round((this.character.amount_minions / maxMinions) * 100)} %`
-        : "0 %",
+      this.character.amount_minions ? `${Math.round((this.character.amount_minions / maxMinions) * 100)} %` : "0 %",
       null,
       false,
       true,
@@ -859,9 +850,7 @@ class Profile {
     ctx.fillText(
       eureka
         ? `${eureka.name}: ${eureka.level}` +
-          (eureka.current_exp !== "--"
-            ? ` (${eureka.current_exp} / ${eureka.max_exp} exp)`
-            : "")
+          (eureka.current_exp !== "--" ? ` (${eureka.current_exp} / ${eureka.max_exp} exp)` : "")
         : "-",
       x + 10,
       yAdd + 30,
@@ -1158,7 +1147,7 @@ class Profile {
     ctx.textAlign = "right";
     ctx.fillStyle = theme.block_content_highlight;
     ctx.font = `normal 32px roboto condensed`;
-    ctx.fillText(this.character.hp, 195, yAdd + 25);
+    ctx.fillText(this.character.hp.toString(), 195, yAdd + 25);
 
     ctx.fillStyle = theme.green;
     ctx.roundRect(x + 20, yAdd + 60, 165, 7, 0).fill();
@@ -1175,7 +1164,7 @@ class Profile {
     ctx.textAlign = "right";
     ctx.fillStyle = theme.block_content_highlight;
     ctx.font = `normal 32px roboto condensed`;
-    ctx.fillText(this.character.mp_gp_cp, fWidth, yAdd + 25);
+    ctx.fillText(this.character.mp_gp_cp.toString(), fWidth, yAdd + 25);
 
     ctx.fillStyle = theme.purple;
     ctx.roundRect(fWidth / 2 + 40, yAdd + 60, 165, 7, 0).fill();
@@ -1376,10 +1365,10 @@ class Profile {
 
 class ProfileBlock {
   private theme: Theme;
-  private ctx: any;
+  private ctx: CanvasRenderingContext2D;
   private yAdd: number;
 
-  constructor(theme: Theme, ctx: any, yAdd: number) {
+  constructor(theme: Theme, ctx: CanvasRenderingContext2D, yAdd: number) {
     this.theme = theme;
     this.ctx = ctx;
     this.yAdd = yAdd;
@@ -1455,33 +1444,34 @@ class ProfileBlock {
 
 class ClassJobBlock {
   private theme: Theme;
-  private ctx: any;
+  private ctx: CanvasRenderingContext2D;
   private x: number;
   private yAdd: number;
 
-  constructor(theme: Theme, ctx: any, x: number, yAdd: number) {
+  constructor(
+    theme: Theme,
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    yAdd: number,
+  ) {
     this.theme = theme;
     this.ctx = ctx;
     this.x = x;
     this.yAdd = yAdd;
   }
 
-  async add(job: any): Promise<void> {
+  async add(job: ClassJob): Promise<void> {
     this.yAdd += 40;
 
     const jobIcon = await loadImage(job.icon);
     this.ctx.drawImage(jobIcon, this.x + 10, this.yAdd + 25, 30, 30);
 
-    const localMaxLevel = job.unlockstate === "Blue Mage"
-      ? maxLevelLimited
-      : maxLevel;
+    const localMaxLevel = job.unlockstate === "Blue Mage" ? maxLevelLimited : maxLevel;
 
     this.ctx.textAlign = "right";
-    this.ctx.fillStyle = job.level === localMaxLevel
-      ? this.theme.block_content_highlight
-      : this.theme.block_content;
+    this.ctx.fillStyle = job.level === localMaxLevel ? this.theme.block_content_highlight : this.theme.block_content;
     this.ctx.font = `bold 30px arial`;
-    this.ctx.fillText(job.level, this.x + 90, this.yAdd + 23);
+    this.ctx.fillText(job.level.toString(), this.x + 90, this.yAdd + 23);
     this.ctx.textAlign = "left";
 
     this.ctx.fillStyle = this.theme.block_content;
@@ -1504,11 +1494,9 @@ class ClassJobBlock {
       .fill();
   }
 
-  getLevelPercent(job: any): number {
+  getLevelPercent(job: ClassJob): number {
     const currentExpParse = job.current_exp.toString().replaceAll(",", "");
-    const currentExp = isNaN(Number(currentExpParse))
-      ? 0
-      : parseInt(currentExpParse);
+    const currentExp = isNaN(Number(currentExpParse)) ? 0 : parseInt(currentExpParse);
 
     const maxExpParse = job.max_exp.toString().replaceAll(",", "");
     const maxExp = isNaN(Number(maxExpParse)) ? 0 : parseInt(maxExpParse);
@@ -1520,12 +1508,18 @@ class ClassJobBlock {
 
 class Stats {
   private theme: Theme;
-  private ctx: any;
+  private ctx: CanvasRenderingContext2D;
   private x: number;
   private yAdd: number;
   private fWidth: number;
 
-  constructor(theme: Theme, ctx: any, x: number, yAdd: number, fWidth: number) {
+  constructor(
+    theme: Theme,
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    yAdd: number,
+    fWidth: number,
+  ) {
     this.theme = theme;
     this.ctx = ctx;
     this.x = x;
@@ -1547,7 +1541,7 @@ class Stats {
     this.ctx.fillStyle = this.theme.block_title;
     this.ctx.textAlign = "right";
     this.ctx.fillText(
-      content ?? "0",
+      content.toString() ?? "0",
       this.x > 200 ? this.fWidth : this.fWidth / 2,
       this.yAdd + 23,
     );
@@ -1556,7 +1550,7 @@ class Stats {
 
 class Gear {
   private theme: Theme;
-  private ctx: any;
+  private ctx: CanvasRenderingContext2D;
   private x: number;
   private y: number;
   private isLeft: boolean;
@@ -1564,7 +1558,13 @@ class Gear {
   private width: number;
   private height: number;
 
-  constructor(theme: Theme, ctx: any, x: number, y: number, isLeft: boolean) {
+  constructor(
+    theme: Theme,
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    isLeft: boolean,
+  ) {
     this.theme = theme;
     this.ctx = ctx;
     this.x = x;
@@ -1575,7 +1575,11 @@ class Gear {
     this.height = 87;
   }
 
-  async add(gear: any, type: string, isFirst = false): Promise<void> {
+  async add(
+    gear: Equipment | null,
+    type: string,
+    isFirst = false,
+  ): Promise<void> {
     if (!isFirst) this.y += 92;
 
     if (this.isLeft) this.ctx.textAlign = "right";
@@ -1624,7 +1628,7 @@ class Gear {
       this.ctx.font = `normal 18px roboto condensed`;
       this.ctx.fillStyle = this.theme.block_title;
       this.ctx.fillText(
-        gear.item_level,
+        gear.item_level ?? "",
         this.isLeft ? this.x - 45 : this.x + 45,
         this.y,
         30,
@@ -1690,7 +1694,7 @@ class Gear {
     // Item name
     this.ctx.font = `bold 15px roboto condensed`;
     this.ctx.fillStyle = gear.rarity
-      ? this.theme[gear.rarity] ?? this.theme.block_content
+      ? this.theme[gear.rarity as keyof Theme] ?? this.theme.block_content
       : this.theme.block_content;
     this.ctx.fillText(
       gear.name?.split("<")[0],
@@ -1735,7 +1739,7 @@ class Gear {
     }
 
     if (this.isLeft && !isFirst) {
-      if (gear.amount_dye_slots > 0) {
+      if ((gear.amount_dye_slots ?? 0) > 0) {
         // Color name
         if (!gear.color_name) gear.color_name = "Undyed";
         if (!gear.color_code) gear.color_code = "#00000000";
@@ -1773,7 +1777,7 @@ class Gear {
         );
       }
 
-      if (gear.amount_dye_slots > 1) {
+      if ((gear.amount_dye_slots ?? 0) > 1) {
         // Color name 2
         if (!gear.color_name2) gear.color_name2 = "Undyed";
         if (!gear.color_code2) gear.color_code2 = "#00000000";

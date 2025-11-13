@@ -1,9 +1,4 @@
-import {
-  CommandInteraction,
-  GuildMember,
-  MessageFlags,
-  PermissionsBitField,
-} from "discord.js";
+import { CommandInteraction, GuildMember, MessageFlags, PermissionsBitField } from "discord.js";
 import { DiscordEmbedService } from "./DiscordEmbedService.ts";
 import { ArrayManipulationService } from "./ArrayManipulationService.ts";
 

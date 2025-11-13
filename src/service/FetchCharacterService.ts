@@ -1,16 +1,10 @@
-import {
-  ButtonInteraction,
-  CommandInteraction,
-  ModalSubmitInteraction,
-  StringSelectMenuInteraction,
-} from "discord.js";
+import { ButtonInteraction, CommandInteraction, ModalSubmitInteraction, StringSelectMenuInteraction } from "discord.js";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
 import { CharacterDataRepository } from "../database/repository/CharacterDataRepository.ts";
 import { Character } from "../naagostone/type/CharacterTypes.ts";
 import moment from "moment";
 import { VerificationsRepository } from "../database/repository/VerificationsRepository.ts";
 import { CharacterDataDto } from "../naagostone/dto/CharacterDataDto.ts";
-import { DiscordEmojiService } from "./DiscordEmojiService.ts";
 import { StringManipulationService } from "./StringManipulationService.ts";
 
 export class FetchCharacterService {

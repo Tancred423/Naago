@@ -1,5 +1,5 @@
 import { load } from "@std/dotenv";
-import { readdirSync } from "node:fs";
+import { readdirSync, statSync } from "node:fs";
 import {
   ActivityType,
   ButtonInteraction,
@@ -25,6 +25,7 @@ import { MaintenanceSenderService } from "./service/MaintenanceSenderService.ts"
 import { UpdateSenderService } from "./service/UpdateSenderService.ts";
 import { ButtonInteractionHandler } from "./handler/ButtonInteractionHandler.ts";
 import { ModalInteractionHandler } from "./handler/ModalInteractionHandler.ts";
+import { Command } from "./command/type/Command.ts";
 
 // Env
 await load({ export: true });
@@ -34,8 +35,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 log.setup({
   handlers: {
     console: new log.ConsoleHandler("DEBUG", {
-      formatter: (logRecord) =>
-        `${logRecord.datetime.toISOString()} [${logRecord.levelName}] ${logRecord.msg}`,
+      formatter: (logRecord) => `${logRecord.datetime.toISOString()} [${logRecord.levelName}] ${logRecord.msg}`,
     }),
   },
   loggers: {
@@ -82,17 +82,20 @@ CanvasRenderingContext2D.prototype.roundRect = function (
 
 // Discord bot setup
 const token = Deno.env.get("DISCORD_TOKEN")!;
-const lodestoneCheckOnStart =
-  Deno.env.get("LODESTONE_CHECK_ON_START") === "true";
+const lodestoneCheckOnStart = Deno.env.get("LODESTONE_CHECK_ON_START") === "true";
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] }) as Client & {
-  commands: Collection<string, any>;
+  commands: Collection<string, Command>;
 };
 
 client.commands = new Collection();
 
 const commandFiles = readdirSync(join(__dirname, "command"))
-  .filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
+  .filter((file) => {
+    const filePath = join(__dirname, "command", file);
+    return (file.endsWith(".ts") || file.endsWith(".js")) &&
+      statSync(filePath).isFile();
+  });
 
 for (const file of commandFiles) {
   const command = await import(join(__dirname, "command", file));
@@ -234,6 +237,18 @@ client.on("interactionCreate", async (interaction) => {
     }
   } else if (interaction.isUserContextMenuCommand()) {
     const command = client.commands.get(interaction.commandName);
+
+    if (!command) {
+      log.error(`Command not found: ${interaction.commandName}`);
+      const embed = DiscordEmbedService.getErrorEmbed(
+        `Command '${interaction.commandName}' not found. Try redeploying commands.`,
+      );
+      await interaction.reply({
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
 
     try {
       await command.execute(interaction as ContextMenuCommandInteraction);
