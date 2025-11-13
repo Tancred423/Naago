@@ -11,11 +11,11 @@ import { Command } from "./type/Command.ts";
 import { DiscordMessageService } from "../service/DiscordMessageService.ts";
 
 class ContextFavoriteRemoveCommand extends Command {
-  readonly data = new ContextMenuCommandBuilder()
+  public readonly data = new ContextMenuCommandBuilder()
     .setName("Remove Favorite")
     .setType(ApplicationCommandType.User);
 
-  async execute(interaction: ContextMenuCommandInteraction): Promise<void> {
+  public async execute(interaction: ContextMenuCommandInteraction): Promise<void> {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const user = interaction.user;

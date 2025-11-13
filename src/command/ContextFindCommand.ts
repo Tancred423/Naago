@@ -6,11 +6,11 @@ import { Command } from "./type/Command.ts";
 import { DiscordMessageService } from "../service/DiscordMessageService.ts";
 
 class ContextFindCommand extends Command {
-  readonly data = new ContextMenuCommandBuilder()
+  public readonly data = new ContextMenuCommandBuilder()
     .setName("Find")
     .setType(ApplicationCommandType.User);
 
-  async execute(interaction: ContextMenuCommandInteraction): Promise<void> {
+  public async execute(interaction: ContextMenuCommandInteraction): Promise<void> {
     const isVerified = interaction.targetId === interaction.user.id;
     const targetCharacterDataDtoCached = await FetchCharacterService.findVerifiedCharacterByUserId(
       interaction.targetId,
