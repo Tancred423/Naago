@@ -14,9 +14,15 @@ services:
       - .env
     environment:
       IS_PROD: true
-    network_mode: bridge
+    networks:
+      - mysql-network
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
+
+networks:
+  mysql-network:
+    external: true
+    name: mysql-network
