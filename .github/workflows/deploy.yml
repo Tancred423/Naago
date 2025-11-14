@@ -71,11 +71,17 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Get lowercase repository name
-        id: repo
-        run: |
-          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          echo "repo=$REPO_LOWER" >> $GITHUB_OUTPUT
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy docker-compose.prod.yml to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "docker-compose.prod.yml"
+          target: ${{ secrets.DEPLOY_PATH }}
 
       - name: Deploy to server
         uses: appleboy/ssh-action@master
@@ -87,16 +93,12 @@ jobs:
             set -e
             cd ${{ secrets.DEPLOY_PATH }}
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
-            echo "Validating docker-compose.prod.yml..."
-            docker compose -f docker-compose.prod.yml config > /dev/null || { echo "ERROR: docker-compose.prod.yml is invalid!"; docker compose -f docker-compose.prod.yml config; exit 1; }
             echo "Stopping existing containers..."
             docker compose -f docker-compose.prod.yml down --volumes=false || true
-            echo "Cleaning up old images..."
-            docker image prune -f --filter "label=org.opencontainers.image.source=https://github.com/${{ github.repository }}" || true
             echo "Pulling latest images..."
             docker compose -f docker-compose.prod.yml pull
             echo "Starting containers..."
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans || { echo "ERROR: Failed to start containers!"; docker compose -f docker-compose.prod.yml ps; exit 1; }
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
             echo "Checking container status..."
             docker compose -f docker-compose.prod.yml ps
             echo "Cleaning up old images..."
