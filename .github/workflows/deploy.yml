@@ -109,18 +109,21 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} bash << REMOTE_SCRIPT
             set -e
+            set -x
             DEPLOY_PATH="${{ secrets.DEPLOY_PATH }}"
             # Expand tilde to home directory on remote server
             if [[ "\$DEPLOY_PATH" =~ ^~ ]]; then
               DEPLOY_PATH="\${DEPLOY_PATH/#\~/\$HOME}"
             fi
-            cd "\$DEPLOY_PATH"
+            echo "Changing to directory: \$DEPLOY_PATH"
+            cd "\$DEPLOY_PATH" || { echo "Failed to cd to \$DEPLOY_PATH"; exit 1; }
+            pwd
 
             echo "Logging in to GitHub Container Registry..."
-            echo "${GITHUB_TOKEN}" | docker login ghcr.io -u ${GITHUB_ACTOR} --password-stdin
+            echo "${GITHUB_TOKEN}" | docker login ghcr.io -u ${GITHUB_ACTOR} --password-stdin || { echo "Docker login failed"; exit 1; }
 
-            echo "Pulling latest image..."
-            docker pull ${IMAGE_TAG}
+            echo "Pulling latest image: ${IMAGE_TAG}"
+            docker pull ${IMAGE_TAG} || { echo "Docker pull failed"; exit 1; }
 
             echo "Updating docker-compose.prod.yml with new image..."
             if grep -q "image:" docker-compose.prod.yml; then
