@@ -95,9 +95,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
-          ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} bash << EOF
+          ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} bash << REMOTE_SCRIPT
             set -e
-            cd "${DEPLOY_PATH/#\~/$HOME}"
+            DEPLOY_PATH="${{ secrets.DEPLOY_PATH }}"
+            # Expand tilde to home directory on remote server
+            if [[ "\$DEPLOY_PATH" =~ ^~ ]]; then
+              DEPLOY_PATH="\${DEPLOY_PATH/#\~/\$HOME}"
+            fi
+            cd "\$DEPLOY_PATH"
 
             echo "Logging in to GitHub Container Registry..."
             echo "${GITHUB_TOKEN}" | docker login ghcr.io -u ${GITHUB_ACTOR} --password-stdin
@@ -123,4 +128,4 @@ jobs:
             docker image prune -af --filter "until=24h" || true
 
             echo "Deployment completed successfully!"
-          EOF
+          REMOTE_SCRIPT
