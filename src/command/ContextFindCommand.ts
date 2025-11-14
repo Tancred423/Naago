@@ -12,6 +12,9 @@ class ContextFindCommand extends Command {
 
   public async execute(interaction: ContextMenuCommandInteraction): Promise<void> {
     const isVerified = interaction.targetId === interaction.user.id;
+
+    await interaction.deferReply();
+
     const targetCharacterDataDtoCached = await FetchCharacterService.findVerifiedCharacterByUserId(
       interaction.targetId,
     );
@@ -20,8 +23,6 @@ class ContextFindCommand extends Command {
       await DiscordMessageService.editReplyError(interaction, "This user does not have a verified character.");
       return;
     }
-
-    await interaction.deferReply();
 
     const targetCharacterCached = targetCharacterDataDtoCached.character;
     const targetCharacterDataDto = await FetchCharacterService.fetchCharacterCached(
