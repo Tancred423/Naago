@@ -84,10 +84,21 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
+            set -e
             cd ${{ secrets.DEPLOY_PATH }}
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
-            docker compose -f docker-compose.prod.yml down --volumes=false
-            docker image prune -f --filter "label=org.opencontainers.image.source=https://github.com/${{ github.repository }}"
+            echo "Validating docker-compose.prod.yml..."
+            docker compose -f docker-compose.prod.yml config > /dev/null || { echo "ERROR: docker-compose.prod.yml is invalid!"; docker compose -f docker-compose.prod.yml config; exit 1; }
+            echo "Stopping existing containers..."
+            docker compose -f docker-compose.prod.yml down --volumes=false || true
+            echo "Cleaning up old images..."
+            docker image prune -f --filter "label=org.opencontainers.image.source=https://github.com/${{ github.repository }}" || true
+            echo "Pulling latest images..."
             docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            echo "Starting containers..."
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans || { echo "ERROR: Failed to start containers!"; docker compose -f docker-compose.prod.yml ps; exit 1; }
+            echo "Checking container status..."
+            docker compose -f docker-compose.prod.yml ps
+            echo "Cleaning up old images..."
             docker image prune -af --filter "until=24h" || true
+            echo "Deployment completed successfully!"
