@@ -6,7 +6,6 @@ import moment from "moment";
 import { VerificationsRepository } from "../database/repository/VerificationsRepository.ts";
 import { CharacterDataDto } from "../naagostone/dto/CharacterDataDto.ts";
 import { StringManipulationService } from "./StringManipulationService.ts";
-import * as log from "@std/log";
 
 export class FetchCharacterService {
   public static async findVerifiedCharacterByUserId(
@@ -58,8 +57,6 @@ export class FetchCharacterService {
     if (!character) return null;
 
     await CharacterDataRepository.set(character);
-
-    log.info("current timestamp", moment().unix());
 
     return new CharacterDataDto(moment(), character);
   }

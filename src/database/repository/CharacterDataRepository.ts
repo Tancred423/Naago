@@ -3,7 +3,6 @@ import { CharacterData, characterData } from "../schema/character-data.ts";
 import { eq } from "drizzle-orm";
 import moment from "moment";
 import { Character } from "../../naagostone/type/CharacterTypes.ts";
-import * as log from "@std/log";
 
 export class CharacterDataRepository {
   public static async find(
@@ -21,7 +20,6 @@ export class CharacterDataRepository {
   public static async set(character: Character): Promise<void> {
     const now = Date.now();
     const nowSQL = moment(now).tz("UTC").toDate();
-    log.info("latestupdate in repo", nowSQL, moment().unix());
     await database
       .insert(characterData)
       .values({
