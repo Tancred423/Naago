@@ -1,28 +1,33 @@
 services:
   app:
-    image: ghcr.io/tancred423/naago:latest
     container_name: naago-app
-    restart: unless-stopped
     entrypoint: [
       "/bin/bash",
       "-c",
       "deno run --allow-all src/database/migrate.ts && exec deno run --allow-all src/index.ts",
     ]
-    volumes:
-      - ./image:/app/image:ro
     env_file:
       - .env
     environment:
       IS_PROD: true
-    networks:
-      - mysql-network
+    image: ghcr.io/tancred423/naago:latest
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
+    networks:
+      - mysql-network
+      - naagostone-network
+    restart: unless-stopped
+    volumes:
+      - ./image:/app/image:ro
 
 networks:
   mysql-network:
     external: true
     name: mysql-network
+
+  naagostone-network:
+    external: true
+    name: naagostone_network
