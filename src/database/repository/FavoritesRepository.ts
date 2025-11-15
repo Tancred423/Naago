@@ -18,8 +18,6 @@ export class FavoritesRepository {
   public static async add(
     userId: string,
     characterId: number,
-    characterName: string,
-    server: string,
   ): Promise<void> {
     const userFavorites = await this.get(userId);
 
@@ -38,8 +36,6 @@ export class FavoritesRepository {
     await database.insert(favorites).values({
       userId,
       characterId,
-      characterName,
-      server,
     });
   }
 

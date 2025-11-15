@@ -8,6 +8,13 @@
       "when": 1762509306383,
       "tag": "0000_initial",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1763212602975,
+      "tag": "0001_remove_favorites_character_name_server",
+      "breakpoints": true
     }
   ]
 }

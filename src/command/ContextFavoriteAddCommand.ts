@@ -33,8 +33,6 @@ class ContextFavoriteAddCommand extends Command {
       await FavoritesRepository.add(
         user.id,
         targetCharacter.id,
-        targetCharacter.name,
-        `${targetCharacter.server.world} (${targetCharacter.server.dc})`,
       );
       await DiscordMessageService.editReplySuccess(interaction, `\`${targetCharacter.name}\` was added as favorite.`);
     } catch (error: unknown) {

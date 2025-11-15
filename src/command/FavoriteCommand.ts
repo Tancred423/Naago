@@ -18,6 +18,9 @@ import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService
 import { FetchCharacterService } from "../service/FetchCharacterService.ts";
 import { MaximumAmountReachedError } from "../database/error/MaximumAmountReachedError.ts";
 import { InvalidSubCommandError } from "./error/InvalidSubCommandError.ts";
+import { CharacterDataRepository } from "../database/repository/CharacterDataRepository.ts";
+import { Character } from "../naagostone/type/CharacterTypes.ts";
+import { AlreadyInDatabaseError } from "../database/error/AlreadyInDatabaseError.ts";
 
 class FavoriteCommand extends Command {
   public readonly data = new SlashCommandBuilder()
@@ -116,16 +119,25 @@ class FavoriteCommand extends Command {
       await FavoritesRepository.add(
         userId,
         characterId,
-        character.name,
-        `${character.server.world} (${character.server.dc})`,
       );
-      await DiscordMessageService.editReplySuccess(interaction, `\`${targetName}\` has been added to your favorites.`);
+      await DiscordMessageService.editReplySuccess(
+        interaction,
+        `\`${character.name}\` has been added to your favorites.`,
+      );
     } catch (error: unknown) {
       if (error instanceof MaximumAmountReachedError) {
         await DiscordMessageService.editReplyError(
           interaction,
           `\`${targetName}\` was NOT added as favorite as you already reached the maximum of 25.` +
             "\nPlease remove a favorite before adding a new one. See \`/favorite remove\`.",
+        );
+        return;
+      }
+
+      if (error instanceof AlreadyInDatabaseError) {
+        await DiscordMessageService.editReplySuccess(
+          interaction,
+          "This character is already in your favorites. If the character data got lost, we refreshed it now and you should see them in the list again.",
         );
         return;
       }
@@ -150,11 +162,24 @@ class FavoriteCommand extends Command {
 
     const options = [];
     for (const favorite of favorites) {
+      const characterData = await CharacterDataRepository.find(favorite.characterId);
+      if (!characterData) {
+        continue;
+      }
+      const character = JSON.parse(characterData.jsonString) as Character;
       options.push({
-        label: favorite.characterName,
-        description: favorite.server,
+        label: character.name,
+        description: `${character.server.world} (${character.server.dc})`,
         value: favorite.characterId.toString(),
       });
+    }
+
+    if (options.length === 0) {
+      const embed = DiscordEmbedService.getErrorEmbed(
+        "Sorry, we couldn't fetch the character data of your favorites. Please try again later.",
+      );
+      await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+      return;
     }
 
     const selectMenu = new StringSelectMenuBuilder()

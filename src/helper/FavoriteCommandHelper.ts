@@ -3,6 +3,8 @@ import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
 import { FavoritesRepository } from "../database/repository/FavoritesRepository.ts";
 import { DiscordMessageService } from "../service/DiscordMessageService.ts";
 import { NotInDatabaseError } from "../database/error/NotInDatabaseError.ts";
+import { CharacterDataRepository } from "../database/repository/CharacterDataRepository.ts";
+import { Character } from "../naagostone/type/CharacterTypes.ts";
 
 export class FavoriteCommandHelper {
   public static async handleRemoveFavoriteModal(interaction: ModalSubmitInteraction): Promise<void> {
@@ -14,10 +16,10 @@ export class FavoriteCommandHelper {
     }
 
     const characterId = parseInt(targetCharacterIds[0]);
-    const userId = interaction.user.id;
-    const favorites = await FavoritesRepository.get(userId);
-    const favorite = favorites.find((f) => f.characterId === characterId);
-    const characterName = favorite?.characterName ?? characterId.toString();
+    const characterData = await CharacterDataRepository.find(characterId);
+    const characterName = characterData
+      ? (JSON.parse(characterData.jsonString) as Character).name
+      : characterId.toString();
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
@@ -25,7 +27,7 @@ export class FavoriteCommandHelper {
         .setLabel("No, cancel.")
         .setStyle(2),
       new ButtonBuilder()
-        .setCustomId(`favorite.unset.${characterId}.${characterName}`)
+        .setCustomId(`favorite.unset.${characterId}`)
         .setLabel("Yes, remove them.")
         .setStyle(4),
     );
@@ -47,13 +49,16 @@ export class FavoriteCommandHelper {
       return;
     }
 
-    if (buttonIdSplit.length !== 4) {
-      throw new Error("button id length is !== 4");
+    if (buttonIdSplit.length !== 3) {
+      throw new Error("button id length is !== 3");
     }
 
     const userId = interaction.user.id;
     const characterId = parseInt(buttonIdSplit[2]);
-    const characterName = buttonIdSplit[3];
+    const characterData = await CharacterDataRepository.find(characterId);
+    const characterName = characterData
+      ? (JSON.parse(characterData.jsonString) as Character).name
+      : characterId.toString();
 
     try {
       await FavoritesRepository.delete(userId, characterId);

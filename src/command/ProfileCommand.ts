@@ -11,6 +11,8 @@ import { Buffer } from "node:buffer";
 import { ProfileGeneratorService } from "../service/ProfileGeneratorService.ts";
 import { VerificationsRepository } from "../database/repository/VerificationsRepository.ts";
 import { FetchCharacterService } from "../service/FetchCharacterService.ts";
+import { CharacterDataRepository } from "../database/repository/CharacterDataRepository.ts";
+import { Character } from "../naagostone/type/CharacterTypes.ts";
 import { ProfilePagesRepository } from "../database/repository/ProfilePagesRepository.ts";
 import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
 import { FfxivServerValidationService } from "../service/FfxivServerValidationService.ts";
@@ -224,11 +226,24 @@ class ProfileCommand extends Command {
 
     const options = [];
     for (const favorite of favorites) {
+      const characterData = await CharacterDataRepository.find(favorite.characterId);
+      if (!characterData) {
+        continue;
+      }
+      const character = JSON.parse(characterData.jsonString) as Character;
       options.push({
-        label: favorite.characterName,
-        description: favorite.server,
+        label: character.name,
+        description: `${character.server.world} (${character.server.dc})`,
         value: favorite.characterId.toString(),
       });
+    }
+
+    if (options.length === 0) {
+      const embed = DiscordEmbedService.getErrorEmbed(
+        "Sorry, we couldn't fetch the character data of your favorites. Please try again later.",
+      );
+      await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+      return;
     }
 
     const selectMenu = new StringSelectMenuBuilder()
