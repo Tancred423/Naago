@@ -10,6 +10,7 @@ services:
       - .env
     environment:
       IS_PROD: true
+      DEPLOYMENT_HASH: ${DEPLOYMENT_HASH:-}
     image: ghcr.io/tancred423/naago:latest
     logging:
       driver: "json-file"

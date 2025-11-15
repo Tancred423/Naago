@@ -98,7 +98,7 @@ jobs:
             echo "Pulling latest images..."
             docker compose -f docker-compose.prod.yml pull
             echo "Starting containers..."
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            DEPLOYMENT_HASH=${{ github.sha }} docker compose -f docker-compose.prod.yml up -d --remove-orphans
             echo "Checking container status..."
             docker compose -f docker-compose.prod.yml ps
             echo "Deploying Discord commands..."

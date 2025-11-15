@@ -211,6 +211,7 @@ export class HelpCommandHelper {
     const client = interaction.client;
     const components = HelpCommandHelper.getButtons("about");
     const uptimeFormatted = time(moment().subtract(client.uptime!, "ms").toDate(), "R");
+    const deploymentHash = Deno.env.get("DEPLOYMENT_HASH");
     const embed = new EmbedBuilder()
       .setColor(await DiscordColorService.getBotColorByInteraction(interaction))
       .setTitle("About M'naago")
@@ -226,6 +227,10 @@ export class HelpCommandHelper {
         { name: "Latest restart", value: uptimeFormatted, inline: true },
         { name: "Servers", value: (await client.guilds.fetch())?.size.toString(), inline: true },
       ]);
+
+    if (deploymentHash) {
+      embed.setFooter({ text: `Deployment Hash: ${deploymentHash}` });
+    }
 
     return {
       embeds: [embed],
