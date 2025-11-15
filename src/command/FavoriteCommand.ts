@@ -135,7 +135,7 @@ class FavoriteCommand extends Command {
         `An unknown error prevented \`${targetName}\` to be added as favorite. Please try again later.`,
       );
 
-      log.error("Error while adding favorite.", error);
+      log.error(`Error while adding favorite: ${error instanceof Error ? error.stack : String(error)}`);
     }
   }
 

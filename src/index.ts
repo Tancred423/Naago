@@ -103,7 +103,7 @@ for (const file of commandFiles) {
       client.commands.set(command.default.data.name, command.default);
     })
     .catch((err) => {
-      log.error(`Failed to load command file ${file}:`, err);
+      log.error(`Failed to load command file ${file}: ${err instanceof Error ? err.stack : String(err)}`);
     });
 }
 
@@ -115,13 +115,13 @@ client.once("clientReady", () => {
 
   if (lodestoneCheckOnStart) {
     checkLodestone().catch((err) => {
-      log.error("Lodestone check failed on start:", err);
+      log.error(`Lodestone check failed on start: ${err instanceof Error ? err.stack : String(err)}`);
     });
   }
 
   cron.schedule("1-56/5 * * * *", async () => {
     await checkLodestone().catch((err) => {
-      log.error("Lodestone check failed:", err);
+      log.error(`Lodestone check failed: ${err instanceof Error ? err.stack : String(err)}`);
     });
     setPresence();
   });
@@ -138,7 +138,7 @@ function setPresence(): void {
       status: "online",
     });
   } catch (err) {
-    log.error("Failed to set presence:", err);
+    log.error(`Failed to set presence: ${err instanceof Error ? err.stack : String(err)}`);
   }
 }
 
@@ -160,7 +160,8 @@ async function checkLodestone(): Promise<void> {
   results.forEach((result, index) => {
     if (result.status === "rejected") {
       const serviceNames = ["topics", "notices", "maintenances", "updates", "status"];
-      log.error(`Failed to check for new ${serviceNames[index]}:`, result.reason);
+      const reason = result.reason instanceof Error ? result.reason.stack : String(result.reason);
+      log.error(`Failed to check for new ${serviceNames[index]}: ${reason}`);
     }
   });
 
@@ -189,12 +190,8 @@ client.on("interactionCreate", async (interaction) => {
       await command.execute(interaction as CommandInteraction);
     } catch (err) {
       log.error(
-        `Error while executing command '${interaction.commandName}':`,
-        err,
+        `Error while executing command '${interaction.commandName}': ${err instanceof Error ? err.stack : String(err)}`,
       );
-      if (err instanceof Error) {
-        console.error(err.stack);
-      }
 
       const embed = DiscordEmbedService.getErrorEmbed(
         "There was an error while executing this command.",
@@ -220,8 +217,7 @@ client.on("interactionCreate", async (interaction) => {
         }
       } catch (error: unknown) {
         log.error(
-          `Error while sending error message for command '${interaction.commandName}':`,
-          error,
+          `Error while sending error message for command '${interaction.commandName}': ${error instanceof Error ? error.stack : String(error)}`,
         );
       }
     }
@@ -229,10 +225,7 @@ client.on("interactionCreate", async (interaction) => {
     try {
       await ButtonInteractionHandler.execute(interaction as ButtonInteraction);
     } catch (err) {
-      log.error(`Error while executing button '${interaction.customId}':`, err);
-      if (err instanceof Error) {
-        console.error(err.stack);
-      }
+      log.error(`Error while executing button '${interaction.customId}': ${err instanceof Error ? err.stack : String(err)}`);
       const embed = DiscordEmbedService.getErrorEmbed(
         "There was an error while executing this button.",
       );
@@ -247,10 +240,7 @@ client.on("interactionCreate", async (interaction) => {
         interaction as ModalSubmitInteraction,
       );
     } catch (err) {
-      log.error(`Error while executing modal '${interaction.customId}':`, err);
-      if (err instanceof Error) {
-        console.error(err.stack);
-      }
+      log.error(`Error while executing modal '${interaction.customId}': ${err instanceof Error ? err.stack : String(err)}`);
       const embed = DiscordEmbedService.getErrorEmbed(
         "There was an error while executing this modal.",
       );
@@ -278,12 +268,8 @@ client.on("interactionCreate", async (interaction) => {
       await command.execute(interaction as ContextMenuCommandInteraction);
     } catch (err) {
       log.error(
-        `Error while executing context command '${interaction.commandName}':`,
-        err,
+        `Error while executing context command '${interaction.commandName}': ${err instanceof Error ? err.stack : String(err)}`,
       );
-      if (err instanceof Error) {
-        console.error(err.stack);
-      }
       const embed = DiscordEmbedService.getErrorEmbed(
         "There was an error while executing this command.",
       );
@@ -303,6 +289,6 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 client.login(token).catch((err) => {
-  log.error("Failed to login to Discord:", err);
+  log.error(`Failed to login to Discord: ${err instanceof Error ? err.stack : String(err)}`);
   Deno.exit(1);
 });

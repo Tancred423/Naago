@@ -1419,7 +1419,7 @@ class ProfileBlock {
         32,
       );
     } catch (err) {
-      log.error(err);
+      log.error(`Error: ${err instanceof Error ? err.stack : String(err)}`);
     }
   }
 }

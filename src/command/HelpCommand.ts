@@ -16,7 +16,7 @@ class HelpCommand extends Command {
     } catch (error: unknown) {
       const embed = DiscordEmbedService.getErrorEmbed("An unknown error occured. Please try again later.");
       await interaction.reply({ embeds: [embed] });
-      log.error("Failed to send help message", error);
+      log.error(`Failed to send help message: ${error instanceof Error ? error.stack : String(error)}`);
     }
   }
 }

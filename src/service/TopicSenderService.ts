@@ -52,7 +52,7 @@ export class TopicSenderService {
         await (channel as TextChannel).send({ embeds: [embed] });
       } catch (error: unknown) {
         if (error instanceof Error) {
-          log.error(`[TOPICS] Sending topic to ${setup.guildId} was NOT successful: ${error.message}`, error);
+          log.error(`[TOPICS] Sending topic to ${setup.guildId} was NOT successful: ${error.stack}`);
         }
         continue;
       }

@@ -86,7 +86,7 @@ export class VerifyCommandHelper {
       if (verification) {
         ThemeRepository.get(verification.characterId)
           .then((theme) => ThemeRepository.set(userId, characterId, theme))
-          .catch((error) => log.error("Failed to update theme after verification", error));
+          .catch((error) => log.error(`Failed to update theme after verification: ${error instanceof Error ? error.stack : String(error)}`));
       }
 
       await VerificationsRepository.setVerification(userId, characterId);

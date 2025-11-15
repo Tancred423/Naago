@@ -127,7 +127,7 @@ class VerifyCommand extends Command {
     try {
       await VerificationsRepository.setVerificationCode(userId, character.id, verificationCode);
     } catch (error: unknown) {
-      log.error("Failed to set verification code", error);
+      log.error(`Failed to set verification code: ${error instanceof Error ? error.stack : String(error)}`);
       const embed = DiscordEmbedService.getErrorEmbed(
         "An error occured during verification process. Please try again later.",
       );

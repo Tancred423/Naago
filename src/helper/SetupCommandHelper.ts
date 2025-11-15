@@ -44,7 +44,7 @@ export class SetupCommandHelper {
           results.push(`\`${typeName}\` notifications are disabled.`);
         } catch (error: unknown) {
           results.push(`\`${typeName}\` notifications could not be unset. Please try again later.`);
-          log.error(`\`${typeName}\` notifications could not be unset.`, error);
+          log.error(`\`${typeName}\` notifications could not be unset: ${error instanceof Error ? error.stack : String(error)}`);
         }
         continue;
       }
@@ -56,7 +56,7 @@ export class SetupCommandHelper {
         results.push(`\`${typeName}\` notifications are active in ${channel?.toString() ?? channelId}.`);
       } catch (error: unknown) {
         results.push(`\`${typeName}\` notification channel could not be set. Please try again later.`);
-        log.error(`\`${typeName}\` notification channel could not be set.`, error);
+        log.error(`\`${typeName}\` notification channel could not be set: ${error instanceof Error ? error.stack : String(error)}`);
       }
     }
 
