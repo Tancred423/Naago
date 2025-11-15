@@ -49,7 +49,7 @@ export class HelpCommandHelper {
     const components = HelpCommandHelper.getButtons("profiles");
     const embed = new EmbedBuilder()
       .setColor(await DiscordColorService.getBotColorByInteraction(interaction))
-      .setTitle("Help: Character Profiles")
+      .setTitle("Character Profile Commands")
       .setThumbnail(client.user!.displayAvatarURL())
       .addFields([
         {
@@ -86,7 +86,7 @@ export class HelpCommandHelper {
     const components = HelpCommandHelper.getButtons("verification");
     const embed = new EmbedBuilder()
       .setColor(await DiscordColorService.getBotColorByInteraction(interaction))
-      .setTitle("Help: Verification")
+      .setTitle("Verification Commands")
       .setThumbnail(client.user!.displayAvatarURL())
       .addFields([
         {
@@ -117,7 +117,7 @@ export class HelpCommandHelper {
     const components = HelpCommandHelper.getButtons("favorites");
     const embed = new EmbedBuilder()
       .setColor(await DiscordColorService.getBotColorByInteraction(interaction))
-      .setTitle("Help: Favorites")
+      .setTitle("Favorite Commands")
       .setThumbnail(client.user!.displayAvatarURL())
       .addFields([
         {
@@ -147,7 +147,7 @@ export class HelpCommandHelper {
     const components = HelpCommandHelper.getButtons("info");
     const embed = new EmbedBuilder()
       .setColor(await DiscordColorService.getBotColorByInteraction(interaction))
-      .setTitle("Help: Informational")
+      .setTitle("Informational Commands")
       .setThumbnail(client.user!.displayAvatarURL())
       .addFields([
         {
@@ -176,7 +176,7 @@ export class HelpCommandHelper {
     const components = HelpCommandHelper.getButtons("setup");
     const embed = new EmbedBuilder()
       .setColor(await DiscordColorService.getBotColorByInteraction(interaction))
-      .setTitle("Help: Setup")
+      .setTitle("Setup Commands")
       .setThumbnail(client.user!.displayAvatarURL())
       .addFields([
         {
