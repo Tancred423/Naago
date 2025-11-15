@@ -7,7 +7,7 @@ import { Topic, TopicResponse } from "../type/Topic.ts";
 import { Update, UpdateResponse } from "../type/Updates.ts";
 import { Status, StatusResponse } from "../type/Status.ts";
 
-const naagostoneHost = Deno.env.get("NAAGOSTONE_HOST") || "localhost";
+const naagostoneHost = Deno.env.get("NAAGOSTONE_HOST")!;
 const naagostonePort = Deno.env.get("NAAGOSTONE_PORT")!;
 
 export class NaagostoneApiService {
