@@ -42,6 +42,7 @@ export interface FreeCompany {
   icon_layer_0: string;
   icon_layer_1: string;
   icon_layer_2: string;
+  tag: string | null;
 }
 
 export interface ClassJob {

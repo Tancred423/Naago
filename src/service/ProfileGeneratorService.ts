@@ -308,7 +308,11 @@ class Profile {
     );
     await profileBlock.add(
       "Free Company",
-      this.character.free_company?.name ?? "-",
+      this.character.free_company
+        ? this.character.free_company.tag
+          ? `${this.character.free_company.name} «${this.character.free_company.tag}»`
+          : this.character.free_company.name
+        : "-",
       this.character.free_company
         ? [
           this.character.free_company?.icon_layer_0,
