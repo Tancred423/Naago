@@ -156,6 +156,11 @@ export class HelpCommandHelper {
           inline: false,
         },
         {
+          name: "/liveletter",
+          value: "- Shows information about the next or current Live Letter.",
+          inline: false,
+        },
+        {
           name: "/maintenance",
           value: "- View current maintenances if any." +
             "\n- Shows active maintenance schedules and their durations.",

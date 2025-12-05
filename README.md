@@ -28,6 +28,7 @@ to add the bot to your server.
 - `/profile favorite` - Get a favorite character's profile.
 - `/favorite add` - Add a character to your favorites.
 - `/favorite remove` - Remove a character from your favorites.
+- `/liveletter` - Shows information about the next or current Live Letter.
 - `/maintenance` - Current maintenances if any.
 - `/setup lodestone` - Set up automated lodestone news notifications.
 
