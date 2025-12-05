@@ -6,6 +6,7 @@ import { Notice, NoticeResponse } from "../type/Notice.ts";
 import { Topic, TopicResponse } from "../type/Topic.ts";
 import { Update, UpdateResponse } from "../type/Updates.ts";
 import { Status, StatusResponse } from "../type/Status.ts";
+import { PhysicalDataCenter, WorldStatusResponse } from "../type/WorldStatus.ts";
 
 const naagostoneHost = Deno.env.get("NAAGOSTONE_HOST")!;
 const naagostonePort = Deno.env.get("NAAGOSTONE_PORT")!;
@@ -92,5 +93,17 @@ export class NaagostoneApiService {
 
     const data = await response.json() as StatusResponse;
     return data?.statuses ?? [];
+  }
+
+  public static async fetchWorldStatus(): Promise<PhysicalDataCenter[]> {
+    const url = `http://${naagostoneHost}:${naagostonePort}/lodestone/worldstatus`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new ApiRequestFailedError(`Failed to fetch world status: ${response.statusText}`);
+    }
+
+    const data = await response.json() as WorldStatusResponse;
+    return data?.worldStatus ?? [];
   }
 }

@@ -26,7 +26,7 @@ class LiveLetterCommand extends Command {
       const timestampRelative = time(newestLiveLetterTopic.timestampLiveLetter, TimestampStyles.RelativeTime);
       const embed = DiscordEmbedService.getTopicEmbedFromData(newestLiveLetterTopic);
       await interaction.reply({
-        content: `This next Live Letter will be on at ${timestampFull} (${timestampRelative}):`,
+        content: `# This is the next Live Letter\nIt will start at ${timestampFull} (${timestampRelative})`,
         embeds: [embed],
       });
     } else if (diffMs >= -twoHoursInMs) {
@@ -34,7 +34,7 @@ class LiveLetterCommand extends Command {
       const timestampRelative = time(newestLiveLetterTopic.timestampLiveLetter, TimestampStyles.RelativeTime);
       const embed = DiscordEmbedService.getTopicEmbedFromData(newestLiveLetterTopic);
       await interaction.reply({
-        content: `This live letter is currently live! It started at ${timestampFull} (${timestampRelative}):`,
+        content: `# This live letter is currently live!\nIt started at ${timestampFull} (${timestampRelative})`,
         embeds: [embed],
       });
     } else {

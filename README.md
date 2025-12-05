@@ -30,6 +30,7 @@ to add the bot to your server.
 - `/favorite remove` - Remove a character from your favorites.
 - `/liveletter` - Shows information about the next or current Live Letter.
 - `/maintenance` - Current maintenances if any.
+- `/worldstatus` - Shows server status, characte creation status and server congestion.
 - `/setup lodestone` - Set up automated lodestone news notifications.
 
 ## For developers

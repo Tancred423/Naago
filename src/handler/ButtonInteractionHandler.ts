@@ -6,6 +6,7 @@ import { StringManipulationService } from "../service/StringManipulationService.
 import { FavoriteCommandHelper } from "../helper/FavoriteCommandHelper.ts";
 import { ProfileCommandHandler } from "../helper/ProfileCommandHelper.ts";
 import { VerifyCommandHelper } from "../helper/VerifyCommandHelper.ts";
+import { WorldStatusCommandHelper } from "../helper/WorldStatusCommandHelper.ts";
 
 export class ButtonInteractionHandler {
   private static cooldown: string[] = [];
@@ -60,6 +61,10 @@ export class ButtonInteractionHandler {
       case "help":
         await interaction.deferUpdate();
         await HelpCommandHelper.handlePageSwapButton(interaction, buttonIdSplit);
+        break;
+      case "worldstatus":
+        await interaction.deferUpdate();
+        await WorldStatusCommandHelper.handlePageSwapButton(interaction, buttonIdSplit);
         break;
       default:
         throw new Error(

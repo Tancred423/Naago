@@ -166,6 +166,11 @@ export class HelpCommandHelper {
             "\n- Shows active maintenance schedules and their durations.",
           inline: false,
         },
+        {
+          name: "/worldstatus",
+          value: "- Shows server status, characte creation status and server congestion.",
+          inline: false,
+        },
       ]);
 
     return {
