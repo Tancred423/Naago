@@ -74,6 +74,8 @@ services:
       IS_PROD: false
     networks:
       - naago-network
+    ports:
+      - "${NAAGOSTONE_PORT}:3001"
     logging:
       driver: "json-file"
       options:

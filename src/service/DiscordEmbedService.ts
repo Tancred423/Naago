@@ -1,6 +1,6 @@
 import { ColorResolvable, EmbedBuilder } from "discord.js";
 import moment from "moment";
-import { MaintenanceData } from "../database/schema/lodestone-news.ts";
+import { MaintenanceData, TopicData } from "../database/schema/lodestone-news.ts";
 import { Maintenance } from "../naagostone/type/Maintenance.ts";
 import { Notice } from "../naagostone/type/Notice.ts";
 import { Topic } from "../naagostone/type/Topic.ts";
@@ -42,6 +42,18 @@ export class DiscordEmbedService {
       .setTitle(topic.title)
       .setURL(topic.link)
       .setDescription(topic.description.markdown)
+      .setImage(topic.banner)
+      .setFooter({ text: "Lodestone", iconURL: lodestoneIconLink })
+      .setTimestamp(moment(topic.date).toDate());
+  }
+
+  public static getTopicEmbedFromData(topic: TopicData): EmbedBuilder {
+    return new EmbedBuilder()
+      .setColor(colorTopics as ColorResolvable)
+      .setAuthor({ name: "Topic", iconURL: topicIconLink })
+      .setTitle(topic.title)
+      .setURL(topic.link)
+      .setDescription(topic.description)
       .setImage(topic.banner)
       .setFooter({ text: "Lodestone", iconURL: lodestoneIconLink })
       .setTimestamp(moment(topic.date).toDate());

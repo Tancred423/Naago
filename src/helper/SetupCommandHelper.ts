@@ -11,19 +11,19 @@ export class SetupCommandHelper {
     const fields = interaction.fields;
 
     const typeMap: Record<string, string> = {
-      "setup_topics_channel_select": "topic",
-      "setup_notice_channel_select": "notice",
-      "setup_maintenance_channel_select": "maintenance",
-      "setup_update_channel_select": "update",
-      "setup_status_channel_select": "status",
+      "setup_topics_channel_select": "topics",
+      "setup_notice_channel_select": "notices",
+      "setup_maintenance_channel_select": "maintenances",
+      "setup_update_channel_select": "updates",
+      "setup_status_channel_select": "statuses",
     };
 
     const typeNameMap: Record<string, string> = {
-      "topic": "Topics",
-      "notice": "Notices",
-      "maintenance": "Maintenances",
-      "update": "Updates",
-      "status": "Statuses",
+      "topics": "Topics",
+      "notices": "Notices",
+      "maintenances": "Maintenances",
+      "updates": "Updates",
+      "statuses": "Statuses",
     };
 
     const results: string[] = [];

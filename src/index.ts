@@ -145,9 +145,26 @@ client.once("clientReady", () => {
 function buildTimeString(totalSeconds: number): string {
   const SECONDS_IN_HOUR = 3600;
   const SECONDS_IN_DAY = 86400;
-  const days = Math.floor(totalSeconds / SECONDS_IN_DAY);
-  const remainingSeconds = totalSeconds - days * SECONDS_IN_DAY;
-  const roundedHours = Math.round(remainingSeconds / SECONDS_IN_HOUR);
+  const SECONDS_IN_WEEK = 604800;
+
+  const weeks = Math.floor(totalSeconds / SECONDS_IN_WEEK);
+  const remainingAfterWeeks = totalSeconds - weeks * SECONDS_IN_WEEK;
+  const days = Math.floor(remainingAfterWeeks / SECONDS_IN_DAY);
+  const remainingAfterDays = remainingAfterWeeks - days * SECONDS_IN_DAY;
+  const roundedHours = Math.round(remainingAfterDays / SECONDS_IN_HOUR);
+
+  if (weeks > 0) {
+    if (days === 0 && roundedHours === 0) {
+      return `${weeks} ${weeks === 1 ? "week" : "weeks"}`;
+    }
+    if (days > 0 && roundedHours > 0) {
+      return `${weeks}w, ${days}d, ${roundedHours}h`;
+    }
+    if (days > 0) {
+      return `${weeks}w, ${days}d`;
+    }
+    return `${weeks}w, ${roundedHours}h`;
+  }
   if (days > 0) {
     if (roundedHours === 24) {
       return `${days + 1} days`;
@@ -168,12 +185,12 @@ function buildTimeString(totalSeconds: number): string {
 
 async function setPresence(): Promise<void> {
   try {
-    const newestLiveLetterTimestamp = await TopicsRepository.getNewestLiveLetterTimestamp();
+    const newestLiveLetterTopic = await TopicsRepository.getNewestLiveLetterTopic();
     let presenceState = "🔗 naago.tancred.de";
 
-    if (newestLiveLetterTimestamp) {
+    if (newestLiveLetterTopic?.timestampLiveLetter) {
       const now = Date.now();
-      const timestampMs = newestLiveLetterTimestamp.getTime();
+      const timestampMs = newestLiveLetterTopic.timestampLiveLetter.getTime();
       const diffMs = timestampMs - now;
       const diffSeconds = Math.floor(diffMs / 1000);
       const twoHoursInMs = 2 * 60 * 60 * 1000;
@@ -182,6 +199,12 @@ async function setPresence(): Promise<void> {
         presenceState = `Live Letter in ${buildTimeString(diffSeconds)}`;
       } else if (diffMs >= -twoHoursInMs) {
         presenceState = "Live Letter is currently live!";
+
+        if (newestLiveLetterTopic.liveLetterAnnounced === 0) {
+          await TopicSenderService.sendLiveLetterStartedAnnouncement(newestLiveLetterTopic);
+          await TopicsRepository.markLiveLetterAsAnnounced(newestLiveLetterTopic.id);
+          log.info(`Sent live letter started announcement for: ${newestLiveLetterTopic.title}`);
+        }
       }
     }
 
@@ -215,7 +238,7 @@ async function checkLodestone(): Promise<void> {
 
   results.forEach((result, index) => {
     if (result.status === "rejected") {
-      const serviceNames = ["topics", "notices", "maintenances", "updates", "status"];
+      const serviceNames = ["topics", "notices", "maintenances", "updates", "statuses"];
       const reason = result.reason instanceof Error ? result.reason.stack : String(result.reason);
       log.error(`Failed to check for new ${serviceNames[index]}: ${reason}`);
     }
@@ -223,7 +246,7 @@ async function checkLodestone(): Promise<void> {
 
   if (topics > 0 || notices > 0 || maintenances > 0 || updates > 0 || statuses > 0) {
     log.info(
-      `Sent ${topics} topics, ${notices} notices, ${maintenances} maintenances, ${updates} updates and ${statuses} status.`,
+      `Sent ${topics} topics, ${notices} notices, ${maintenances} maintenances, ${updates} updates, ${statuses} statuses.`,
     );
   }
 }

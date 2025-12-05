@@ -24,8 +24,8 @@ class MaintenanceCommand extends Command {
     }
 
     const content = embeds.length > 1
-      ? "These maintenances are currently active:"
-      : "This maintenance is currently active:";
+      ? "# These maintenances are currently active"
+      : "# This maintenance is currently active";
 
     await interaction.reply({ content: content, embeds: embeds });
   }

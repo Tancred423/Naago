@@ -12,7 +12,8 @@
     "deploy-commands": "deno run --allow-all src/deploy-commands.ts",
     "delete-all-commands": "deno run --allow-all src/delete-all-commands.ts",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "deno run --allow-all src/database/migrate.ts"
+    "db:migrate": "deno run --allow-all src/database/migrate.ts",
+    "db:backfill-live-letter": "deno run --allow-all src/database/backfill-live-letter-timestamps.ts"
   },
   "imports": {
     "@std/dotenv": "https://deno.land/std@0.224.0/dotenv/mod.ts",

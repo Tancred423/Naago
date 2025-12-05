@@ -22,6 +22,20 @@
       "when": 1733407200000,
       "tag": "0002_add_topic_timestamp_live_letter",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1733410800000,
+      "tag": "0003_add_topic_live_letter_announced",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1733414400000,
+      "tag": "0004_normalize_setup_types",
+      "breakpoints": true
     }
   ]
 }

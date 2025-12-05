@@ -1,4 +1,4 @@
-import { and, desc, eq, isNotNull } from "drizzle-orm";
+import { and, desc, eq, isNotNull, lte } from "drizzle-orm";
 import { database } from "../connection.ts";
 import { TopicData, topicData } from "../schema/lodestone-news.ts";
 import moment from "moment-timezone";
@@ -54,9 +54,43 @@ export class TopicsRepository {
       .select({ timestampLiveLetter: topicData.timestampLiveLetter })
       .from(topicData)
       .where(isNotNull(topicData.timestampLiveLetter))
-      .orderBy(desc(topicData.timestampLiveLetter))
+      .orderBy(desc(topicData.id))
       .limit(1);
 
     return result[0]?.timestampLiveLetter ?? null;
+  }
+
+  public static async getNewestLiveLetterTopic(): Promise<TopicData | null> {
+    const result = await database
+      .select()
+      .from(topicData)
+      .where(isNotNull(topicData.timestampLiveLetter))
+      .orderBy(desc(topicData.id))
+      .limit(1);
+
+    return result[0] ?? null;
+  }
+
+  public static async getUnannouncedLiveLetters(): Promise<TopicData[]> {
+    const now = new Date();
+    const result = await database
+      .select()
+      .from(topicData)
+      .where(
+        and(
+          isNotNull(topicData.timestampLiveLetter),
+          lte(topicData.timestampLiveLetter, now),
+          eq(topicData.liveLetterAnnounced, 0),
+        ),
+      );
+
+    return result;
+  }
+
+  public static async markLiveLetterAsAnnounced(id: number): Promise<void> {
+    await database
+      .update(topicData)
+      .set({ liveLetterAnnounced: 1 })
+      .where(eq(topicData.id, id));
   }
 }
