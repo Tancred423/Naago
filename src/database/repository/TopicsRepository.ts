@@ -35,9 +35,7 @@ export class TopicsRepository {
       throw new AlreadyInDatabaseError("This topic is already in the database");
     }
 
-    const timestampLiveLetterSQL = topic.timestamp_live_letter
-      ? new Date(topic.timestamp_live_letter)
-      : null;
+    const timestampLiveLetterSQL = topic.timestamp_live_letter ? new Date(topic.timestamp_live_letter) : null;
 
     await database
       .insert(topicData)
